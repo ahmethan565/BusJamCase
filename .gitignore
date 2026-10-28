@@ -1,0 +1,29 @@
+# Unity tarafından üretilen klasörler
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+
+# IDE dosyaları
+.vs/
+.idea/
+.vscode/
+*.csproj
+*.sln
+*.suo
+*.user
+*.pidb
+*.booproj
+
+# Build çıktıları
+*.apk
+*.aab
+*.unitypackage
+
+# İşletim sistemi
+.DS_Store
+Thumbs.db
