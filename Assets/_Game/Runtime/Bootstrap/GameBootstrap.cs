@@ -51,9 +51,20 @@ namespace Game.Runtime.Bootstrap
 
             inputHandler.enabled = false;                     // only GameplayState turns it on
 
+            // --- Was "play this level" requested from the level editor? (§15.3)
+            int requestedLevel = -1;
+            bool launchedFromEditor = false;
+#if UNITY_EDITOR
+            launchedFromEditor = EditorLevelRequest.TryConsume(out requestedLevel)   // the return value decides
+                                 && requestedLevel < levelCatalog.Count;
+#endif
+
             // --- Services
             var pathFinder = new BfsPathFinder();
-            var progress = new ProgressService(new PlayerPrefsProgressStorage(), levelCatalog.Count);
+            IProgressStorage storage = launchedFromEditor
+                ? new InMemoryProgressStorage()               // an editor try-out must not change the real save
+                : new PlayerPrefsProgressStorage();
+            var progress = new ProgressService(storage, levelCatalog.Count);
             IFeedback feedback = new FeedbackPlayer(audioPlayer, vfxPlayer, soundLibrary);
 
             // --- Views and screens
@@ -82,7 +93,7 @@ namespace Game.Runtime.Bootstrap
             // Every screen starts hidden
             foreach (ScreenView screen in screens) screen.Hide();
 
-            machine.ChangeTo(states.Menu());
+            machine.ChangeTo(launchedFromEditor ? states.Gameplay(requestedLevel) : states.Menu());
         }
     }
 }

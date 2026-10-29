@@ -343,6 +343,7 @@ Assets/
       LevelCatalogEditor.cs
       DebugMenu.cs
       EditorLevelLauncher.cs
+      LevelEditing.cs                 (bölüm editörünün test edilebilir mantığı)
 
     Tests/
       Core/                       → Game.Core.Tests.asmdef (EditMode)
@@ -1788,7 +1789,8 @@ private void Awake()
 - **Otomatik doldur:** Her renk için `yolcu sayısı / kapasite` kadar otobüs ekler (renk sırasıyla). Sıra tasarımcı tarafından elle düzenlenir. Bölünemiyorsa uyarı.
 - **Çöz:** `LevelSolver` + rastgele oyuncu simülasyonu (1000 oyun). Sonuç ekranda.
 - **Bu bölümü oyna:** §15.3.
-- Tüm değişiklikler `Undo.RecordObject` ile geri alınabilir; `EditorUtility.SetDirty` ile kaydedilir.
+- Tüm değişiklikler `Undo.RecordObject` ile geri alınabilir; `EditorUtility.SetDirty` ile kaydedilir. (Uygulamada `SerializedObject` üzerinden yapılır; bu ikisini kendisi sağlar.)
+- Izgara ve otobüs mantığı IMGUI kodundan ayrı, test edilebilir `LevelEditing` (Game.Editor, statik) sınıfındadır: `Resize`, `Paint`, `AutoFillBuses`, `Check` (parse + doğrulama hataları). `LevelCatalogEditor` de durumu `Check` ile gösterir.
 
 ### 15.2 `LevelCatalogEditor`
 - Liste + her bölüm için doğrulama durumu (✅/❌).
@@ -1799,6 +1801,8 @@ private void Awake()
 2. `PlayerPrefs.SetInt("Editor.RequestedLevel", index)` yazılır ve Play moduna girilir.
 3. `GameBootstrap` (sadece `UNITY_EDITOR` altında) bu anahtarı okur, siler ve doğrudan `Gameplay(index)` durumunu başlatır.
 4. Bu şekilde başlatılan oturumda ilerleme **`InMemoryProgressStorage`** ile tutulur: editörde 4. bölümü denemek gerçek kayıtta 0–4 arasını açmaz (§14.3).
+
+- Bölüm katalogda değilse uyarı penceresi açılır; aktif sahne `Main.unity` değilse kaydetme sorulur ve `Main.unity` açılır. İstenen index katalogdan büyükse (katalog değişmişse) menüden başlanır. `EditorLevelLauncher.FindIndex` ve `WriteRequest` testler için ayrı metotlardır.
 
 > İki küçük sınıf var: **yazan** `EditorLevelLauncher` (`Game.Editor`) ve **okuyan** `EditorLevelRequest` (`Game.Runtime`, tamamı `#if UNITY_EDITOR` içinde, statik `TryConsume(out int index)`). Anahtar `PlayerPrefs` üzerinden taşınır çünkü `Game.Runtime` derlemesi `Game.Editor`'a referans veremez.
 
@@ -2048,6 +2052,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - Editörden başlatılan bölümde ilerleme bellekte tutulur.
 - `CameraFitter` varsayılan `margin` değeri 0.15 → **0.3** (Faz 3'te ölçüldü: 0.15 dikey ekranda alt köşeleri kırpıyordu, §9.4).
 - `ScreenView.Init` butonları soyut `BindButtons()` ile bağlar (Awake EditMode testlerinde çalışmaz); popup açılışı ortak `PopIn` yardımcısında (§12.2). HUD'daki baştan başlat butonunun metni "Baştan" (font'ta ↻ glifi yok).
+- Bölüm editörünün mantığı ayrı `LevelEditing` sınıfında (Faz 7, test edilebilirlik için, §15.1).
 - `PooledParticle` `[ExecuteAlways]` + sahipsiz durma mesajını yok sayma (Faz 6, EditMode testinde mesajın çalışabilmesi için, §13.4).
 - **Kaybetme kuralı** (Faz 3 oyun testi, ekip kararı): bekleme alanının son koltuğu dolduğu anda kayıp (§2.6, §2.8, karar #28). `OverflowPoint` kaldırıldı; kaybeden yolcu koltuğunda sallanır (§10.5). Koltuk sayıları değişmedi; Bölüm 3–5'in bilinen çözümleri ve rastgele kazanma oranları yeni kurala göre güncellendi (§21.1).
 
