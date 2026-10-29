@@ -1,10 +1,11 @@
 using DG.Tweening;
-using Game.Core;
-using Game.Core.Levels;
 using Game.Core.Path;
+using Game.Core.Progress;
 using Game.Runtime.Data;
 using Game.Runtime.Feedback;
+using Game.Runtime.Flow;
 using Game.Runtime.Input;
+using Game.Runtime.UI;
 using Game.Runtime.View;
 using UnityEngine;
 
@@ -27,10 +28,14 @@ namespace Game.Runtime.Bootstrap
 
         [Header("Input")]
         [SerializeField] private InputHandler inputHandler;
+        [SerializeField] private BackButtonInput backButton;
 
-        [Header("Phase 3 only")]
-        [Tooltip("0-based catalog index of the level to start (level 1 cannot be lost; try 3 to test losing)")]
-        [SerializeField] private int phase3LevelIndex;
+        [Header("UI")]
+        [SerializeField] private LevelMapScreen mapScreen;
+        [SerializeField] private Hud hud;
+        [SerializeField] private WinScreen winScreen;
+        [SerializeField] private LoseScreen loseScreen;
+        [SerializeField] private QuitConfirmScreen quitConfirmScreen;
 
         private void Awake()
         {
@@ -38,41 +43,39 @@ namespace Game.Runtime.Bootstrap
             DOTween.Init(recycleAllByDefault: true, useSafeMode: true, logBehaviour: LogBehaviour.ErrorsOnly)
                    .SetCapacity(200, 50);
 
-            inputHandler.enabled = false;                     // only gameplay turns it on
+            inputHandler.enabled = false;                     // only GameplayState turns it on
 
             // --- Services
             var pathFinder = new BfsPathFinder();
+            var progress = new ProgressService(new InMemoryProgressStorage(), levelCatalog.Count);   // Phase 5: PlayerPrefsProgressStorage
             IFeedback feedback = new NullFeedback();          // Phase 6: FeedbackPlayer
 
-            // --- Views
+            // --- Views and screens
+            var screens = new ScreenView[] { mapScreen, hud, winScreen, loseScreen, quitConfirmScreen };
             presenter.Init(colorPalette, animationSettings, layoutSettings, feedback);
             boardView.Init(layoutSettings);
             waitingAreaView.Init(layoutSettings);
+            foreach (ScreenView screen in screens) screen.Init(feedback);
+            mapScreen.Build(levelCatalog.Count);
             presenter.Prewarm(); boardView.Prewarm(); waitingAreaView.Prewarm();
 
-            StartFirstLevel(pathFinder);
-        }
+            // --- Flow
+            var deps = new AppDependencies
+            {
+                Catalog = levelCatalog, Progress = progress, PathFinder = pathFinder, Feedback = feedback,
+                LayoutSettings = layoutSettings,
+                BoardView = boardView, WaitingAreaView = waitingAreaView, Presenter = presenter, CameraFitter = cameraFitter,
+                Input = inputHandler, BackButton = backButton,
+                MapScreen = mapScreen, Hud = hud, WinScreen = winScreen, LoseScreen = loseScreen,
+                QuitConfirmScreen = quitConfirmScreen,
+            };
+            var machine = new AppStateMachine();
+            var states = new AppStates(machine, deps);
 
-        // Phase 3 only: starts a level directly, in the same order as GameplayState.Enter (§11.5).
-        // Replaced by the app state machine in Phase 4.
-        private void StartFirstLevel(IPathFinder pathFinder)
-        {
-            LevelData level = levelCatalog.Get(phase3LevelIndex);
-            var layout = new BoardLayout(level, layoutSettings);
+            // Every screen starts hidden
+            foreach (ScreenView screen in screens) screen.Hide();
 
-            boardView.Build(level, layout);
-            waitingAreaView.Build(level.WaitingSlots, layout);
-            cameraFitter.Fit(layout.ContentBounds);
-
-            presenter.Begin(level, layout);
-            var session = new GameSession(level, pathFinder, presenter);
-
-            inputHandler.SetLayout(layout);
-            inputHandler.CellTapped += session.Tap;
-            inputHandler.enabled = true;
-
-            presenter.PresentationFinished += result => Debug.Log($"[Phase 3] Presentation finished: {result}");
-            session.Start();
+            machine.ChangeTo(states.Menu());
         }
     }
 }

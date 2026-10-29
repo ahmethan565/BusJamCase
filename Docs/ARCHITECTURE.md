@@ -1465,7 +1465,14 @@ public abstract class ScreenView : MonoBehaviour
     [SerializeField] private CanvasGroup group;
     protected IFeedback Feedback { get; private set; }
 
-    public void Init(IFeedback feedback) => Feedback = feedback;
+    // Butonlar burada (kodda) bağlanır. Awake değil: EditMode testlerinde Awake çalışmaz.
+    public void Init(IFeedback feedback)
+    {
+        Feedback = feedback;
+        BindButtons();
+    }
+
+    protected abstract void BindButtons();
 
     public virtual void Show()
     {
@@ -1497,7 +1504,7 @@ public abstract class ScreenView : MonoBehaviour
 ```
 **`Fire` ne zaman kullanılmaz?** Sonucu kesin bir geçiş olmayan tıklamalarda: HUD butonu (tekrar basılabilir), harita düğümleri (kilitli düğüm geçiş yapmaz). Bunlar doğrudan `Feedback?.UiClick()` + event çağırır. Aksi halde kilitli bir düğüme dokunmak tüm haritayı tıklanamaz bırakır.
 
-Popup'lar (`WinScreen`, `LoseScreen`, `QuitConfirmScreen`) `Show` içinde panelini ölçek 0.8 → 1 ve fade ile açar (`PopupTime`, `SetUpdate(true)`). Tam ekran yarı saydam arka plan tahtaya dokunmayı da engeller.
+Popup'lar (`WinScreen`, `LoseScreen`, `QuitConfirmScreen`) `Show` içinde panelini ölçek 0.8 → 1 ve fade ile açar (`PopupTime`, `SetUpdate(true)`). Bu ortak animasyon `ScreenView`'daki `protected void PopIn(Transform panel, float time)` yardımcısındadır. Tam ekran yarı saydam arka plan tahtaya dokunmayı da engeller.
 
 ### 12.3 Ekranlar
 | Ekran | İçerik | Event'ler | Not |
@@ -1547,6 +1554,7 @@ scrollRect.verticalNormalizedPosition = count > 1 ? currentIndex / (float)(count
 | `Current` | Açık ve geçilmemiş | Vurgulu, hafif nabız (DOTween Yoyo; `Show`'da başlar, `Hide`'da `DOKill`) | Oynanır |
 | `Locked` | `!progress.IsUnlocked(i)` | Gri, kilit ikonu | Düğüm kendi içinde `DOShakePosition` ile sallanır; **`LevelSelected` yayınlanmaz** |
 
+- `LevelNodeView` katmanları (her katmanın tek sahibi): kök `RectTransform` → kilitli sallanma (`DOShakeAnchorPos`); `Body` → "current" nabzı (ölçek). Durumlar `LevelNodeState { Completed, Current, Locked }`. Düğüm ve bağlantı çizgisi prefab'ları `Content/Prefabs/UI/` altındadır (`LevelNode`, `MapLine`).
 - 5 bölüm için düğümler doğrudan oluşturulur. Yüzlerce bölüm olursa sadece görünenleri çizen bir havuz eklenir (sadece `LevelMapScreen`'in içini etkiler).
 
 ### 12.5 `UiText` — 0/1 dönüşümü tek yerde
@@ -2035,6 +2043,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - `GameplayState.Exit` içindeki `DOTween.KillAll()` kaldırıldı; her görsel havuza dönerken kendi tween'lerini öldürür.
 - Editörden başlatılan bölümde ilerleme bellekte tutulur.
 - `CameraFitter` varsayılan `margin` değeri 0.15 → **0.3** (Faz 3'te ölçüldü: 0.15 dikey ekranda alt köşeleri kırpıyordu, §9.4).
+- `ScreenView.Init` butonları soyut `BindButtons()` ile bağlar (Awake EditMode testlerinde çalışmaz); popup açılışı ortak `PopIn` yardımcısında (§12.2). HUD'daki baştan başlat butonunun metni "Baştan" (font'ta ↻ glifi yok).
 - **Kaybetme kuralı** (Faz 3 oyun testi, ekip kararı): bekleme alanının son koltuğu dolduğu anda kayıp (§2.6, §2.8, karar #28). `OverflowPoint` kaldırıldı; kaybeden yolcu koltuğunda sallanır (§10.5). Koltuk sayıları değişmedi; Bölüm 3–5'in bilinen çözümleri ve rastgele kazanma oranları yeni kurala göre güncellendi (§21.1).
 
 ---

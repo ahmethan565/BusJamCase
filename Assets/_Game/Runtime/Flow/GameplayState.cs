@@ -1,0 +1,80 @@
+using Game.Core;
+using Game.Core.Levels;
+using Game.Runtime.View;
+
+namespace Game.Runtime.Flow
+{
+    // One level being played. Restart and retry build a NEW GameplayState: nothing is reset in place (§11.5).
+    public sealed class GameplayState : IAppState
+    {
+        private readonly AppStateMachine machine;
+        private readonly AppStates states;
+        private readonly AppDependencies deps;
+        private readonly int levelIndex;
+        private GameSession session;
+
+        public GameplayState(AppStateMachine machine, AppStates states, AppDependencies deps, int levelIndex)
+        {
+            this.machine = machine;
+            this.states = states;
+            this.deps = deps;
+            this.levelIndex = levelIndex;
+        }
+
+        public void Enter()
+        {
+            // 1) Clear the previous level's visuals (they stayed behind the popup, §11.6)
+            deps.Presenter.Clear();
+            deps.BoardView.Clear();
+            deps.WaitingAreaView.Clear();
+
+            // 2) Level and layout
+            LevelData level = deps.Catalog.Get(levelIndex);
+            var layout = new BoardLayout(level, deps.LayoutSettings);
+
+            // 3) Static board and camera
+            deps.BoardView.Build(level, layout);
+            deps.WaitingAreaView.Build(level.WaitingSlots, layout);
+            deps.CameraFitter.Fit(layout.ContentBounds);
+
+            // 4-5) Passenger visuals, then the rules
+            deps.Presenter.Begin(level, layout);
+            session = new GameSession(level, deps.PathFinder, deps.Presenter);
+
+            // 6) Input
+            deps.Input.SetLayout(layout);
+            deps.Input.CellTapped += session.Tap;
+            deps.Input.enabled = true;
+
+            // 7) HUD
+            deps.Hud.Show();
+            deps.Hud.SetLevel(levelIndex);
+
+            // 8) Subscriptions
+            deps.Hud.RestartClicked += OnRestartClicked;
+            deps.BackButton.BackPressed += OnBackPressed;
+            deps.Presenter.PresentationFinished += OnPresentationFinished;
+
+            // 9) First bus arrives
+            session.Start();
+        }
+
+        // Board visuals and their tweens are NOT cleared here: the popup opens over the finished board (§11.6).
+        public void Exit()
+        {
+            deps.Input.enabled = false;
+            deps.Input.CellTapped -= session.Tap;
+            deps.Hud.RestartClicked -= OnRestartClicked;
+            deps.BackButton.BackPressed -= OnBackPressed;
+            deps.Presenter.PresentationFinished -= OnPresentationFinished;
+            deps.Hud.Hide();
+        }
+
+        private void OnPresentationFinished(SessionResult result) =>
+            machine.ChangeTo(result == SessionResult.Won ? states.Win(levelIndex) : states.Lose(levelIndex));
+
+        private void OnRestartClicked() => machine.ChangeTo(states.Gameplay(levelIndex));
+
+        private void OnBackPressed() => machine.ChangeTo(states.Menu());
+    }
+}
