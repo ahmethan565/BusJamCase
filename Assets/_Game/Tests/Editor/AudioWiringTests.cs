@@ -64,6 +64,15 @@ namespace Game.Editor.Tests
         }
 
         [Test]
+        public void Scene_HasExactlyOneEnabledAudioListener_OnTheCamera()
+        {
+            AudioListener listener = SceneComponent<AudioListener>();
+
+            Assert.IsTrue(listener.enabled, "without a listener nothing is heard");
+            Assert.IsNotNull(listener.GetComponent<Camera>(), "the listener sits on the camera");
+        }
+
+        [Test]
         public void AudioAndVfx_SitUnderTheAudioObject()
         {
             Assert.AreEqual("[Audio]", SceneComponent<AudioPlayer>().transform.root.name);
