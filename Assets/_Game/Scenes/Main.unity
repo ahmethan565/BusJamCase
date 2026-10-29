@@ -233,6 +233,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 245696762}
+  - component: {fileID: 245696763}
   m_Layer: 0
   m_Name: WaitingAreaView
   m_TagString: Untagged
@@ -255,6 +256,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1388142358}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &245696763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 245696761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd6fd1df277d818458ec6caf19f2e4b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  slotMarkerPrefab: {fileID: 8615524153017414854, guid: 431b8a84fd52890459be99d47b5fdc6a, type: 3}
+  poolRoot: {fileID: 284647862}
+  slotMarkerPrewarm: 8
 --- !u!1 &275576954
 GameObject:
   m_ObjectHideFlags: 0
@@ -264,6 +280,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 275576955}
+  - component: {fileID: 275576956}
   m_Layer: 0
   m_Name: GameplayPresenter
   m_TagString: Untagged
@@ -286,6 +303,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1388142358}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &275576956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 275576954}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac4326822f1bfca4b89415861be6c50a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  passengerPrefab: {fileID: 8400331720159249522, guid: 99a3e8ff9c86e164bb09914a9db7a839, type: 3}
+  busPrefab: {fileID: 6490642979369693767, guid: 4394e817a31e339468465c6174f3e4e2, type: 3}
+  poolRoot: {fileID: 284647862}
+  passengerPrewarm: 40
+  busPrewarm: 4
 --- !u!1 &284647861
 GameObject:
   m_ObjectHideFlags: 0
@@ -902,6 +936,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 920173520}
+  - component: {fileID: 920173521}
   m_Layer: 0
   m_Name: BoardView
   m_TagString: Untagged
@@ -924,6 +959,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1388142358}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &920173521
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 920173519}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0587c7e7a8a438a44acad878737196bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  floorTilePrefab: {fileID: 1390254440066863027, guid: 98d6af5898d74e34ab9f10769980a439, type: 3}
+  wallBlockPrefab: {fileID: 4314996853161338195, guid: 66776578e9cd5bb49a70c7e19ac5e52a, type: 3}
+  edgePiecePrefab: {fileID: 7618199294095355413, guid: 984a5ef6f4a16cb449bca61664114a09, type: 3}
+  poolRoot: {fileID: 284647862}
+  floorTilePrewarm: 64
+  wallBlockPrewarm: 8
+  edgePiecePrewarm: 64
 --- !u!1 &1284843000
 GameObject:
   m_ObjectHideFlags: 0
@@ -933,6 +987,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1284843001}
+  - component: {fileID: 1284843002}
   m_Layer: 0
   m_Name: '[Bootstrap]'
   m_TagString: Untagged
@@ -955,6 +1010,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1284843002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1284843000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: afe860babd8554a44a454f4c8e671fac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  levelCatalog: {fileID: 11400000, guid: 095f7e96885575148a55348d6ab40ac6, type: 2}
+  layoutSettings: {fileID: 11400000, guid: cedf7f13541c87846b6e1793d9b9e660, type: 2}
+  animationSettings: {fileID: 11400000, guid: d2d908264510dc24e962fbb9c31d7743, type: 2}
+  colorPalette: {fileID: 11400000, guid: 771473e62a788fe4ca5c22c188465f3f, type: 2}
+  boardView: {fileID: 920173521}
+  waitingAreaView: {fileID: 245696763}
+  presenter: {fileID: 275576956}
+  cameraFitter: {fileID: 1783700110}
+  inputHandler: {fileID: 1295678893}
 --- !u!1 &1295678891
 GameObject:
   m_ObjectHideFlags: 0
@@ -964,6 +1040,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1295678892}
+  - component: {fileID: 1295678893}
   m_Layer: 0
   m_Name: '[Input]'
   m_TagString: Untagged
@@ -986,6 +1063,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1295678893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1295678891}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d783c02bb2e5ba49bfa749d39beba42, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cam: {fileID: 1783700108}
 --- !u!1 &1388142357
 GameObject:
   m_ObjectHideFlags: 0
@@ -1031,6 +1121,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1783700109}
   - component: {fileID: 1783700108}
+  - component: {fileID: 1783700110}
   m_Layer: 0
   m_Name: '[Camera]'
   m_TagString: MainCamera
@@ -1047,8 +1138,8 @@ Camera:
   m_GameObject: {fileID: 1783700107}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0.56, g: 0.76, b: 0.9, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -1104,6 +1195,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1783700110
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1783700107}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac06cf31804e78f42b1e831c9beb7200, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cam: {fileID: 1783700108}
+  tilt: 55
+  verticalFov: 40
+  margin: 0.3
 --- !u!1 &1826457809
 GameObject:
   m_ObjectHideFlags: 0

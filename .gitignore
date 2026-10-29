@@ -27,3 +27,5 @@
 # İşletim sistemi
 .DS_Store
 Thumbs.db
+# Python (Docs/reference simulator)
+__pycache__/

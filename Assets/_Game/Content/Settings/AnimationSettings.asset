@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 793ad5395eca39f42b7e6aa9d3e6a6ab, type: 3}
+  m_Name: AnimationSettings
+  m_EditorClassIdentifier: 
+  walkSpeed: 4
+  stepHeight: 0.15
+  stepTime: 0.12
+  tapSquash: {x: 0.2, y: -0.2, z: 0.2}
+  tapSquashTime: 0.2
+  blockedShakeStrength: 0.1
+  blockedShakeTime: 0.3
+  boardHopHeight: 0.5
+  boardHopTime: 0.2
+  boardFromSlotTime: 0.25
+  introPopTime: 0.25
+  introStagger: 0.02
+  idleBreathScale: 0.03
+  idleBreathTime: 1.2
+  busArriveTime: 0.5
+  busDepartTime: 0.4
+  indicatorSpacing: 0.3
+  popupTime: 0.25
+  nodePulseScale: 1.1
+  nodePulseTime: 0.6

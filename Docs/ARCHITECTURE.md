@@ -952,11 +952,12 @@ float hFov = 2f * Mathf.Atan(Mathf.Tan(vFov / 2f) * cam.aspect);
 
 float distForWidth = (bounds.size.x / 2f) / Mathf.Tan(hFov / 2f);
 float distForDepth = (bounds.size.z / 2f) / Mathf.Tan(vFov / 2f);
-float distance = Mathf.Max(distForWidth, distForDepth) * (1f + margin);   // margin varsayılan 0.15
+float distance = Mathf.Max(distForWidth, distForDepth) * (1f + margin);   // margin varsayılan 0.3
 
 cam.transform.position = bounds.center - cam.transform.forward * distance;
 ```
-Eğimden kaynaklanan küçük perspektif farkını `margin` karşılar. Daha karmaşık bir hesap yapılmaz.
+Eğimden kaynaklanan perspektif farkını `margin` karşılar. Daha karmaşık bir hesap yapılmaz.
+> **Neden 0.3?** Dikey ekranda sığdırma genişliğe göre yapılır; tahtanın kameraya en yakın (alt) satırı daha geniş görünür. 0.15 ile alt köşeler ve üzerlerindeki ~1 birim boyundaki nesneler 9:16 ekranda yanlardan ~%8 taşıyordu. 0.3 ile 9:16 ve 19.5:9 telefonlarda 5 bölümün tamamı (1 birim yüksekliğe kadar) ekrana sığar.
 
 ### 9.5 `InputHandler`
 - **Input System `Pointer`** soyutlaması: telefonda parmak, editörde fare. Tek kod iki ortamda çalışır.
@@ -2029,6 +2030,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - Tween referansı saklanmaz; adımlar kendi `IsDone` bayrağını tutar (DOTween recycling).
 - `GameplayState.Exit` içindeki `DOTween.KillAll()` kaldırıldı; her görsel havuza dönerken kendi tween'lerini öldürür.
 - Editörden başlatılan bölümde ilerleme bellekte tutulur.
+- `CameraFitter` varsayılan `margin` değeri 0.15 → **0.3** (Faz 3'te ölçüldü: 0.15 dikey ekranda alt köşeleri kırpıyordu, §9.4).
 
 ---
 
