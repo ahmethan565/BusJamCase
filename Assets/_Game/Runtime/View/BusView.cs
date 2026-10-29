@@ -27,6 +27,11 @@ namespace Game.Runtime.View
         public bool IsParked { get; private set; }
         public event Action<BusView> Parked;
 
+        // Boardings run in parallel (§10.8): the bus leaves when nobody is left to get on, and
+        // the indicators fill by how many are in, because passengers can get on out of seat order.
+        public int PendingBoardings { get; private set; }
+        private int boarded;
+
         // Once, in the pool's create function.
         public void Configure(AnimationSettings animationSettings) => anim = animationSettings;
 
@@ -36,6 +41,8 @@ namespace Game.Runtime.View
             Id = busId;
             DoorPoint = doorPoint;
             IsParked = false;
+            PendingBoardings = 0;
+            boarded = 0;
             capacity = busCapacity;
             bodyRenderer.sharedMaterial = material;
             transform.SetPositionAndRotation(enterPosition, Quaternion.identity);
@@ -66,6 +73,15 @@ namespace Game.Runtime.View
                     Parked?.Invoke(this);
                     onComplete();
                 });
+        }
+
+        public void ExpectBoarding() => PendingBoardings++;
+
+        // A passenger is in: returns how many are in now.
+        public int CompleteBoarding()
+        {
+            PendingBoardings--;
+            return ++boarded;
         }
 
         // The next bus moving up to its place in the queue (not parked: nobody boards it yet).
@@ -99,6 +115,8 @@ namespace Game.Runtime.View
         public void ResetForPool()
         {
             IsParked = false;
+            PendingBoardings = 0;
+            boarded = 0;
             transform.DOKill();
             indicatorRoot.DOKill();
             indicatorRoot.localScale = Vector3.one;

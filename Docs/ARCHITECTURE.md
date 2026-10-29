@@ -1100,12 +1100,12 @@ public void ReleaseBus(int busId);
 | `OnPassengerExited(p, path)` | `lastExitedId = p.Id`; `view.StopIdle()`, `view.PlayTapSquash()` + `feedback.PassengerTapped(pos)`; yol hücreleri dünya noktalarına çevrilir, sonuna `RoadPointAbove(path[path.Count - 1])` eklenir ve **saklanır** (`exitWalk`). Yürüyüş, aynı dokunuşun bir sonraki olayıyla başlar; yolcunun nereye gideceğine o olay karar verir | Serbest |
 | `OnPassengerWaiting(p, slot)` | Durağa git: ekranda boş bir koltuk alınır (tercihen mantıktaki `slot`, doluysa en küçük boş koltuk; `StopSeats`), `exitWalk` + koltuk noktası yürünür, varınca `ArrivedAtSlot`: `feedback.PassengerWaiting()`; kayıp bekleniyorsa ve bu son çıkan yolcuysa `view.PlayBlockedShake()`. Ekranda boş koltuk yoksa yolcu hücresinde **tutulur** (aşağıdaki durak kuralı) | Serbest |
 | `OnPassengerLeftWaitingArea(p, slot)` | Görsel bir şey yok: yolcu, `BoardStep` onu otobüse yürütene kadar ekrandaki koltuğunu korur | — |
-| `OnPassengerBoarded(p, bus, seat)` | Yolcu tahtadan geliyorsa: otobüs **park etmişse** (`busView.IsParked`) `exitWalk` + `DoorPoint` yürünür; **park etmemişse** durağa gider (boş koltuk, yoksa tutulur). Zaten duraktaysa (koltukta ya da tutulmuş) yürüyüş yok; tutulmuşsa otobüsü kaydedilir. Her durumda `lane.Enqueue(new BoardStep(this, view, busView, seat, feedback))` | Serbest + Şerit |
+| `OnPassengerBoarded(p, bus, seat)` | Yolcu tahtadan geliyorsa: otobüs **park etmişse** (`busView.IsParked`) `exitWalk` + `DoorPoint` yürünür; **park etmemişse** durağa gider (boş koltuk, yoksa tutulur). Zaten duraktaysa (koltukta ya da tutulmuş) yürüyüş yok; tutulmuşsa otobüsü kaydedilir. Her durumda `busView.ExpectBoarding()` ve `boardings.Add(new BoardStep(this, view, busView, feedback))` (şeride değil, paralel biniş listesine) | Serbest |
 | `OnBusDeparted(bus)` | `lane.Enqueue(new BusDepartStep(this, busView, layout.BusExitPosition, feedback))` | Şerit |
 | `OnWon()` | `pendingResult = Won` | — |
 | `OnLost()` | `pendingResult = Lost` (sallanmayı `ArrivedAtSlot` yapar) | — |
 
-**Durak kuralı (kesin):** Kimse kapıda otobüs beklemez ve ayrı bir bekleme yeri yoktur. Yolcu kapıya sadece otobüsü **park etmişken** yürür; aksi halde duraktaki boş bir koltuğa oturur ve otobüs park edince oradan biner. Ekrandaki koltukları `StopSeats` dağıtır: koltuk, yolcusu gerçekten otobüse yürüyene kadar dolu sayılır, böylece iki yolcu aynı koltuğa düşmez. Bu yüzden ekrandaki koltuk mantıktaki koltuk numarasından farklı olabilir. Otobüs değişimi sırasında ekranda boş koltuk kalmazsa (nadir) yolcu hücresinde tutulur ve bir koltuk boşalınca ya da otobüsü park edince yürümeye başlar; o kısa sürede arkasındaki bir yolcu onun içinden geçerek yürüyebilir (kabul edildi). Kurallar (`GameSession`) bu görsel beklemeden etkilenmez; kaybetme yalnızca mantıktaki koltuklara bakar.
+**Durak kuralı (kesin):** Kimse kapıda otobüs beklemez ve ayrı bir bekleme yeri yoktur. Yolcu kapıya sadece otobüsü **park etmişken** yürür; aksi halde duraktaki boş bir koltuğa oturur ve otobüs park edince oradan biner. Otobüs park ettiği an, ona binecek ve koltukta bekleyen **bütün yolcular aynı anda kalkıp otobüse koşar**; her yolcu kapıya vardığı an biner (kapıda kimse kimseyi beklemez). Ekrandaki koltukları `StopSeats` dağıtır: koltuk, yolcusu gerçekten otobüse yürüyene kadar dolu sayılır, böylece iki yolcu aynı koltuğa düşmez. Bu yüzden ekrandaki koltuk mantıktaki koltuk numarasından farklı olabilir. Otobüs değişimi sırasında ekranda boş koltuk kalmazsa (nadir) yolcu hücresinde tutulur ve bir koltuk boşalınca ya da otobüsü park edince yürümeye başlar; o kısa sürede arkasındaki bir yolcu onun içinden geçerek yürüyebilir (kabul edildi). Kurallar (`GameSession`) bu görsel beklemeden etkilenmez; kaybetme yalnızca mantıktaki koltuklara bakar.
 
 **Kayıp görseli:** Son dokunulan yolcu son boş koltuğa yürür, oturduğu anda sallanır. Popup, bu yürüyüş bittikten sonra açılır (sallanma beklenmez).
 
@@ -1114,9 +1114,14 @@ public void ReleaseBus(int busId);
 private void Update()
 {
     lane.Tick();
+    for (int i = boardings.Count - 1; i >= 0; i--)   // binişler paralel: her biri kendi hazır olunca başlar
+    {
+        boardings[i].Tick();
+        if (boardings[i].IsDone) boardings.RemoveAt(i);
+    }
 
     if (pendingResult != SessionResult.Playing && !finishedRaised
-        && lane.IsIdle && walkingCount == 0)
+        && lane.IsIdle && boardings.Count == 0 && walkingCount == 0 && held.Count == 0)
     {
         finishedRaised = true;
         PresentationFinished?.Invoke(pendingResult);
@@ -1226,6 +1231,9 @@ public void Arrive(Vector3 parkPosition, Action onComplete);    // DOMove, Ease.
 public void DriveTo(Vector3 position);                          // kuyruğa ilerleme; park sayılmaz
 public void Depart(Vector3 exitPosition, Action onComplete);    // DOMove, Ease.InQuad, BusDepartTime
 public void SetFilledCount(int count);                          // ilk `count` gösterge dolu + IndicatorRoot.DOPunchScale
+public int PendingBoardings { get; }                           // binmesi beklenen, henüz binmemiş yolcu sayısı
+public void ExpectBoarding();                                  // OnPassengerBoarded'da +1
+public int CompleteBoarding();                                 // yolcu girdi: -1, binen sayısını döndürür (gösterge ve perde bunu kullanır)
 public void ResetForPool();
 ```
 - **Göstergeler:** `BusView` bir gösterge listesi tutar. `Init`'te `capacity` kadar gösterge görünür olur; liste yetmezse `BusIndicator` prefab'ından eklenir (havuzdaki otobüsle birlikte saklanır, bir daha oluşturulmaz). Fazlası gizlenir. Göstergeler `IndicatorRoot` altında ortalanarak dizilir: `x = (i - (capacity - 1) / 2f) * IndicatorSpacing`.
@@ -1260,15 +1268,16 @@ public sealed class BusLane
 ```
 **Örnek adım:**
 ```csharp
+// Şeritte DEĞİL: presenter'ın paralel biniş listesinde tick edilir.
 public sealed class BoardStep : IStep
 {
-    // (constructor: presenter, passenger, bus, seat, feedback)
+    // (constructor: presenter, passenger, bus, feedback)
     private bool started;
     public bool IsDone { get; private set; }
 
     public void Tick()
     {
-        if (started || passenger.IsWalking || presenter.IsHeldBack(passenger.Id)) return;   // yürüyüş bitmeden / tutulmuşken başlama
+        if (started || !bus.IsParked || passenger.IsWalking || presenter.IsHeldBack(passenger.Id)) return;   // otobüs durmadan / yürüyüş bitmeden / tutulmuşken başlama
         started = true;
 
         if (presenter.LeaveSeat(passenger.Id)) passenger.MoveFromSlotTo(bus.DoorPoint, Hop);   // koltuktaysa oradan
@@ -1279,8 +1288,9 @@ public sealed class BoardStep : IStep
 
     private void OnBoarded()
     {
-        bus.SetFilledCount(seat + 1);
-        feedback.PassengerBoarded(seat);
+        int boarded = bus.CompleteBoarding();    // sırasız biniş: koltuk numarası değil binen sayısı
+        bus.SetFilledCount(boarded);
+        feedback.PassengerBoarded(boarded - 1);
         presenter.ReleasePassenger(passenger.Id);
         IsDone = true;
     }
@@ -1289,11 +1299,11 @@ public sealed class BoardStep : IStep
 | Adım | Başlama koşulu | Ne yapar | Bitince |
 |---|---|---|---|
 | `BusArriveStep` | Sıra gelince | `busView.Arrive(park, ...)` (kuyruktan kısa ilerleme ya da sağdan giriş); varsa arkadaki otobüs aynı anda `DriveTo(BusQueuePosition)` | `IsParked = true`, `Parked` olayı, `feedback.BusArrived()` |
-| `BoardStep` | Sıra geldi **ve** yolcunun yürüyüşü bitti **ve** yolcu tutulmuyor | Ekranda koltuktaysa koltuğu bırakır (`presenter.LeaveSeat`, boşalan koltuk ilk tutulan yolcuya verilir) + `MoveFromSlotTo` + `HopInto`, değilse sadece `HopInto` | `SetFilledCount(seat + 1)`, `feedback.PassengerBoarded(seat)`, `presenter.ReleasePassenger(id)` |
-| `BusDepartStep` | Sıra gelince | `feedback.BusDeparted(pos)` + `busView.Depart(exit, ...)` | `presenter.ReleaseBus(id)` |
+| `BoardStep` (paralel, şeritte değil) | Otobüs park etti **ve** yolcunun yürüyüşü bitti **ve** yolcu tutulmuyor | Ekranda koltuktaysa koltuğu bırakır (`presenter.LeaveSeat`, boşalan koltuk ilk tutulan yolcuya verilir) + `MoveFromSlotTo` + `HopInto`, değilse sadece `HopInto` | `CompleteBoarding()` → `SetFilledCount(binen)`, `feedback.PassengerBoarded(binen - 1)`, `presenter.ReleasePassenger(id)` |
+| `BusDepartStep` | Sıra geldi **ve** otobüse binecek herkes bindi (`PendingBoardings == 0`) | `feedback.BusDeparted(pos)` + `busView.Depart(exit, ...)` | `presenter.ReleaseBus(id)` |
 
-- Oyuncu ne kadar hızlı dokunursa dokunsun binişler **dokunuş sırasıyla** oynar. Kapıya erken varan yolcu kapıda bekler.
-- Kapı önünde birden fazla yolcunun bir an üst üste görünmesi **kabul edilmiş bir durumdur** (§19).
+- Şerit yalnızca otobüs geliş/gidişlerini sıralar. **Binişler paraleldir:** her yolcu, otobüsü park etmişken kapıya vardığı an biner; kimse sırasını kapıda beklemez. Otobüs park edince koltuktaki yolcuları aynı anda kalkar. Otobüs, ona binecek son yolcu girince kalkar.
+- Aynı anda kapıya varan yolcuların bir an üst üste görünmesi **kabul edilmiş bir durumdur** (§19).
 
 ### 10.9 `AnimationSettings` (ScriptableObject) — varsayılan değerler
 Hepsi Play modunda değiştirilip denenebilir; **kodda sabit süre/hız/güç yazılmaz.**
@@ -1609,7 +1619,7 @@ public interface IFeedback
 |---|---|---|---|
 | Geçerli dokunuş | Squash başlarken | `Pop` | — |
 | Yolu kapalı yolcu | Sallanma başlarken | `Bonk` | — |
-| Otobüse biniş | Zıplama bitince | `Board`, perde `1 + seat * 0.1` | — |
+| Otobüse biniş | Zıplama bitince | `Board`, perde `1 + index * 0.1` (index = o otobüse binen sayısı − 1) | — |
 | Koltuğa varış | Koltuk yürüyüşü bitince (`WalkAlong` `onArrived`) | `Seat` | — |
 | Otobüs gidiyor | Gidiş başlarken | `Horn` | `ExhaustPuff` |
 | Otobüs geliyor | Geliş bitince (`BusArriveStep`) | `Brake` | — |
@@ -1619,7 +1629,7 @@ public interface IFeedback
 
 Perde hesabı: otobüs dolarken "do-re-mi" hissi verir.
 ```csharp
-float pitch = 1f + seat * 0.1f;   // 1.0 → 1.1 → 1.2
+float pitch = 1f + index * 0.1f;   // 1.0 → 1.1 → 1.2 (binişler sırasız olduğu için koltuk değil binen sırası)
 ```
 
 ### 13.4 Sınıflar
@@ -1995,7 +2005,7 @@ Her faz **tek başına derlenir ve testleri yeşildir.** Bir faz bitmeden sonrak
 - `LayoutSettings`, `AnimationSettings`, `ColorPalette`; `BoardLayout`, `BoardView`, `WaitingAreaView`, `PassengerView`, `BusView` (yer tutucu küp/kapsül modeller, §10.6'daki katmanlı hiyerarşiyle); `GameplayPresenter`, `BusLane` ve adımlar; `InputHandler`; `CameraFitter`.
 - **`IFeedback` arayüzü ve `NullFeedback`** bu fazda yazılır (presenter ve adımlar ona bağlı); gerçek `FeedbackPlayer` Faz 6'da.
 - Geçici olarak `GameBootstrap` doğrudan 1. bölümü başlatır ve `PresentationFinished` sonucunu konsola yazar.
-- **Kabul:** Editörde ve Device Simulator'da 1. bölüm baştan sona oynanır; hızlı ardışık dokunuşta yolcular paralel yürür, binişler dokunuş sırasıyla olur; kapalı yolcu sallanır; son koltuk dolunca oyun kaybedilir ve son yolcu koltuğunda sallanır.
+- **Kabul:** Editörde ve Device Simulator'da 1. bölüm baştan sona oynanır; hızlı ardışık dokunuşta yolcular paralel yürür, her yolcu otobüs kapısına varınca beklemeden biner (paralel biniş, §10.8); kapalı yolcu sallanır; son koltuk dolunca oyun kaybedilir ve son yolcu koltuğunda sallanır.
 
 ### Faz 4 — Akış ve UI
 - `IAppState`, `AppStateMachine`, `AppDependencies`, `AppStates`, 4 durum; `ScreenView` ve tüm ekranlar; `SafeAreaFitter`, `UiText`; `BackButtonInput`; çıkış onayı overlay'i.
@@ -2077,6 +2087,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - `CameraFitter` varsayılan `margin` değeri 0.15 → **0.3** (Faz 3'te ölçüldü: 0.15 dikey ekranda alt köşeleri kırpıyordu, §9.4).
 - `ScreenView.Init` butonları soyut `BindButtons()` ile bağlar (Awake EditMode testlerinde çalışmaz); popup açılışı ortak `PopIn` yardımcısında (§12.2). HUD'daki baştan başlat butonunun metni "Restart" (font'ta ↻ glifi yok).
 - **Dil:** oyuncu metinleri ve editör araçlarının metinleri Türkçeden **İngilizceye** çevrildi (Faz 7 sonrası ekip kararı; §1, §4.4, §7.3, §12.3, §12.5). Testler İngilizce metinleri ve sahnede Türkçe karakter kalmadığını denetler.
+- **Paralel biniş** (oyun testi, ekip kararı): binişler artık şeritte sırayla değil paralel oynar; otobüs park edince koltuktaki yolcuları aynı anda koşar, her yolcu kapıya varınca biner, otobüs son yolcu girince kalkar. Gösterge ve perde binen sayısına göre (§10.5, §10.7, §10.8, §13.3). Kurallar ve testler değişmedi.
 - **Otobüs kuyruğu ve durak kuralı** (Faz 8 sonrası oyun testi, ekip kararı): sıradaki otobüs park noktasının hemen arkasında bekler ve bir kısmı görünür (oyuncu sıradaki rengi görür); öndeki gidince kısa bir mesafe ilerler. Kimse kapıda beklemez: otobüsü park etmemiş yolcu duraktaki boş koltuğa oturur ve oradan biner; ekranda koltuk yoksa hücresinde tutulur (§9.2, §9.3, §10.5, §10.7, §10.8). Kurallar ve mevcut testler değişmedi.
 - Faz 8: yer tutucu low-poly yolcu/otobüs mesh'leri, harita düğümüne gölge + çizilmiş onay işareti ve kilit; cihaz ölçümü için Tools → Game → Configure Development Build ve §16.5 adımları. Cihaz kabulü (60 FPS, 0 GC, < 60 batch) ekip tarafından telefonda ölçülür.
 - Bölüm editörünün mantığı ayrı `LevelEditing` sınıfında (Faz 7, test edilebilirlik için, §15.1).

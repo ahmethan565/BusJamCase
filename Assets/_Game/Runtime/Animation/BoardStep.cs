@@ -3,23 +3,22 @@ using Game.Runtime.View;
 
 namespace Game.Runtime.Animation
 {
-    // A passenger gets on the bus. Waits for its turn, for the passenger's walk to end, and for a passenger
-    // held back without a seat. A passenger sitting at the stop walks from its seat; otherwise it is at the door.
+    // A passenger gets on the bus. NOT in the BusLane: boardings run in parallel (§10.8). Starts as soon as the bus
+    // is parked and the passenger is ready (walk finished, not held back), so nobody waits at the door for anyone.
+    // A passenger sitting at the stop runs from its seat; otherwise it is already at the door.
     public sealed class BoardStep : IStep
     {
         private readonly GameplayPresenter presenter;
         private readonly PassengerView passenger;
         private readonly BusView bus;
-        private readonly int seat;
         private readonly IFeedback feedback;
         private bool started;
 
-        public BoardStep(GameplayPresenter presenter, PassengerView passenger, BusView bus, int seat, IFeedback feedback)
+        public BoardStep(GameplayPresenter presenter, PassengerView passenger, BusView bus, IFeedback feedback)
         {
             this.presenter = presenter;
             this.passenger = passenger;
             this.bus = bus;
-            this.seat = seat;
             this.feedback = feedback;
         }
 
@@ -27,7 +26,7 @@ namespace Game.Runtime.Animation
 
         public void Tick()
         {
-            if (started || passenger.IsWalking || presenter.IsHeldBack(passenger.Id)) return;
+            if (started || !bus.IsParked || passenger.IsWalking || presenter.IsHeldBack(passenger.Id)) return;
             started = true;
 
             if (presenter.LeaveSeat(passenger.Id)) passenger.MoveFromSlotTo(bus.DoorPoint, Hop);
@@ -38,8 +37,9 @@ namespace Game.Runtime.Animation
 
         private void OnBoarded()
         {
-            bus.SetFilledCount(seat + 1);
-            feedback.PassengerBoarded(seat);
+            int boarded = bus.CompleteBoarding();   // out of seat order: count who is in
+            bus.SetFilledCount(boarded);
+            feedback.PassengerBoarded(boarded - 1);
             presenter.ReleasePassenger(passenger.Id);
             IsDone = true;
         }

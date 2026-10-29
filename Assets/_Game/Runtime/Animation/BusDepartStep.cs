@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Game.Runtime.Animation
 {
-    // A full bus drives away to the left and goes back to the pool.
+    // A full bus drives away to the left and goes back to the pool, once everyone boarding it is in.
     public sealed class BusDepartStep : IStep
     {
         private readonly GameplayPresenter presenter;
@@ -25,7 +25,7 @@ namespace Game.Runtime.Animation
 
         public void Tick()
         {
-            if (started) return;
+            if (started || bus.PendingBoardings > 0) return;
             started = true;
             feedback.BusDeparted(bus.transform.position);
             bus.Depart(exitPosition, OnDeparted);

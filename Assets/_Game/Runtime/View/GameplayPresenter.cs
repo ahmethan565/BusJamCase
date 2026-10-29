@@ -38,6 +38,7 @@ namespace Game.Runtime.View
         private readonly Dictionary<int, BusView> buses = new Dictionary<int, BusView>();
         private readonly StopSeats seats = new StopSeats();
         private readonly List<HeldPassenger> held = new List<HeldPassenger>();
+        private readonly List<BoardStep> boardings = new List<BoardStep>();   // in parallel, not in the lane (§10.8)
 
         private ColorPalette palette;
         private AnimationSettings anim;
@@ -112,6 +113,7 @@ namespace Game.Runtime.View
             buses.Clear();
             seats.Reset(0);
             held.Clear();
+            boardings.Clear();
             lastExitedId = -1;
             exitWalk = null;
             walkingCount = 0;   // killed walks never raise WalkFinished
@@ -192,7 +194,8 @@ namespace Game.Runtime.View
             else if (busView.IsParked) view.WalkAlong(Append(walk, layout.DoorPoint));
             else GoToStop(view, walk, -1, busView);                              // the bus is not here yet: wait at the stop
 
-            lane.Enqueue(new BoardStep(this, view, busView, seat, feedback));
+            busView.ExpectBoarding();
+            boardings.Add(new BoardStep(this, view, busView, feedback));
         }
 
         public void OnBusDeparted(Bus bus)
@@ -210,9 +213,14 @@ namespace Game.Runtime.View
         private void Update()
         {
             lane.Tick();
+            for (int i = boardings.Count - 1; i >= 0; i--)   // each starts on its own as soon as it is ready
+            {
+                boardings[i].Tick();
+                if (boardings[i].IsDone) boardings.RemoveAt(i);
+            }
 
             if (pendingResult != SessionResult.Playing && !finishedRaised
-                && lane.IsIdle && walkingCount == 0 && held.Count == 0)
+                && lane.IsIdle && boardings.Count == 0 && walkingCount == 0 && held.Count == 0)
             {
                 finishedRaised = true;
                 PresentationFinished?.Invoke(pendingResult);
