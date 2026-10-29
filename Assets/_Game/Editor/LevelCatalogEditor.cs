@@ -12,27 +12,27 @@ namespace Game.Editor
         public override void OnInspectorGUI()
         {
             EditorGUILayout.HelpBox(
-                "Yayındaki oyunda bölümleri sadece sona ekleyin. Sıra değişirse oyuncu ilerlemesi kayar.",
+                "In a released game, only append levels at the end. Reordering shifts player progress.",
                 MessageType.Warning);
 
             DrawDefaultInspector();
 
             EditorGUILayout.Space();
-            EditorGUILayout.LabelField("Durum", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Status", EditorStyles.boldLabel);
             var catalog = (LevelCatalog)target;
             for (int i = 0; i < catalog.Count; i++)
             {
                 LevelAsset level = catalog.GetAsset(i);
                 if (level == null)
                 {
-                    EditorGUILayout.LabelField($"{i}: (boş)", "❌ Boş kayıt");
+                    EditorGUILayout.LabelField($"{i}: (empty)", "❌ Empty entry");
                     continue;
                 }
                 IReadOnlyList<string> errors = LevelEditing.Check(level);
-                string status = errors.Count == 0 ? "✅ Geçerli" : $"❌ {errors.Count} hata";
+                string status = errors.Count == 0 ? "✅ Valid" : $"❌ {errors.Count} error(s)";
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField($"{i}: {level.name}", status);
-                if (GUILayout.Button("Seç", GUILayout.Width(40))) Selection.activeObject = level;
+                if (GUILayout.Button("Select", GUILayout.Width(55))) Selection.activeObject = level;
                 EditorGUILayout.EndHorizontal();
             }
         }

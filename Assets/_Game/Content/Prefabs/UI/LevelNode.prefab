@@ -531,7 +531,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "B\xF6l\xFCm 1"
+  m_text: Level 1
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 497c4647e0b9ea94b811b1a7904cf8cc, type: 2}
   m_sharedMaterial: {fileID: -2649051454488046740, guid: 497c4647e0b9ea94b811b1a7904cf8cc, type: 2}

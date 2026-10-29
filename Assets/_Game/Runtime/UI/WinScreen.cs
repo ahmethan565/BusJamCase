@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Game.Runtime.UI
 {
-    // "Tebrikler!" popup. On the last level the Next button is hidden and "all levels completed" is shown.
+    // "Well done!" popup. On the last level the Next button is hidden and "all levels completed" is shown.
     public sealed class WinScreen : ScreenView
     {
         [SerializeField] private AnimationSettings animationSettings;

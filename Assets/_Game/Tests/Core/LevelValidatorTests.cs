@@ -47,7 +47,7 @@ namespace Game.Core.Tests
             IReadOnlyList<string> errors = Validate(new[] { "#",
                                                             "R" }, "R", capacity: 1);
 
-            Assert.IsTrue(errors.Any(e => e.Contains("çıkış hücresi")), string.Join("\n", errors));
+            Assert.IsTrue(errors.Any(e => e.Contains("exit cell")), string.Join("\n", errors));
         }
 
         [Test]

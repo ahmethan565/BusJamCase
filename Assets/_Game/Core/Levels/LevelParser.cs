@@ -35,7 +35,7 @@ namespace Game.Core.Levels
             var errors = new List<string>();
             if (rows == null || rows.Count == 0)
             {
-                errors.Add("Bölümde hiç satır yok.");
+                errors.Add("The level has no rows.");
                 return ParseResult.Failed(errors);
             }
 
@@ -49,7 +49,7 @@ namespace Game.Core.Levels
                 string row = rows[y] ?? "";
                 if (row.Length != width)
                 {
-                    errors.Add($"Satır {y} uzunluğu {row.Length}, beklenen {width}.");
+                    errors.Add($"Row {y} has length {row.Length}, expected {width}.");
                     continue;
                 }
 
@@ -57,7 +57,7 @@ namespace Game.Core.Levels
                 {
                     if (!Symbols.TryGetValue(row[x], out Symbol symbol))
                     {
-                        errors.Add($"({x},{y}) konumunda tanımsız karakter '{row[x]}'.");
+                        errors.Add($"Unknown character '{row[x]}' at ({x},{y}).");
                         continue;
                     }
                     cells[y * width + x] = symbol.Cell;
@@ -73,7 +73,7 @@ namespace Game.Core.Levels
                 if (Symbols.TryGetValue(letter, out Symbol symbol) && symbol.HasPassenger)
                     busColors.Add(symbol.Color);
                 else
-                    errors.Add($"Otobüs dizisinde tanımsız harf '{letter}'.");
+                    errors.Add($"Unknown letter '{letter}' in the bus list.");
             }
 
             if (errors.Count > 0) return ParseResult.Failed(errors);

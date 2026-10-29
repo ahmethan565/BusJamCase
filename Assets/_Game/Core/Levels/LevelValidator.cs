@@ -12,32 +12,32 @@ namespace Game.Core.Levels
 
         public LevelValidator(IPathFinder pathFinder) => this.pathFinder = pathFinder;
 
-        // Empty list = valid. Messages are Turkish and shown as-is in the level editor.
+        // Empty list = valid. Messages are shown as-is in the level editor.
         public IReadOnlyList<string> Validate(LevelData level)
         {
             var errors = new List<string>();
 
             if (level.Version != SupportedVersion)
-                errors.Add($"Desteklenmeyen sürüm: {level.Version} (desteklenen: {SupportedVersion}).");
+                errors.Add($"Unsupported version: {level.Version} (supported: {SupportedVersion}).");
             if (level.BusCapacity < 1)
-                errors.Add("Otobüs kapasitesi en az 1 olmalı.");
+                errors.Add("Bus capacity must be at least 1.");
             if (level.WaitingSlots < 1)
-                errors.Add("Bekleme alanında en az 1 koltuk olmalı.");
+                errors.Add("The waiting area needs at least 1 slot.");
             if (level.Passengers.Count == 0)
-                errors.Add("Bölümde hiç yolcu yok.");
+                errors.Add("The level has no passengers.");
             if (level.BusColors.Count == 0)
-                errors.Add("Bölümde hiç otobüs yok.");
+                errors.Add("The level has no buses.");
 
             CheckColorCounts(level, errors);
 
             Board board = Board.FromLevel(level);
             if (board.ExitCells.Count == 0)
-                errors.Add("Hiç çıkış hücresi yok.");
+                errors.Add("There is no exit cell.");
 
             HashSet<GridPos> reachable = pathFinder.ReachableFromExits(board, ignorePassengers: true);
             foreach (PassengerSpawn spawn in level.Passengers)
                 if (!reachable.Contains(spawn.Position))
-                    errors.Add($"{spawn.Position} konumundaki yolcu çıkışa hiç ulaşamaz.");
+                    errors.Add($"The passenger at {spawn.Position} can never reach an exit.");
 
             return errors;
         }
@@ -55,7 +55,7 @@ namespace Game.Core.Levels
                 busCounts.TryGetValue(color, out int buses);
                 int needed = buses * level.BusCapacity;
                 if (passengers != needed)
-                    errors.Add($"{TurkishName(color)}: {passengers} yolcu var, {buses} otobüs × {level.BusCapacity} = {needed} gerekiyor.");
+                    errors.Add($"{color}: {passengers} passengers, but {buses} buses × {level.BusCapacity} = {needed} are needed.");
             }
         }
 
@@ -64,16 +64,5 @@ namespace Game.Core.Levels
             counts.TryGetValue(color, out int count);
             counts[color] = count + 1;
         }
-
-        private static string TurkishName(PassengerColor color) => color switch
-        {
-            PassengerColor.Red => "Kırmızı",
-            PassengerColor.Green => "Yeşil",
-            PassengerColor.Blue => "Mavi",
-            PassengerColor.Yellow => "Sarı",
-            PassengerColor.Purple => "Mor",
-            PassengerColor.Orange => "Turuncu",
-            _ => color.ToString(),
-        };
     }
 }

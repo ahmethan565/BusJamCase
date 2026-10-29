@@ -140,7 +140,7 @@ namespace Game.Editor.Tests
 
             hud.SetLevel(2);
 
-            Assert.AreEqual("Bölüm 3", Child(hud, "LevelLabel").GetComponent<TMP_Text>().text);
+            Assert.AreEqual("Level 3", Child(hud, "LevelLabel").GetComponent<TMP_Text>().text);
         }
 
         [Test]

@@ -18,8 +18,8 @@ namespace Game.Editor
 
         private static readonly (char symbol, string label, Color color)[] Palette =
         {
-            ('.', "Zemin", new Color(0.85f, 0.85f, 0.85f)),
-            ('#', "Duvar", new Color(0.30f, 0.30f, 0.35f)),
+            ('.', "Floor", new Color(0.85f, 0.85f, 0.85f)),
+            ('#', "Wall", new Color(0.30f, 0.30f, 0.35f)),
             ('-', "Void", new Color(0.12f, 0.12f, 0.12f)),
             ('R', "R", new Color(0.90f, 0.25f, 0.25f)),
             ('G', "G", new Color(0.25f, 0.70f, 0.35f)),
@@ -52,17 +52,17 @@ namespace Game.Editor
 
             // --- Size and numbers
             EditorGUILayout.BeginHorizontal();
-            int newWidth = Mathf.Max(1, EditorGUILayout.IntField("Boyut (en)", width));
-            int newHeight = Mathf.Max(1, EditorGUILayout.IntField("(boy)", height));
+            int newWidth = Mathf.Max(1, EditorGUILayout.IntField("Width", width));
+            int newHeight = Mathf.Max(1, EditorGUILayout.IntField("Height", height));
             EditorGUILayout.EndHorizontal();
             if (newWidth != width || newHeight != height)
             {
                 grid = LevelEditing.Resize(grid, newWidth, newHeight);
                 WriteRows(grid);
             }
-            EditorGUILayout.PropertyField(waitingSlots, new GUIContent("Koltuk"));
-            EditorGUILayout.PropertyField(busCapacity, new GUIContent("Kapasite"));
-            EditorGUILayout.PropertyField(version, new GUIContent("Sürüm"));
+            EditorGUILayout.PropertyField(waitingSlots, new GUIContent("Waiting Slots"));
+            EditorGUILayout.PropertyField(busCapacity, new GUIContent("Bus Capacity"));
+            EditorGUILayout.PropertyField(version, new GUIContent("Version"));
 
             // --- Palette and grid
             EditorGUILayout.Space();
@@ -72,8 +72,8 @@ namespace Game.Editor
             // --- Buses
             EditorGUILayout.Space();
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.PropertyField(buses, new GUIContent("Otobüsler"));
-            if (GUILayout.Button("Otomatik doldur", GUILayout.Width(120)))
+            EditorGUILayout.PropertyField(buses, new GUIContent("Buses"));
+            if (GUILayout.Button("Auto Fill", GUILayout.Width(120)))
             {
                 LevelEditing.AutoFillBuses(grid, busCapacity.intValue, out string filled, out autoFillWarning);
                 buses.stringValue = filled;
@@ -88,19 +88,19 @@ namespace Game.Editor
             EditorGUILayout.Space();
             var level = (LevelAsset)target;
             IReadOnlyList<string> errors = LevelEditing.Check(level);
-            if (errors.Count == 0) EditorGUILayout.HelpBox("Bölüm geçerli.", MessageType.Info);
+            if (errors.Count == 0) EditorGUILayout.HelpBox("Level is valid.", MessageType.Info);
             foreach (string error in errors) EditorGUILayout.HelpBox(error, MessageType.Error);
 
             // --- Solve and play
             using (new EditorGUI.DisabledScope(errors.Count > 0))
             {
-                if (GUILayout.Button("Çöz")) solveReport = Solve(level);
+                if (GUILayout.Button("Solve")) solveReport = Solve(level);
             }
             if (solveReport != null) EditorGUILayout.HelpBox(solveReport, MessageType.None);
 
             using (new EditorGUI.DisabledScope(errors.Count > 0 || EditorApplication.isPlaying))
             {
-                if (GUILayout.Button("Bu bölümü oyna ▶")) EditorLevelLauncher.Play(level);
+                if (GUILayout.Button("Play This Level ▶")) EditorLevelLauncher.Play(level);
             }
         }
 
@@ -120,7 +120,7 @@ namespace Game.Editor
         private void DrawPalette()
         {
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Palet", GUILayout.Width(40));
+            EditorGUILayout.LabelField("Palette", GUILayout.Width(50));
             foreach ((char symbol, string label, Color color) in Palette)
             {
                 Color old = GUI.backgroundColor;
@@ -175,11 +175,11 @@ namespace Game.Editor
             LevelData data = level.Parse().Level;
             var solver = new LevelSolver(new BfsPathFinder());
             SolveResult result = solver.Solve(data);
-            if (result.HitLimit) return $"Bilinmiyor: arama sınırına ulaşıldı ({result.StatesExplored} durum).";
-            if (!result.IsSolvable) return $"Çözülemez · {result.StatesExplored} durum";
+            if (result.HitLimit) return $"Unknown: the search limit was reached ({result.StatesExplored} states).";
+            if (!result.IsSolvable) return $"Not solvable · {result.StatesExplored} states";
 
             float rate = solver.EstimateRandomWinRate(data, SolverGames, seed: 1);
-            return $"Çözülebilir · {result.StatesExplored} durum · Kazanma oranı (rastgele) %{rate * 100f:0.#}";
+            return $"Solvable · {result.StatesExplored} states · Random win rate {rate * 100f:0.#}%";
         }
     }
 }

@@ -19,12 +19,6 @@ namespace Game.Editor
             { PassengerColor.Yellow, 'Y' }, { PassengerColor.Purple, 'P' }, { PassengerColor.Orange, 'O' },
         };
 
-        private static readonly Dictionary<PassengerColor, string> ColorNames = new Dictionary<PassengerColor, string>
-        {
-            { PassengerColor.Red, "Kırmızı" }, { PassengerColor.Green, "Yeşil" }, { PassengerColor.Blue, "Mavi" },
-            { PassengerColor.Yellow, "Sarı" }, { PassengerColor.Purple, "Mor" }, { PassengerColor.Orange, "Turuncu" },
-        };
-
         public static char Letter(PassengerColor color) => Letters[color];
 
         // Growing adds floor cells, shrinking crops (§15.1).
@@ -66,7 +60,7 @@ namespace Game.Editor
             {
                 if (!counts.TryGetValue(Letters[color], out int count)) continue;
                 if (capacity < 1 || count % capacity != 0)
-                    problems.Add($"{ColorNames[color]} yolcu sayısı ({count}) kapasiteye ({capacity}) bölünmüyor.");
+                    problems.Add($"{color}: {count} passengers cannot be split into buses of {capacity}.");
                 if (capacity >= 1) result.Append(Letters[color], count / capacity);
             }
 

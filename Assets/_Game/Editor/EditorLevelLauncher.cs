@@ -18,8 +18,8 @@ namespace Game.Editor
             int index = catalog == null ? -1 : FindIndex(catalog, level);
             if (index < 0)
             {
-                EditorUtility.DisplayDialog("Bu bölümü oyna",
-                    $"'{level.name}' katalogda yok. Önce LevelCatalog'un sonuna ekleyin.", "Tamam");
+                EditorUtility.DisplayDialog("Play This Level",
+                    $"'{level.name}' is not in the catalog. Append it to the LevelCatalog first.", "OK");
                 return;
             }
 

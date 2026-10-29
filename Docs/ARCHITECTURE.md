@@ -61,7 +61,7 @@
 
 ### Kod dili kuralı
 - Tanımlayıcılar (sınıf, metot, değişken adları) ve kod yorumları **İngilizce**.
-- Oyuncunun gördüğü metinler **Türkçe**.
+- Oyuncunun gördüğü metinler ve editör araçlarının metinleri (bölüm editörü, katalog, doğrulama/parser hataları) **İngilizce**. Projede Türkçe metin yoktur; sadece bu doküman Türkçedir.
 - *(Ekip tercihine göre değiştirilebilir; değiştirilirse bu satır güncellenmeli.)*
 
 ---
@@ -229,8 +229,8 @@ Parmak ──▶ InputHandler ──CellTapped(GridPos)──▶ GameSession.Tap
 | Quality | Mobil için tek seviye; URP asset'i §16.2'deki ayarlarla |
 | Editor → Enter Play Mode Options | **Kapalı bırakılır** (varsayılan). Açılırsa (domain reload kapalı) ScriptableObject'lerdeki çalışma zamanı alanları Play modları arasında taşınabilir |
 
-### 4.4 TextMeshPro ve Türkçe karakterler
-Varsayılan TMP font asset'inde Türkçe karakterler (`ğ Ğ ş Ş ı İ ö Ö ü Ü ç Ç`) eksik olabilir. Seçilen font için **Türkçe karakterleri içeren bir TMP Font Asset** üretilmeli (Font Asset Creator → Character Set: "Custom Characters" ile ASCII + Türkçe karakterler, ya da Dynamic font asset). Kabul kriteri: "Bölüm", "Tüm bölümler tamamlandı!", "Çıkmak istiyor musun?" metinleri kare/boşluk olmadan görünmeli.
+### 4.4 TextMeshPro font
+Metinler İngilizce olduğu için ASCII yeterlidir. Kullanılan TMP Font Asset (`LiberationSans_TR SDF`, Faz 0'da Türkçe karakterlerle üretildi) bunu karşılar. Kabul kriteri: sahnedeki her metnin tüm karakterleri font'ta var (kare/boşluk yok); bunu `UiWiringTests` denetler.
 
 ---
 
@@ -732,7 +732,7 @@ public sealed class LevelValidator
 5. En az bir çıkış hücresi var.
 6. **Erişilebilirlik:** `ReachableFromExits(board, ignorePassengers: true)` kümesinde olmayan her yolcu için hata ("(x,y) konumundaki yolcu çıkışa hiç ulaşamaz"). Void ve duvarlarla çevrili "adaları" yakalar.
 
-Hata mesajları Türkçe ve konum içerir; bölüm editöründe olduğu gibi gösterilir.
+Hata mesajları İngilizce ve konum içerir; bölüm editöründe olduğu gibi gösterilir.
 
 ### 7.4 `LevelSolver`
 ```csharp
@@ -1391,7 +1391,7 @@ public sealed class AppStates
 |---|---|
 | Enter | Tahta görselleri temizlenir (`presenter.Clear()`, `boardView.Clear()`, `waitingAreaView.Clear()`); `mapScreen.Show(progress)` (düğüm durumlarını tazeler ve mevcut bölüme kaydırır); `mapScreen.LevelSelected`, `backButton.BackPressed` abonelikleri |
 | Bölüm seçildi | `progress.IsUnlocked(i)` **tekrar kontrol edilir** (UI'daki bir hata kilitli bölümü açamasın); açıksa `ChangeTo(Gameplay(i))` |
-| Geri tuşu (overlay kapalıyken) | `quitConfirmScreen` **overlay** olarak açılır: "Evet" → `Application.Quit()`, "Hayır" → kapanır |
+| Geri tuşu (overlay kapalıyken) | `quitConfirmScreen` **overlay** olarak açılır: "Yes" → `Application.Quit()`, "No" → kapanır |
 | Geri tuşu (overlay açıkken) | Overlay kapanır (çıkış yapılmaz) |
 | Exit | Abonelikler kaldırılır, harita ve varsa çıkış popup'ı gizlenir |
 
@@ -1413,7 +1413,7 @@ public sealed class AppStates
 | Ana menü / geri tuşu | `ChangeTo(Menu())` |
 | Exit | Abonelikler kaldırılır, `winScreen.Hide()` |
 
-Son bölümde `HasNext` false olduğu için "Sonraki" butonu gizlenir ve "Tüm bölümler tamamlandı!" metni görünür; sadece "Ana menü" butonu kalır.
+Son bölümde `HasNext` false olduğu için "Next" butonu gizlenir ve "All levels completed!" metni görünür; sadece "Main Menu" butonu kalır.
 
 **`LoseState(n)`**
 | | |
@@ -1512,14 +1512,14 @@ Popup'lar (`WinScreen`, `LoseScreen`, `QuitConfirmScreen`) `Show` içinde paneli
 |---|---|---|---|
 | `LevelMapScreen` | Aşağıdan yukarıya bölüm zinciri | `LevelSelected(int)` (sadece açık düğümler için) | `Fire` kullanmaz; §12.4 |
 | `Hud` | Bölüm numarası + **baştan başlat** butonu | `RestartClicked` | `Fire` kullanmaz (tekrar tekrar basılabilir); tıkta `Feedback.UiClick()` |
-| `WinScreen` | "Tebrikler!", Sonraki, Ana menü | `NextClicked`, `MenuClicked` | `Show(bool showNextButton)`; son bölümde "Tüm bölümler tamamlandı!" |
-| `LoseScreen` | "Yer kalmadı!", Tekrar dene, Ana menü | `RetryClicked`, `MenuClicked` | |
-| `QuitConfirmScreen` | "Çıkmak istiyor musun?", Evet, Hayır | `ConfirmClicked`, `CancelClicked` | Menüde overlay |
+| `WinScreen` | "Well done!", Next, Main Menu | `NextClicked`, `MenuClicked` | `Show(bool showNextButton)`; son bölümde "All levels completed!" |
+| `LoseScreen` | "Out of space!", Try Again, Main Menu | `RetryClicked`, `MenuClicked` | |
+| `QuitConfirmScreen` | "Quit the game?", Yes, No | `ConfirmClicked`, `CancelClicked` | Menüde overlay |
 
 **HUD yerleşimi:**
 ```
 ┌──────────────────────────────────┐
-│            Bölüm 3         [↻]   │   ← SafeAreaFitter içinde
+│            Level 3      [Restart]│   ← SafeAreaFitter içinde
 ```
 HUD'da başka bir şey **yok** (ayarlar, ana menü butonu, sayaç yok — bkz. §20).
 
@@ -1563,7 +1563,7 @@ Kodda bölümler **0'dan**, oyuncunun gördüğü numaralar **1'den** başlar. D
 ```csharp
 public static class UiText
 {
-    public static string LevelLabel(int index) => $"Bölüm {index + 1}";
+    public static string LevelLabel(int index) => $"Level {index + 1}";
 }
 ```
 Harita düğümleri ve HUD bu metodu kullanır; başka hiçbir yerde `+ 1` yazılmaz.
@@ -1768,21 +1768,20 @@ private void Awake()
 
 ### 15.1 `LevelAssetEditor` (özel Inspector)
 ```
-┌─ Level_Holes ─────────────────────────────────┐
-│ Boyut: [6] x [5]     Koltuk: [5]   Kapasite: [3] │
-│                                                 │
-│ Palet: [Zemin][Duvar][Void] ●R ●G ●B ●Y ●P ●O   │
-│ ┌──┬──┬──┬──┬──┬──┐                             │
-│ │R │R │B │B │G │G │   ← tıkla / sürükle ile boya │
-│ │Y │░░│R │G │░░│B │                             │
-│ └──┴──┴──┴──┴──┴──┘                             │
-│ Otobüsler: G R B Y G R B   [Otomatik doldur]    │
-│                                                 │
-│ ✅ Renk sayıları otobüslerle uyumlu              │
-│ ✅ Tüm yolcular çıkışa ulaşabilir                │
-│ [Çöz]  → Çözülebilir · 1.234 durum · Kazanma oranı (rastgele) %7 │
-│ [Bu bölümü oyna ▶]                              │
-└─────────────────────────────────────────────────┘
+┌─ Level_Holes ─────────────────────────────────────┐
+│ Size: [6] x [5]     Slots: [5]   Capacity: [3]    │
+│                                                   │
+│ Palette: [Floor][Wall][Void] ●R ●G ●B ●Y ●P ●O    │
+│ ┌──┬──┬──┬──┬──┬──┐                               │
+│ │R │R │B │B │G │G │   ← tıkla / sürükle ile boya   │
+│ │Y │░░│R │G │░░│B │                               │
+│ └──┴──┴──┴──┴──┴──┘                               │
+│ Buses: G R B Y G R B   [Auto Fill]                │
+│                                                   │
+│ Level is valid. (ya da hata listesi)              │
+│ [Solve]  → Solvable · 1,234 states · Random win rate 7% │
+│ [Play This Level ▶]                               │
+└───────────────────────────────────────────────────┘
 ```
 - **Boyut değişimi** mevcut içeriği korur (büyürken yeni hücreler `.`, küçülürken kırpılır).
 - **Canlı doğrulama:** Her değişiklikte `LevelParser` + `LevelValidator`; hatalar liste halinde.
@@ -1794,7 +1793,7 @@ private void Awake()
 
 ### 15.2 `LevelCatalogEditor`
 - Liste + her bölüm için doğrulama durumu (✅/❌).
-- Kalıcı uyarı kutusu: **"Yayındaki oyunda bölümleri sadece sona ekleyin. Sıra değişirse oyuncu ilerlemesi kayar."**
+- Kalıcı uyarı kutusu: **"In a released game, only append levels at the end. Reordering shifts player progress."** (oyuncu ilerlemesi index tabanlı)
 
 ### 15.3 `EditorLevelLauncher` — "Bu bölümü oyna"
 1. Seçili `LevelAsset`'in katalogdaki index'i bulunur (katalogda değilse uyarı).
@@ -1949,7 +1948,7 @@ var session = TestSessions.From(
 Her faz **tek başına derlenir ve testleri yeşildir.** Bir faz bitmeden sonrakine geçilmez.
 
 ### Faz 0 — Proje iskeleti
-- Paketler (§4.1), Player/Project ayarları (§4.2, §4.3), DOTween + "Create ASMDEF", Türkçe karakterli TMP font asset (§4.4).
+- Paketler (§4.1), Player/Project ayarları (§4.2, §4.3), DOTween + "Create ASMDEF", TMP font asset (§4.4).
 - Klasörler ve 5 asmdef (§5). `Game.Core`'da "No Engine References" işaretli.
 - Boş `Main.unity` sahnesi ve hiyerarşi iskeleti (§14.1).
 - **Kabul:** Proje hatasız derlenir; boş bir Core testi Test Runner'da yeşil; `Game.Core`'a `using UnityEngine;` eklenince derleme hatası alınır (sonra geri alınır).
@@ -1976,7 +1975,7 @@ Her faz **tek başına derlenir ve testleri yeşildir.** Bir faz bitmeden sonrak
 ### Faz 4 — Akış ve UI
 - `IAppState`, `AppStateMachine`, `AppDependencies`, `AppStates`, 4 durum; `ScreenView` ve tüm ekranlar; `SafeAreaFitter`, `UiText`; `BackButtonInput`; çıkış onayı overlay'i.
 - `IProgress` geçici olarak `ProgressService(new InMemoryProgressStorage(), count)` ile bağlanır (ikisi de Faz 1'de hazır).
-- **Kabul:** Menü → bölüm → kazan → sonraki → ... → son bölüm (Sonraki butonu gizli, "Tüm bölümler tamamlandı!") → menü; kaybet → tekrar dene; HUD'dan baştan başlat (animasyon ortasında dahil); geri tuşu her ekranda §11.5'e uygun; kilitli düğüm sallanır ve harita tıklanabilir kalır; HUD butonuna dokunmak tahtayı tetiklemez.
+- **Kabul:** Menü → bölüm → kazan → sonraki → ... → son bölüm (Next butonu gizli, "All levels completed!") → menü; kaybet → tekrar dene; HUD'dan baştan başlat (animasyon ortasında dahil); geri tuşu her ekranda §11.5'e uygun; kilitli düğüm sallanır ve harita tıklanabilir kalır; HUD butonuna dokunmak tahtayı tetiklemez.
 
 ### Faz 5 — Kalıcı ilerleme
 - `PlayerPrefsProgressStorage`; bootstrap'te `InMemoryProgressStorage` yerine geçer. `DebugMenu`.
@@ -2051,7 +2050,8 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - `GameplayState.Exit` içindeki `DOTween.KillAll()` kaldırıldı; her görsel havuza dönerken kendi tween'lerini öldürür.
 - Editörden başlatılan bölümde ilerleme bellekte tutulur.
 - `CameraFitter` varsayılan `margin` değeri 0.15 → **0.3** (Faz 3'te ölçüldü: 0.15 dikey ekranda alt köşeleri kırpıyordu, §9.4).
-- `ScreenView.Init` butonları soyut `BindButtons()` ile bağlar (Awake EditMode testlerinde çalışmaz); popup açılışı ortak `PopIn` yardımcısında (§12.2). HUD'daki baştan başlat butonunun metni "Baştan" (font'ta ↻ glifi yok).
+- `ScreenView.Init` butonları soyut `BindButtons()` ile bağlar (Awake EditMode testlerinde çalışmaz); popup açılışı ortak `PopIn` yardımcısında (§12.2). HUD'daki baştan başlat butonunun metni "Restart" (font'ta ↻ glifi yok).
+- **Dil:** oyuncu metinleri ve editör araçlarının metinleri Türkçeden **İngilizceye** çevrildi (Faz 7 sonrası ekip kararı; §1, §4.4, §7.3, §12.3, §12.5). Testler İngilizce metinleri ve sahnede Türkçe karakter kalmadığını denetler.
 - Bölüm editörünün mantığı ayrı `LevelEditing` sınıfında (Faz 7, test edilebilirlik için, §15.1).
 - `PooledParticle` `[ExecuteAlways]` + sahipsiz durma mesajını yok sayma (Faz 6, EditMode testinde mesajın çalışabilmesi için, §13.4).
 - **Kaybetme kuralı** (Faz 3 oyun testi, ekip kararı): bekleme alanının son koltuğu dolduğu anda kayıp (§2.6, §2.8, karar #28). `OverflowPoint` kaldırıldı; kaybeden yolcu koltuğunda sallanır (§10.5). Koltuk sayıları değişmedi; Bölüm 3–5'in bilinen çözümleri ve rastgele kazanma oranları yeni kurala göre güncellendi (§21.1).
@@ -2070,7 +2070,7 @@ Bilerek yapılmayanlar. Eklenmesi istenirse önce bu doküman güncellenir.
 - Bölüm içi durumun kaydedilmesi (uygulama kapanırsa bölüm baştan)
 - Gizli yolcu, tünel gibi ek engel tipleri (eklemek: parser tablosuna bir satır + hücre davranışı)
 - Üçgen/altıgen hücreli tahtalar
-- Lokalizasyon (metinler Türkçe sabit; `UiText` tek toplama noktası)
+- Lokalizasyon (metinler İngilizce sabit; `UiText` tek toplama noktası)
 - Analitik
 
 ---

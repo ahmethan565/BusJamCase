@@ -109,27 +109,50 @@ namespace Game.Editor.Tests
                 Assert.AreEqual(0, button.onClick.GetPersistentEventCount(), $"{button.name}: buttons are bound in code (§12.1)");
         }
 
-        [Test]
-        public void Scene_AllTextsCanShowTurkishCharacters()
+        // Every text in the scene and in the level node prefab.
+        private TMP_Text[] AllTexts()
         {
-            TMP_Text[] texts = SceneComponents<TMP_Text>();
+            var node = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Game/Content/Prefabs/UI/LevelNode.prefab");
+            Assert.IsNotNull(node, "LevelNode prefab");
+            return SceneComponents<TMP_Text>().Concat(node.GetComponentsInChildren<TMP_Text>(true)).ToArray();
+        }
+
+        [Test]
+        public void Scene_EveryTextHasItsGlyphsInTheFont()
+        {
+            TMP_Text[] texts = AllTexts();
             Assert.IsNotEmpty(texts);
             foreach (TMP_Text text in texts)
             {
                 Assert.IsNotNull(text.font, text.name);
-                bool all = text.font.HasCharacters("ğĞşŞıİöÖüÜçÇ", out uint[] missing, true, true);
+                bool all = text.font.HasCharacters(text.text, out uint[] missing, true, true);
                 string missingText = missing == null ? "" : new string(missing.Select(c => (char)c).ToArray());
                 Assert.IsTrue(all, $"{text.name} font {text.font.name} misses: {missingText} (§4.4)");
             }
         }
 
         [Test]
-        public void Scene_PlayerTextsAreTurkish()
+        public void Scene_PlayerTextsAreEnglish()
         {
-            StringAssert.Contains("Tebrikler!", AllText(SceneComponent<WinScreen>()));
-            StringAssert.Contains("Tüm bölümler tamamlandı!", AllText(SceneComponent<WinScreen>()));
-            StringAssert.Contains("Yer kalmadı!", AllText(SceneComponent<LoseScreen>()));
-            StringAssert.Contains("Çıkmak istiyor musun?", AllText(SceneComponent<QuitConfirmScreen>()));
+            StringAssert.Contains("Well done!", AllText(SceneComponent<WinScreen>()));
+            StringAssert.Contains("All levels completed!", AllText(SceneComponent<WinScreen>()));
+            StringAssert.Contains("Next", AllText(SceneComponent<WinScreen>()));
+            StringAssert.Contains("Main Menu", AllText(SceneComponent<WinScreen>()));
+            StringAssert.Contains("Out of space!", AllText(SceneComponent<LoseScreen>()));
+            StringAssert.Contains("Try Again", AllText(SceneComponent<LoseScreen>()));
+            StringAssert.Contains("Quit the game?", AllText(SceneComponent<QuitConfirmScreen>()));
+            StringAssert.Contains("Yes", AllText(SceneComponent<QuitConfirmScreen>()));
+            StringAssert.Contains("No", AllText(SceneComponent<QuitConfirmScreen>()));
+            StringAssert.Contains("Restart", AllText(SceneComponent<Hud>()));
+            StringAssert.Contains("Levels", AllText(SceneComponent<LevelMapScreen>()));
+        }
+
+        [Test]
+        public void Scene_NoTurkishCharactersInAnyText()
+        {
+            const string turkish = "çÇğĞıİöÖşŞüÜ";
+            foreach (TMP_Text text in AllTexts())
+                Assert.AreEqual(-1, text.text.IndexOfAny(turkish.ToCharArray()), $"{text.name}: '{text.text}' (§1)");
         }
     }
 }

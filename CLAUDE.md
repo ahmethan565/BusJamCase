@@ -28,7 +28,7 @@ Bir karar kodda uygulanamıyor ya da çelişki görüyorsan **kendi başına de�
 - Kapsam dışı özellikler (ARCHITECTURE.md §20) eklenmez.
 
 ## Kod stili
-- Tanımlayıcılar ve yorumlar İngilizce, oyuncu metinleri Türkçe.
+- Tanımlayıcılar, yorumlar, oyuncu metinleri ve editör araçlarının metinleri İngilizce. Projede Türkçe metin yok (sadece dokümanlar Türkçe).
 - Her sınıfın tek sorumluluğu var; okunabilirlik performans mikro-optimizasyonlarından önce gelir (bütçe §16.4 içinde kaldığı sürece).
 - Oyun döngüsünde (her kare) GC tahsisi yok: LINQ, string birleştirme, `GetComponent` yok.
 

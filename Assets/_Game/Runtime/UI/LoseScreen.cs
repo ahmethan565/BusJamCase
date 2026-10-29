@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Game.Runtime.UI
 {
-    // "Yer kalmadı!" popup.
+    // "Out of space!" popup.
     public sealed class LoseScreen : ScreenView
     {
         [SerializeField] private AnimationSettings animationSettings;

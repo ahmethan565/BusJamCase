@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Game.Runtime.UI
 {
-    // "Çıkmak istiyor musun?" overlay on the map, owned by MenuState (§11.7).
+    // "Quit the game?" overlay on the map, owned by MenuState (§11.7).
     public sealed class QuitConfirmScreen : ScreenView
     {
         [SerializeField] private AnimationSettings animationSettings;

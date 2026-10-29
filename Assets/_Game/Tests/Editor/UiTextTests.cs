@@ -9,8 +9,8 @@ namespace Game.Editor.Tests
         [Test]
         public void LevelLabel_IsOneBased()
         {
-            Assert.AreEqual("Bölüm 1", UiText.LevelLabel(0));
-            Assert.AreEqual("Bölüm 5", UiText.LevelLabel(4));
+            Assert.AreEqual("Level 1", UiText.LevelLabel(0));
+            Assert.AreEqual("Level 5", UiText.LevelLabel(4));
         }
     }
 }
