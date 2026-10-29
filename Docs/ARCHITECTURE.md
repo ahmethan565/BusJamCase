@@ -1803,6 +1803,7 @@ private void Awake()
 Menü öğeleri **sadece Play modu dışında** aktiftir (`EditorApplication.isPlaying` iken pasif). Play modunda `ProgressService` veriyi bellekte tuttuğu için değişiklik yok sayılır ve sonraki kayıtta ezilir.
 - **İlerlemeyi sıfırla:** `PlayerPrefs.DeleteKey(PlayerPrefsProgressStorage.DefaultKey)`
 - **Tüm bölümleri aç:** `HighestCompletedIndex = Count - 2` yazar (son bölüm hariç hepsi geçilmiş, hepsi açık)
+- Menü öğeleri "Tools/Game/Reset Progress" ve "Tools/Game/Unlock All Levels". İşi yapan metotlar anahtar alır (`ResetProgress(string key)`, `UnlockAllLevels(string key, int levelCount)`), böylece testler gerçek kayda dokunmadan `"progress_test"` ile çalışır.
 
 ---
 

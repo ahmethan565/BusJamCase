@@ -5,6 +5,7 @@ using Game.Runtime.Data;
 using Game.Runtime.Feedback;
 using Game.Runtime.Flow;
 using Game.Runtime.Input;
+using Game.Runtime.Progress;
 using Game.Runtime.UI;
 using Game.Runtime.View;
 using UnityEngine;
@@ -47,7 +48,7 @@ namespace Game.Runtime.Bootstrap
 
             // --- Services
             var pathFinder = new BfsPathFinder();
-            var progress = new ProgressService(new InMemoryProgressStorage(), levelCatalog.Count);   // Phase 5: PlayerPrefsProgressStorage
+            var progress = new ProgressService(new PlayerPrefsProgressStorage(), levelCatalog.Count);
             IFeedback feedback = new NullFeedback();          // Phase 6: FeedbackPlayer
 
             // --- Views and screens
