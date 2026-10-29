@@ -20,12 +20,17 @@ namespace Game.Runtime.Bootstrap
         [SerializeField] private LayoutSettings layoutSettings;
         [SerializeField] private AnimationSettings animationSettings;
         [SerializeField] private ColorPalette colorPalette;
+        [SerializeField] private SoundLibrary soundLibrary;
 
         [Header("World")]
         [SerializeField] private BoardView boardView;
         [SerializeField] private WaitingAreaView waitingAreaView;
         [SerializeField] private GameplayPresenter presenter;
         [SerializeField] private CameraFitter cameraFitter;
+
+        [Header("Audio")]
+        [SerializeField] private AudioPlayer audioPlayer;
+        [SerializeField] private VfxPlayer vfxPlayer;
 
         [Header("Input")]
         [SerializeField] private InputHandler inputHandler;
@@ -49,16 +54,17 @@ namespace Game.Runtime.Bootstrap
             // --- Services
             var pathFinder = new BfsPathFinder();
             var progress = new ProgressService(new PlayerPrefsProgressStorage(), levelCatalog.Count);
-            IFeedback feedback = new NullFeedback();          // Phase 6: FeedbackPlayer
+            IFeedback feedback = new FeedbackPlayer(audioPlayer, vfxPlayer, soundLibrary);
 
             // --- Views and screens
             var screens = new ScreenView[] { mapScreen, hud, winScreen, loseScreen, quitConfirmScreen };
             presenter.Init(colorPalette, animationSettings, layoutSettings, feedback);
             boardView.Init(layoutSettings);
             waitingAreaView.Init(layoutSettings);
+            vfxPlayer.Init();
             foreach (ScreenView screen in screens) screen.Init(feedback);
             mapScreen.Build(levelCatalog.Count);
-            presenter.Prewarm(); boardView.Prewarm(); waitingAreaView.Prewarm();
+            presenter.Prewarm(); boardView.Prewarm(); waitingAreaView.Prewarm(); vfxPlayer.Prewarm();
 
             // --- Flow
             var deps = new AppDependencies

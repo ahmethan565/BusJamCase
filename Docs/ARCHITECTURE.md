@@ -1623,6 +1623,9 @@ float pitch = 1f + seat * 0.1f;   // 1.0 → 1.1 → 1.2
 `SoundId`: `Pop, Bonk, Board, Seat, Horn, Brake, Win, Lose, Click`
 `VfxId`: `ExhaustPuff, Confetti`
 
+- `PooledParticle` `[ExecuteAlways]` taşır: durma mesajı EditMode testlerinde de gelir; sahibi (`VfxPlayer`) yoksa (editörde prefab önizlemesi) mesaj yok sayılır.
+- `Confetti` dünya merkezinde (tahtanın ortası, `Vector3.zero`) yukarı doğru patlar. Efekt prefab'ları `Content/Prefabs/Vfx/`, sesler `Content/Audio/`, `SoundLibrary` `Content/Settings/` altındadır. `AudioPlayer` `[Audio]` üzerinde, `VfxPlayer` onun `Vfx` alt nesnesindedir.
+
 ### 13.5 Ses import ayarları
 | Tip | Load Type | Sıkıştırma | Diğer |
 |---|---|---|---|
@@ -2045,6 +2048,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - Editörden başlatılan bölümde ilerleme bellekte tutulur.
 - `CameraFitter` varsayılan `margin` değeri 0.15 → **0.3** (Faz 3'te ölçüldü: 0.15 dikey ekranda alt köşeleri kırpıyordu, §9.4).
 - `ScreenView.Init` butonları soyut `BindButtons()` ile bağlar (Awake EditMode testlerinde çalışmaz); popup açılışı ortak `PopIn` yardımcısında (§12.2). HUD'daki baştan başlat butonunun metni "Baştan" (font'ta ↻ glifi yok).
+- `PooledParticle` `[ExecuteAlways]` + sahipsiz durma mesajını yok sayma (Faz 6, EditMode testinde mesajın çalışabilmesi için, §13.4).
 - **Kaybetme kuralı** (Faz 3 oyun testi, ekip kararı): bekleme alanının son koltuğu dolduğu anda kayıp (§2.6, §2.8, karar #28). `OverflowPoint` kaldırıldı; kaybeden yolcu koltuğunda sallanır (§10.5). Koltuk sayıları değişmedi; Bölüm 3–5'in bilinen çözümleri ve rastgele kazanma oranları yeni kurala göre güncellendi (§21.1).
 
 ---
