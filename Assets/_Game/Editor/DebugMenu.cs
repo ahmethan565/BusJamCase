@@ -33,6 +33,16 @@ namespace Game.Editor
         [MenuItem(UnlockItem, true)]
         public static bool CanEditProgress() => !EditorApplication.isPlaying;
 
+        // A build the Unity Profiler can attach to on the phone (§16.5). These are per-user editor settings.
+        [MenuItem("Tools/Game/Configure Development Build")]
+        private static void ConfigureDevelopmentBuild()
+        {
+            EditorUserBuildSettings.development = true;
+            EditorUserBuildSettings.connectProfiler = true;
+            EditorUserBuildSettings.buildWithDeepProfilingSupport = false;   // deep profiling distorts the timings
+            Debug.Log("Development Build + Autoconnect Profiler are on. Build and Run to the phone, then open Window > Analysis > Profiler.");
+        }
+
         public static void ResetProgress(string key) => PlayerPrefs.DeleteKey(key);
 
         // Every level but the last is completed, so every level is open.

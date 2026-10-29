@@ -1042,6 +1042,7 @@ private void Update()
 - Havuzdan alınırken: `SetActive(true)`. Havuza verilirken: `ResetForPool()` (tween'leri öldür, tüm katmanların yerel konum/rotasyon/ölçeğini sıfırla, göstergeleri kapat) + `SetActive(false)`.
 - **Ön ısıtma (pre-warm):** Her havuz sahibinin bir `Prewarm()` metodu var (`GameplayPresenter`, `BoardView`, `WaitingAreaView`); `GameBootstrap` açılışta bunları çağırır. Her biri kendi havuzundan N nesne alıp hemen geri verir; ilk bölümün intro'sunda `Instantiate` olmaz. Varsayılan N: Passenger 40, Bus 4, FloorTile 64, WallBlock 8, EdgePiece 64, SlotMarker 8.
 - Bölümler arasında nesneler **yok edilmez**, havuza döner.
+- Şu anki modeller (Faz 8) kodla üretilmiş yer tutucu low-poly mesh'lerdir (`Content/Models/`: `Passenger` ~400 üçgen, `BusBody` + `BusDetails`). Gerçek modeller geldiğinde prefab'daki `Model` / `Body` / `Details` nesnelerinin mesh'i değiştirilir; pivot ayakta (y = 0) kalmalıdır. Otobüs -X yönüne (sola) gider; ön cam o taraftadır.
 
 ### 10.3 `ColorPalette` (ScriptableObject)
 `PassengerColor` → `Material` (yolcu ve otobüs ortak) ve `Color` (UI/göstergeler).
@@ -1851,6 +1852,21 @@ Menü öğeleri **sadece Play modu dışında** aktiftir (`EditorApplication.isP
 ### 16.5 Ölçüm
 Tahmin değil ölçüm: **gerçek cihazda** Unity Profiler (CPU, GC Alloc sütunu), Frame Debugger (draw call), Memory Profiler. `InputHandler.Update` beklenen değer < 0,01 ms.
 
+**Cihazda ölçüm adımları:**
+1. Telefonda Geliştirici Seçenekleri → USB hata ayıklama açık; telefonu USB ile bağla.
+2. File → Build Settings → Android → Switch Platform (bir kez).
+3. Tools → Game → **Configure Development Build** (Development Build + Autoconnect Profiler açar; derin profil kapalı).
+4. Build And Run. Oyun telefonda açılınca Window → Analysis → **Profiler** otomatik bağlanır (bağlanmazsa üstteki hedef listesinden telefonu seç).
+5. Menüden Bölüm 5'i aç ve ~30 saniye oyna (hızlı ardışık dokunuşlar dahil). Profiler'da:
+   - CPU Usage: kare süresi ≤ 16,6 ms (60 FPS).
+   - Hierarchy görünümü, **GC Alloc** sütunu: oyun sırasında dokunuş olmayan karelerde 0 B.
+   - Rendering modülü: **Batches** < 60 (SRP Batcher açıkken aynı shader'lı çizimler tek partide toplanır).
+   - Memory: toplam < 300 MB.
+6. Bir kareyi incelemek için Window → Analysis → Frame Debugger (telefona bağlıyken).
+7. Profiler'da oyun sırasında `Instantiate` görülürse ilgili havuzun ön ısıtma sayısı (`Main.unity` Inspector'ında) büyütülür.
+
+Editörde otomatik denetlenenler (`PolishTests`): URP ayarları (§16.2), modellerin üçgen sınırı, en büyük bölümün < 100 bin üçgen olması, tüm opak dünya materyallerinin tek shader (Simple Lit) kullanması ve gölge atmaması, ön ısıtma sayılarının katalogdaki her bölümü karşılaması, `BusLane.Tick`'in kare başına 0 bayt ayırması.
+
 ### 16.6 Sonraki faz (opsiyonel)
 `OnDemandRendering.renderFrameInterval` ile oyuncu boştayken kare hızını düşürmek (pil). İlk sürümde yok.
 
@@ -2052,6 +2068,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - `CameraFitter` varsayılan `margin` değeri 0.15 → **0.3** (Faz 3'te ölçüldü: 0.15 dikey ekranda alt köşeleri kırpıyordu, §9.4).
 - `ScreenView.Init` butonları soyut `BindButtons()` ile bağlar (Awake EditMode testlerinde çalışmaz); popup açılışı ortak `PopIn` yardımcısında (§12.2). HUD'daki baştan başlat butonunun metni "Restart" (font'ta ↻ glifi yok).
 - **Dil:** oyuncu metinleri ve editör araçlarının metinleri Türkçeden **İngilizceye** çevrildi (Faz 7 sonrası ekip kararı; §1, §4.4, §7.3, §12.3, §12.5). Testler İngilizce metinleri ve sahnede Türkçe karakter kalmadığını denetler.
+- Faz 8: yer tutucu low-poly yolcu/otobüs mesh'leri, harita düğümüne gölge + çizilmiş onay işareti ve kilit; cihaz ölçümü için Tools → Game → Configure Development Build ve §16.5 adımları. Cihaz kabulü (60 FPS, 0 GC, < 60 batch) ekip tarafından telefonda ölçülür.
 - Bölüm editörünün mantığı ayrı `LevelEditing` sınıfında (Faz 7, test edilebilirlik için, §15.1).
 - `PooledParticle` `[ExecuteAlways]` + sahipsiz durma mesajını yok sayma (Faz 6, EditMode testinde mesajın çalışabilmesi için, §13.4).
 - **Kaybetme kuralı** (Faz 3 oyun testi, ekip kararı): bekleme alanının son koltuğu dolduğu anda kayıp (§2.6, §2.8, karar #28). `OverflowPoint` kaldırıldı; kaybeden yolcu koltuğunda sallanır (§10.5). Koltuk sayıları değişmedi; Bölüm 3–5'in bilinen çözümleri ve rastgele kazanma oranları yeni kurala göre güncellendi (§21.1).
