@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Game.Core.Levels;
 
 namespace Game.Core
 {
@@ -78,6 +79,17 @@ namespace Game.Core
         }
 
         public Board Clone() => new Board(this);
+
+        // Used by GameSession and LevelValidator so both build the board the same way.
+        internal static Board FromLevel(LevelData level)
+        {
+            var cells = new CellType[level.Cells.Count];
+            for (int i = 0; i < cells.Length; i++) cells[i] = level.Cells[i];
+            var passengers = new List<Passenger>(level.Passengers.Count);
+            foreach (PassengerSpawn spawn in level.Passengers)
+                passengers.Add(new Passenger(spawn.Id, spawn.Color, spawn.Position));
+            return new Board(level.Width, level.Height, cells, passengers);
+        }
 
         private void Place(Passenger passenger)
         {

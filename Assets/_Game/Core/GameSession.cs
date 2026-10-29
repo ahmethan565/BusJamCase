@@ -18,7 +18,7 @@ namespace Game.Core
 
         public GameSession(LevelData level, IPathFinder pathFinder, IGameListener listener)
         {
-            board = CreateBoard(level);
+            board = Board.FromLevel(level);
             buses = CreateBuses(level);
             waitingArea = new WaitingArea(level.WaitingSlots);
             this.pathFinder = pathFinder;
@@ -139,16 +139,6 @@ namespace Game.Core
             Result = result;
             if (result == SessionResult.Won) listener.OnWon();
             else listener.OnLost();
-        }
-
-        private static Board CreateBoard(LevelData level)
-        {
-            var cells = new CellType[level.Cells.Count];
-            for (int i = 0; i < cells.Length; i++) cells[i] = level.Cells[i];
-            var passengers = new List<Passenger>(level.Passengers.Count);
-            foreach (PassengerSpawn spawn in level.Passengers)
-                passengers.Add(new Passenger(spawn.Id, spawn.Color, spawn.Position));
-            return new Board(level.Width, level.Height, cells, passengers);
         }
 
         private static BusQueue CreateBuses(LevelData level)
