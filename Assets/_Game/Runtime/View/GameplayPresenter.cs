@@ -12,8 +12,21 @@ namespace Game.Runtime.View
 {
     // Turns Core events into animations: free animations or the sequential BusLane (§10.5).
     // Owns the passenger and bus pools; only this class gives those visuals back to their pools.
+    //
+    // Stop rule (§10.5): nobody waits at the door. A passenger walks to the door only when its bus is parked;
+    // otherwise it sits on a free seat at the stop and boards from there. If every seat is taken on screen,
+    // the passenger is held back on its cell until a seat frees up or its bus parks.
     public sealed class GameplayPresenter : MonoBehaviour, IGameListener
     {
+        // A passenger that left the board but has no seat on screen yet.
+        private sealed class HeldPassenger
+        {
+            public PassengerView View;
+            public Vector3[] ExitWalk;
+            public int PreferredSlot;
+            public BusView Bus;   // set once Core has boarded it
+        }
+
         [SerializeField] private PassengerView passengerPrefab;
         [SerializeField] private BusView busPrefab;
         [SerializeField] private Transform poolRoot;
@@ -23,7 +36,8 @@ namespace Game.Runtime.View
         private readonly BusLane lane = new BusLane();
         private readonly Dictionary<int, PassengerView> passengers = new Dictionary<int, PassengerView>();
         private readonly Dictionary<int, BusView> buses = new Dictionary<int, BusView>();
-        private readonly HashSet<int> fromSlot = new HashSet<int>();
+        private readonly StopSeats seats = new StopSeats();
+        private readonly List<HeldPassenger> held = new List<HeldPassenger>();
 
         private ColorPalette palette;
         private AnimationSettings anim;
@@ -32,8 +46,11 @@ namespace Game.Runtime.View
         private ObjectPool<PassengerView> passengerPool;
         private ObjectPool<BusView> busPool;
         private BoardLayout layout;
+        private IReadOnlyList<PassengerColor> busColors;
+        private int busCapacity;
 
         private int lastExitedId = -1;
+        private Vector3[] exitWalk;   // the walk of the passenger that just left the board; the next event in the same tap uses it
         private int walkingCount;
         private SessionResult pendingResult = SessionResult.Playing;
         private bool finishedRaised;
@@ -74,6 +91,9 @@ namespace Game.Runtime.View
         public void Begin(LevelData level, BoardLayout boardLayout)
         {
             layout = boardLayout;
+            busColors = level.BusColors;
+            busCapacity = level.BusCapacity;
+            seats.Reset(level.WaitingSlots);
             foreach (PassengerSpawn spawn in level.Passengers)
             {
                 PassengerView view = passengerPool.Get();
@@ -90,8 +110,10 @@ namespace Game.Runtime.View
             passengers.Clear();
             foreach (BusView view in buses.Values) busPool.Release(view);
             buses.Clear();
-            fromSlot.Clear();
+            seats.Reset(0);
+            held.Clear();
             lastExitedId = -1;
+            exitWalk = null;
             walkingCount = 0;   // killed walks never raise WalkFinished
             pendingResult = SessionResult.Playing;
             finishedRaised = false;
@@ -108,14 +130,26 @@ namespace Game.Runtime.View
             if (buses.Remove(busId, out BusView view)) busPool.Release(view);
         }
 
+        // --- For BoardStep
+
+        public bool IsHeldBack(int passengerId) => FindHeld(passengerId) >= 0;
+
+        // The passenger stands up from its seat (if it has one); the freed seat goes to the first held passenger.
+        public bool LeaveSeat(int passengerId)
+        {
+            if (!seats.TryRelease(passengerId, out _)) return false;
+            SeatFirstHeldPassenger();
+            return true;
+        }
+
         // --- IGameListener
 
         public void OnBusArrived(Bus bus)
         {
-            BusView view = busPool.Get();
-            view.Init(bus.Id, palette.GetMaterial(bus.Color), bus.Capacity, layout.BusEnterPosition, layout.DoorPoint);
-            buses[bus.Id] = view;
-            lane.Enqueue(new BusArriveStep(view, layout.BusParkPosition, feedback));
+            // The bus may already be waiting in the queue; the one behind it (if any) moves up into the queue.
+            if (!buses.TryGetValue(bus.Id, out BusView view)) view = SpawnBus(bus.Id, layout.BusEnterPosition);
+            BusView follower = bus.Id + 1 < busColors.Count ? SpawnBus(bus.Id + 1, layout.BusQueueEnterPosition) : null;
+            lane.Enqueue(new BusArriveStep(view, layout.BusParkPosition, follower, layout.BusQueuePosition, feedback));
         }
 
         public void OnPassengerBlocked(Passenger passenger)
@@ -125,6 +159,7 @@ namespace Game.Runtime.View
             feedback.PassengerBlocked(view.transform.position);
         }
 
+        // The walk only starts with the next event of the same tap: it decides where the passenger goes.
         public void OnPassengerExited(Passenger passenger, IReadOnlyList<GridPos> path)
         {
             lastExitedId = passenger.Id;
@@ -134,26 +169,30 @@ namespace Game.Runtime.View
             feedback.PassengerTapped(view.transform.position);
 
             // path[0] is the cell the passenger stands on; walk the rest, then up to the road.
-            var points = new Vector3[path.Count];
-            for (int i = 1; i < path.Count; i++) points[i - 1] = layout.CellToWorld(path[i]);
-            points[path.Count - 1] = layout.RoadPointAbove(path[path.Count - 1]);
-            view.WalkAlong(points);
+            exitWalk = new Vector3[path.Count];
+            for (int i = 1; i < path.Count; i++) exitWalk[i - 1] = layout.CellToWorld(path[i]);
+            exitWalk[path.Count - 1] = layout.RoadPointAbove(path[path.Count - 1]);
         }
 
         public void OnPassengerWaiting(Passenger passenger, int slot)
         {
-            PassengerView view = passengers[passenger.Id];
-            view.WalkAlong(new[] { layout.SlotPosition(slot) }, () => ArrivedAtSlot(view));
+            GoToStop(passengers[passenger.Id], TakeExitWalk(passenger.Id), slot, null);
         }
 
-        public void OnPassengerLeftWaitingArea(Passenger passenger, int slot) => fromSlot.Add(passenger.Id);
+        // Nothing to animate: the passenger keeps its seat on screen until its BoardStep walks it to the bus.
+        public void OnPassengerLeftWaitingArea(Passenger passenger, int slot) { }
 
         public void OnPassengerBoarded(Passenger passenger, Bus bus, int seat)
         {
             PassengerView view = passengers[passenger.Id];
-            bool comesFromSlot = fromSlot.Remove(passenger.Id);
-            if (!comesFromSlot) view.WalkAlong(new[] { layout.DoorPoint });
-            lane.Enqueue(new BoardStep(this, view, buses[bus.Id], seat, comesFromSlot, feedback));
+            BusView busView = buses[bus.Id];
+            Vector3[] walk = TakeExitWalk(passenger.Id);
+
+            if (walk == null) AssignBusToHeld(passenger.Id, busView);           // already at the stop (seated or held)
+            else if (busView.IsParked) view.WalkAlong(Append(walk, layout.DoorPoint));
+            else GoToStop(view, walk, -1, busView);                              // the bus is not here yet: wait at the stop
+
+            lane.Enqueue(new BoardStep(this, view, busView, seat, feedback));
         }
 
         public void OnBusDeparted(Bus bus)
@@ -166,13 +205,6 @@ namespace Game.Runtime.View
         // The shake is played by ArrivedAtSlot when the losing passenger reaches the last slot.
         public void OnLost() => pendingResult = SessionResult.Lost;
 
-        private void ArrivedAtSlot(PassengerView view)
-        {
-            feedback.PassengerWaiting();
-            // The passenger that took the last free slot lost the level (§2.8): it shakes in its slot.
-            if (pendingResult == SessionResult.Lost && view.Id == lastExitedId) view.PlayBlockedShake();
-        }
-
         // --- Per frame: the lane and the end-of-presentation check (an allowed Update, §16.3)
 
         private void Update()
@@ -180,11 +212,104 @@ namespace Game.Runtime.View
             lane.Tick();
 
             if (pendingResult != SessionResult.Playing && !finishedRaised
-                && lane.IsIdle && walkingCount == 0)
+                && lane.IsIdle && walkingCount == 0 && held.Count == 0)
             {
                 finishedRaised = true;
                 PresentationFinished?.Invoke(pendingResult);
             }
+        }
+
+        // --- The stop
+
+        private Vector3[] TakeExitWalk(int passengerId)
+        {
+            if (passengerId != lastExitedId || exitWalk == null) return null;
+            Vector3[] walk = exitWalk;
+            exitWalk = null;
+            return walk;
+        }
+
+        private void GoToStop(PassengerView view, Vector3[] walk, int preferredSlot, BusView bus)
+        {
+            int seat = seats.Take(view.Id, preferredSlot);
+            if (seat >= 0)
+            {
+                WalkToSeat(view, walk, seat);
+                return;
+            }
+            held.Add(new HeldPassenger { View = view, ExitWalk = walk, PreferredSlot = preferredSlot, Bus = bus });
+        }
+
+        private void WalkToSeat(PassengerView view, Vector3[] walk, int seat)
+        {
+            Vector3[] points = walk == null ? new[] { layout.SlotPosition(seat) } : Append(walk, layout.SlotPosition(seat));
+            view.WalkAlong(points, () => ArrivedAtSlot(view));
+        }
+
+        private void SeatFirstHeldPassenger()
+        {
+            if (held.Count == 0) return;
+            HeldPassenger next = held[0];
+            int seat = seats.Take(next.View.Id, next.PreferredSlot);
+            if (seat < 0) return;
+            held.RemoveAt(0);
+            WalkToSeat(next.View, next.ExitWalk, seat);
+        }
+
+        private void AssignBusToHeld(int passengerId, BusView bus)
+        {
+            int index = FindHeld(passengerId);
+            if (index < 0) return;
+            held[index].Bus = bus;
+            if (bus.IsParked) WalkHeldToDoor(index);
+        }
+
+        // A held passenger's bus has parked: it walks straight to the door, no seat needed any more.
+        private void OnBusParked(BusView bus)
+        {
+            for (int i = held.Count - 1; i >= 0; i--)
+                if (held[i].Bus == bus) WalkHeldToDoor(i);
+        }
+
+        private void WalkHeldToDoor(int index)
+        {
+            HeldPassenger passenger = held[index];
+            held.RemoveAt(index);
+            passenger.View.WalkAlong(passenger.ExitWalk == null
+                ? new[] { layout.DoorPoint }
+                : Append(passenger.ExitWalk, layout.DoorPoint));
+        }
+
+        private int FindHeld(int passengerId)
+        {
+            for (int i = 0; i < held.Count; i++)
+                if (held[i].View.Id == passengerId) return i;
+            return -1;
+        }
+
+        private static Vector3[] Append(Vector3[] points, Vector3 last)
+        {
+            var result = new Vector3[points.Length + 1];
+            points.CopyTo(result, 0);
+            result[points.Length] = last;
+            return result;
+        }
+
+        private void ArrivedAtSlot(PassengerView view)
+        {
+            feedback.PassengerWaiting();
+            // The passenger that took the last free slot lost the level (§2.8): it shakes in its slot.
+            if (pendingResult == SessionResult.Lost && view.Id == lastExitedId) view.PlayBlockedShake();
+        }
+
+        // --- Pools
+
+        private BusView SpawnBus(int busId, Vector3 position)
+        {
+            BusView view = busPool.Get();
+            view.Init(busId, palette.GetMaterial(busColors[busId]), busCapacity, position, layout.DoorPoint);
+            buses[busId] = view;
+            return view;
         }
 
         private PassengerView CreatePassenger()
@@ -200,6 +325,7 @@ namespace Game.Runtime.View
         {
             BusView view = Instantiate(busPrefab, poolRoot);
             view.Configure(anim);
+            view.Parked += OnBusParked;
             return view;
         }
     }

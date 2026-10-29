@@ -308,6 +308,7 @@ Assets/
         BusView.cs
         WaitingAreaView.cs
         GameplayPresenter.cs
+        StopSeats.cs                  (ekrandaki durak koltukları, §10.5)
         CameraFitter.cs
       Animation/
         IStep.cs
@@ -914,6 +915,7 @@ JSON dosyası veya bulut kaydı gerekirse yeni bir `IProgressStorage` yazılır;
 | `SlotSpacing` | 1.1 | Koltuklar arası mesafe |
 | `DoorOffsetZ` | 0.6 | Kapı noktasının otobüsün önüne (−z) uzaklığı |
 | `BusOffscreenX` | 10 | Otobüsün ekran dışı başlangıç/bitiş x'i |
+| `BusQueueOffsetX` | 2.7 | Sıradaki otobüsün park noktasının sağında beklediği mesafe (otobüs boyu 2.4 + küçük boşluk) |
 
 ### 9.3 `BoardLayout` (Runtime/View, saf hesap sınıfı)
 Bir `LevelData` ve `LayoutSettings` ile kurulur. **Tüm dünya koordinatı matematiği burada ve sadece burada.**
@@ -938,6 +940,8 @@ public sealed class BoardLayout
     public Vector3 DoorPoint       => BusParkPosition + new Vector3(0f, 0f, -s.DoorOffsetZ);
     public Vector3 BusEnterPosition => BusParkPosition + new Vector3( s.BusOffscreenX, 0f, 0f);
     public Vector3 BusExitPosition  => BusParkPosition + new Vector3(-s.BusOffscreenX, 0f, 0f);
+public Vector3 BusQueuePosition => BusParkPosition + new Vector3(s.BusQueueOffsetX, 0f, 0f);    // sıradaki otobüs (ContentBounds'ta değil; bir kısmı görünür)
+public Vector3 BusQueueEnterPosition => BusEnterPosition + new Vector3(s.BusQueueOffsetX, 0f, 0f); // takipçi, öndekinin bir kuyruk mesafesi arkasından girer
 
     // Dünya → hücre (tek bölme işlemi)
     public GridPos WorldToCell(Vector3 world) => new GridPos(
@@ -1091,15 +1095,17 @@ public void ReleaseBus(int busId);
 **Olay → animasyon tablosu (kesin):**
 | Olay | Ne yapılır | Tür |
 |---|---|---|
-| `OnBusArrived(bus)` | Havuzdan `BusView` alınır, `Init(bus.Id, material, bus.Capacity, layout.BusEnterPosition, layout.DoorPoint)`; `lane.Enqueue(new BusArriveStep(busView, layout.BusParkPosition, feedback))` | Şerit |
+| `OnBusArrived(bus)` | Otobüs kuyrukta zaten bekliyorsa o görsel kullanılır, yoksa havuzdan alınıp `BusEnterPosition`'a konur. Arkasında otobüs varsa (`bus.Id + 1 < BusColors.Count`) o da havuzdan alınıp `BusQueueEnterPosition`'a konur (renk `LevelData.BusColors`'tan). `lane.Enqueue(new BusArriveStep(busView, BusParkPosition, follower, BusQueuePosition, feedback))` | Şerit |
 | `OnPassengerBlocked(p)` | `view.PlayBlockedShake()` + `feedback.PassengerBlocked(pos)` | Serbest |
-| `OnPassengerExited(p, path)` | `lastExitedId = p.Id`; `view.StopIdle()`, `view.PlayTapSquash()` + `feedback.PassengerTapped(pos)`; yol hücreleri dünya noktalarına çevrilir, sonuna `RoadPointAbove(path[path.Count - 1])` eklenir; `view.WalkAlong(points)` | Serbest |
-| `OnPassengerWaiting(p, slot)` | `view.WalkAlong(new[] { SlotPosition(slot) }, onArrived: () => ArrivedAtSlot(view))` (sıraya eklenir). `ArrivedAtSlot`: `feedback.PassengerWaiting()`; kayıp bekleniyorsa ve bu son çıkan yolcuysa (`lastExitedId`) `view.PlayBlockedShake()` | Serbest |
-| `OnPassengerLeftWaitingArea(p, slot)` | `fromSlot.Add(p.Id)` (bir sonraki `OnPassengerBoarded` için) | — |
-| `OnPassengerBoarded(p, bus, seat)` | `fromSlot` değilse: `view.WalkAlong(new[] { DoorPoint })` (serbest, sıraya eklenir). Her durumda `lane.Enqueue(new BoardStep(this, view, busView, seat, fromSlot.Remove(p.Id), feedback))` | Serbest + Şerit |
+| `OnPassengerExited(p, path)` | `lastExitedId = p.Id`; `view.StopIdle()`, `view.PlayTapSquash()` + `feedback.PassengerTapped(pos)`; yol hücreleri dünya noktalarına çevrilir, sonuna `RoadPointAbove(path[path.Count - 1])` eklenir ve **saklanır** (`exitWalk`). Yürüyüş, aynı dokunuşun bir sonraki olayıyla başlar; yolcunun nereye gideceğine o olay karar verir | Serbest |
+| `OnPassengerWaiting(p, slot)` | Durağa git: ekranda boş bir koltuk alınır (tercihen mantıktaki `slot`, doluysa en küçük boş koltuk; `StopSeats`), `exitWalk` + koltuk noktası yürünür, varınca `ArrivedAtSlot`: `feedback.PassengerWaiting()`; kayıp bekleniyorsa ve bu son çıkan yolcuysa `view.PlayBlockedShake()`. Ekranda boş koltuk yoksa yolcu hücresinde **tutulur** (aşağıdaki durak kuralı) | Serbest |
+| `OnPassengerLeftWaitingArea(p, slot)` | Görsel bir şey yok: yolcu, `BoardStep` onu otobüse yürütene kadar ekrandaki koltuğunu korur | — |
+| `OnPassengerBoarded(p, bus, seat)` | Yolcu tahtadan geliyorsa: otobüs **park etmişse** (`busView.IsParked`) `exitWalk` + `DoorPoint` yürünür; **park etmemişse** durağa gider (boş koltuk, yoksa tutulur). Zaten duraktaysa (koltukta ya da tutulmuş) yürüyüş yok; tutulmuşsa otobüsü kaydedilir. Her durumda `lane.Enqueue(new BoardStep(this, view, busView, seat, feedback))` | Serbest + Şerit |
 | `OnBusDeparted(bus)` | `lane.Enqueue(new BusDepartStep(this, busView, layout.BusExitPosition, feedback))` | Şerit |
 | `OnWon()` | `pendingResult = Won` | — |
 | `OnLost()` | `pendingResult = Lost` (sallanmayı `ArrivedAtSlot` yapar) | — |
+
+**Durak kuralı (kesin):** Kimse kapıda otobüs beklemez ve ayrı bir bekleme yeri yoktur. Yolcu kapıya sadece otobüsü **park etmişken** yürür; aksi halde duraktaki boş bir koltuğa oturur ve otobüs park edince oradan biner. Ekrandaki koltukları `StopSeats` dağıtır: koltuk, yolcusu gerçekten otobüse yürüyene kadar dolu sayılır, böylece iki yolcu aynı koltuğa düşmez. Bu yüzden ekrandaki koltuk mantıktaki koltuk numarasından farklı olabilir. Otobüs değişimi sırasında ekranda boş koltuk kalmazsa (nadir) yolcu hücresinde tutulur ve bir koltuk boşalınca ya da otobüsü park edince yürümeye başlar; o kısa sürede arkasındaki bir yolcu onun içinden geçerek yürüyebilir (kabul edildi). Kurallar (`GameSession`) bu görsel beklemeden etkilenmez; kaybetme yalnızca mantıktaki koltuklara bakar.
 
 **Kayıp görseli:** Son dokunulan yolcu son boş koltuğa yürür, oturduğu anda sallanır. Popup, bu yürüyüş bittikten sonra açılır (sallanma beklenmez).
 
@@ -1212,9 +1218,12 @@ private static float PathLength(Vector3 from, Vector3[] points)
 ```csharp
 public int Id { get; private set; }
 public Vector3 DoorPoint { get; private set; }
+public bool IsParked { get; private set; }                     // Arrive bitince true; Init, Depart ve ResetForPool'da false
+public event Action<BusView> Parked;                           // Arrive bitince (presenter tutulan yolcuları kapıya yollar)
 public void Configure(AnimationSettings anim);                 // havuzun oluşturma fonksiyonunda bir kez
 public void Init(int busId, Material material, int capacity, Vector3 enterPosition, Vector3 doorPoint);   // SetActive(true), konum, göstergeler
-public void Arrive(Vector3 parkPosition, Action onComplete);    // DOMove, Ease.OutQuad, BusArriveTime
+public void Arrive(Vector3 parkPosition, Action onComplete);    // DOMove, Ease.OutQuad, BusArriveTime (önce kendi tween'ini öldürür)
+public void DriveTo(Vector3 position);                          // kuyruğa ilerleme; park sayılmaz
 public void Depart(Vector3 exitPosition, Action onComplete);    // DOMove, Ease.InQuad, BusDepartTime
 public void SetFilledCount(int count);                          // ilk `count` gösterge dolu + IndicatorRoot.DOPunchScale
 public void ResetForPool();
@@ -1253,16 +1262,16 @@ public sealed class BusLane
 ```csharp
 public sealed class BoardStep : IStep
 {
-    // (constructor: presenter, passenger, bus, seat, fromSlot, feedback)
+    // (constructor: presenter, passenger, bus, seat, feedback)
     private bool started;
     public bool IsDone { get; private set; }
 
     public void Tick()
     {
-        if (started || passenger.IsWalking) return;   // yürüyüş bitmeden başlama
+        if (started || passenger.IsWalking || presenter.IsHeldBack(passenger.Id)) return;   // yürüyüş bitmeden / tutulmuşken başlama
         started = true;
 
-        if (fromSlot) passenger.MoveFromSlotTo(bus.DoorPoint, Hop);
+        if (presenter.LeaveSeat(passenger.Id)) passenger.MoveFromSlotTo(bus.DoorPoint, Hop);   // koltuktaysa oradan
         else Hop();
     }
 
@@ -1279,8 +1288,8 @@ public sealed class BoardStep : IStep
 ```
 | Adım | Başlama koşulu | Ne yapar | Bitince |
 |---|---|---|---|
-| `BusArriveStep` | Sıra gelince | `busView.Arrive(park, ...)` | `feedback.BusArrived()` |
-| `BoardStep` | Sıra geldi **ve** yolcunun yürüyüşü bitti | Koltuktan geliyorsa `MoveFromSlotTo` + `HopInto`, değilse sadece `HopInto` | `SetFilledCount(seat + 1)`, `feedback.PassengerBoarded(seat)`, `presenter.ReleasePassenger(id)` |
+| `BusArriveStep` | Sıra gelince | `busView.Arrive(park, ...)` (kuyruktan kısa ilerleme ya da sağdan giriş); varsa arkadaki otobüs aynı anda `DriveTo(BusQueuePosition)` | `IsParked = true`, `Parked` olayı, `feedback.BusArrived()` |
+| `BoardStep` | Sıra geldi **ve** yolcunun yürüyüşü bitti **ve** yolcu tutulmuyor | Ekranda koltuktaysa koltuğu bırakır (`presenter.LeaveSeat`, boşalan koltuk ilk tutulan yolcuya verilir) + `MoveFromSlotTo` + `HopInto`, değilse sadece `HopInto` | `SetFilledCount(seat + 1)`, `feedback.PassengerBoarded(seat)`, `presenter.ReleasePassenger(id)` |
 | `BusDepartStep` | Sıra gelince | `feedback.BusDeparted(pos)` + `busView.Depart(exit, ...)` | `presenter.ReleaseBus(id)` |
 
 - Oyuncu ne kadar hızlı dokunursa dokunsun binişler **dokunuş sırasıyla** oynar. Kapıya erken varan yolcu kapıda bekler.
@@ -2068,6 +2077,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - `CameraFitter` varsayılan `margin` değeri 0.15 → **0.3** (Faz 3'te ölçüldü: 0.15 dikey ekranda alt köşeleri kırpıyordu, §9.4).
 - `ScreenView.Init` butonları soyut `BindButtons()` ile bağlar (Awake EditMode testlerinde çalışmaz); popup açılışı ortak `PopIn` yardımcısında (§12.2). HUD'daki baştan başlat butonunun metni "Restart" (font'ta ↻ glifi yok).
 - **Dil:** oyuncu metinleri ve editör araçlarının metinleri Türkçeden **İngilizceye** çevrildi (Faz 7 sonrası ekip kararı; §1, §4.4, §7.3, §12.3, §12.5). Testler İngilizce metinleri ve sahnede Türkçe karakter kalmadığını denetler.
+- **Otobüs kuyruğu ve durak kuralı** (Faz 8 sonrası oyun testi, ekip kararı): sıradaki otobüs park noktasının hemen arkasında bekler ve bir kısmı görünür (oyuncu sıradaki rengi görür); öndeki gidince kısa bir mesafe ilerler. Kimse kapıda beklemez: otobüsü park etmemiş yolcu duraktaki boş koltuğa oturur ve oradan biner; ekranda koltuk yoksa hücresinde tutulur (§9.2, §9.3, §10.5, §10.7, §10.8). Kurallar ve mevcut testler değişmedi.
 - Faz 8: yer tutucu low-poly yolcu/otobüs mesh'leri, harita düğümüne gölge + çizilmiş onay işareti ve kilit; cihaz ölçümü için Tools → Game → Configure Development Build ve §16.5 adımları. Cihaz kabulü (60 FPS, 0 GC, < 60 batch) ekip tarafından telefonda ölçülür.
 - Bölüm editörünün mantığı ayrı `LevelEditing` sınıfında (Faz 7, test edilebilirlik için, §15.1).
 - `PooledParticle` `[ExecuteAlways]` + sahipsiz durma mesajını yok sayma (Faz 6, EditMode testinde mesajın çalışabilmesi için, §13.4).

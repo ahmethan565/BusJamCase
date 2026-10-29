@@ -39,6 +39,11 @@ namespace Game.Runtime.View
         public Vector3 BusEnterPosition => BusParkPosition + new Vector3(s.BusOffscreenX, 0f, 0f);
         public Vector3 BusExitPosition => BusParkPosition + new Vector3(-s.BusOffscreenX, 0f, 0f);
 
+        // The next bus waits here, right behind the parked one; only part of it is on screen (it is not in ContentBounds).
+        public Vector3 BusQueuePosition => BusParkPosition + new Vector3(s.BusQueueOffsetX, 0f, 0f);
+        // A follower drives in one queue offset behind its leader.
+        public Vector3 BusQueueEnterPosition => BusEnterPosition + new Vector3(s.BusQueueOffsetX, 0f, 0f);
+
         // World -> cell (a single division per axis)
         public GridPos WorldToCell(Vector3 world) => new GridPos(
             Mathf.RoundToInt((world.x - Origin.x) / s.CellSize),

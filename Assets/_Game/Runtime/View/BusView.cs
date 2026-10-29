@@ -23,6 +23,10 @@ namespace Game.Runtime.View
         public int Id { get; private set; }
         public Vector3 DoorPoint { get; private set; }
 
+        // True from the end of the arrival until the departure starts. Passengers only walk to the door of a parked bus.
+        public bool IsParked { get; private set; }
+        public event Action<BusView> Parked;
+
         // Once, in the pool's create function.
         public void Configure(AnimationSettings animationSettings) => anim = animationSettings;
 
@@ -31,6 +35,7 @@ namespace Game.Runtime.View
             gameObject.SetActive(true);
             Id = busId;
             DoorPoint = doorPoint;
+            IsParked = false;
             capacity = busCapacity;
             bodyRenderer.sharedMaterial = material;
             transform.SetPositionAndRotation(enterPosition, Quaternion.identity);
@@ -51,14 +56,29 @@ namespace Game.Runtime.View
 
         public void Arrive(Vector3 parkPosition, Action onComplete)
         {
+            transform.DOKill();   // a queue move still running must not fight the arrival
             transform.DOMove(parkPosition, anim.BusArriveTime)
                 .SetEase(Ease.OutQuad)
                 .SetLink(gameObject, LinkBehaviour.KillOnDisable)
-                .OnComplete(() => onComplete());
+                .OnComplete(() =>
+                {
+                    IsParked = true;
+                    Parked?.Invoke(this);
+                    onComplete();
+                });
+        }
+
+        // The next bus moving up to its place in the queue (not parked: nobody boards it yet).
+        public void DriveTo(Vector3 position)
+        {
+            transform.DOMove(position, anim.BusArriveTime)
+                .SetEase(Ease.OutQuad)
+                .SetLink(gameObject, LinkBehaviour.KillOnDisable);
         }
 
         public void Depart(Vector3 exitPosition, Action onComplete)
         {
+            IsParked = false;
             transform.DOMove(exitPosition, anim.BusDepartTime)
                 .SetEase(Ease.InQuad)
                 .SetLink(gameObject, LinkBehaviour.KillOnDisable)
@@ -78,6 +98,7 @@ namespace Game.Runtime.View
 
         public void ResetForPool()
         {
+            IsParked = false;
             transform.DOKill();
             indicatorRoot.DOKill();
             indicatorRoot.localScale = Vector3.one;
