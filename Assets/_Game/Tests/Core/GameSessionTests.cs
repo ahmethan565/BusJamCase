@@ -168,11 +168,11 @@ namespace Game.Core.Tests
         }
 
         [Test]
-        public void WaitingFull_TapMatchingPassenger_GameContinues()
+        public void WaitingOneSlotLeft_TapMatchingPassenger_GameContinues()
         {
-            GameSession session = TestSessions.From(new[] { "GRR" }, "R", capacity: 2, slots: 1, listener: recorder);
-            session.Tap(new GridPos(0, 0));   // green fills the only slot
-            Assert.IsTrue(session.WaitingArea.IsFull);
+            GameSession session = TestSessions.From(new[] { "GRR" }, "R", capacity: 2, slots: 2, listener: recorder);
+            session.Tap(new GridPos(0, 0));   // green takes slot 0; slot 1 is still free
+            Assert.AreEqual(SessionResult.Playing, session.Result);
             recorder.Clear();
 
             session.Tap(new GridPos(1, 0));
@@ -183,17 +183,18 @@ namespace Game.Core.Tests
         }
 
         [Test]
-        public void WaitingFull_TapNonMatching_Lost_ExitedThenLostOrder()
+        public void LastFreeSlotTaken_Lost_ExitedWaitingLostOrder()
         {
-            GameSession session = TestSessions.From(new[] { "GBR" }, "R", capacity: 1, slots: 1, listener: recorder);
-            session.Tap(new GridPos(0, 0));   // green fills the only slot
+            GameSession session = TestSessions.From(new[] { "GBR" }, "R", capacity: 1, slots: 2, listener: recorder);
+            session.Tap(new GridPos(0, 0));   // green takes slot 0
             recorder.Clear();
 
-            session.Tap(new GridPos(1, 0));   // blue: no bus, no seat
+            session.Tap(new GridPos(1, 0));   // blue takes the last free slot
 
-            CollectionAssert.AreEqual(new[] { "Exited 1", "Lost" }, recorder.Events);
+            CollectionAssert.AreEqual(new[] { "Exited 1", "Waiting 1 slot1", "Lost" }, recorder.Events);
             Assert.AreEqual(SessionResult.Lost, session.Result);
             Assert.IsTrue(session.IsOver);
+            Assert.IsTrue(session.WaitingArea.IsFull);
             Assert.IsFalse(session.Board.TryGetPassenger(new GridPos(1, 0), out _), "the losing passenger has left the board");
         }
 
@@ -220,8 +221,7 @@ namespace Game.Core.Tests
         public void TapAfterOver_Ignored()
         {
             GameSession session = TestSessions.From(new[] { "GBR" }, "R", capacity: 1, slots: 1, listener: recorder);
-            session.Tap(new GridPos(0, 0));
-            session.Tap(new GridPos(1, 0));   // lost
+            session.Tap(new GridPos(0, 0));   // green takes the only slot: lost
             recorder.Clear();
 
             session.Tap(new GridPos(2, 0));   // red could board, but the game is over

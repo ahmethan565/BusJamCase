@@ -38,7 +38,6 @@ namespace Game.Runtime.View
         public Vector3 DoorPoint => BusParkPosition + new Vector3(0f, 0f, -s.DoorOffsetZ);
         public Vector3 BusEnterPosition => BusParkPosition + new Vector3(s.BusOffscreenX, 0f, 0f);
         public Vector3 BusExitPosition => BusParkPosition + new Vector3(-s.BusOffscreenX, 0f, 0f);
-        public Vector3 OverflowPoint => new Vector3(0f, 0f, s.RoadOffset * s.CellSize); // where the losing passenger stops
 
         // World -> cell (a single division per axis)
         public GridPos WorldToCell(Vector3 world) => new GridPos(

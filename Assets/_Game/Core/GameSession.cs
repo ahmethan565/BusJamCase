@@ -67,12 +67,16 @@ namespace Game.Core
 
             if (buses.Current != null && buses.Current.CanBoard(passenger))
                 BoardPassenger(passenger);
-            else if (waitingArea.TryAdd(passenger, out int slot))
-                listener.OnPassengerWaiting(passenger, slot);
             else
             {
-                Finish(SessionResult.Lost);
-                return;
+                // The area is never left full while playing (§2.8), so a free slot always exists here.
+                waitingArea.TryAdd(passenger, out int slot);
+                listener.OnPassengerWaiting(passenger, slot);
+                if (waitingArea.IsFull)
+                {
+                    Finish(SessionResult.Lost);
+                    return;
+                }
             }
 
             if (board.IsEmpty && waitingArea.IsEmpty)

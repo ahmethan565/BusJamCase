@@ -129,11 +129,12 @@ class Session:
         if self.current_bus() == color:
             self._board()
         else:
-            free = next((i for i, v in enumerate(self.slots) if v is None), None)
-            if free is None:
-                self.result = 'lost'
-                return 'lost'
+            # The area is never left full while playing (§2.8), so a free slot always exists here.
+            free = next(i for i, v in enumerate(self.slots) if v is None)
             self.slots[free] = color
+            if all(v is not None for v in self.slots):
+                self.result = 'lost'      # the last free slot was taken (§2.8)
+                return 'lost'
         if not self.passengers and all(v is None for v in self.slots):
             self.result = 'won'
         return 'ok'

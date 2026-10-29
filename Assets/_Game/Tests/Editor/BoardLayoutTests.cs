@@ -76,7 +76,6 @@ namespace Game.Editor.Tests
             AssertNear(new Vector3(0f, 0f, 2.9f), layout.DoorPoint);
             AssertNear(new Vector3(10f, 0f, 3.5f), layout.BusEnterPosition, "bus comes from the right");
             AssertNear(new Vector3(-10f, 0f, 3.5f), layout.BusExitPosition, "bus leaves to the left");
-            AssertNear(new Vector3(0f, 0f, 1f), layout.OverflowPoint);
         }
 
         [Test]
@@ -126,7 +125,6 @@ namespace Game.Editor.Tests
             for (int slot = 0; slot < 5; slot++) AssertInside(layout.SlotPosition(slot), $"slot {slot}");
             AssertInside(layout.BusParkPosition, "bus park");
             AssertInside(layout.DoorPoint, "door");
-            AssertInside(layout.OverflowPoint, "overflow point");
         }
     }
 }

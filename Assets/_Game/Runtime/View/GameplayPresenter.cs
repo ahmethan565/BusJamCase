@@ -142,7 +142,8 @@ namespace Game.Runtime.View
 
         public void OnPassengerWaiting(Passenger passenger, int slot)
         {
-            passengers[passenger.Id].WalkAlong(new[] { layout.SlotPosition(slot) }, feedback.PassengerWaiting);
+            PassengerView view = passengers[passenger.Id];
+            view.WalkAlong(new[] { layout.SlotPosition(slot) }, () => ArrivedAtSlot(view));
         }
 
         public void OnPassengerLeftWaitingArea(Passenger passenger, int slot) => fromSlot.Add(passenger.Id);
@@ -162,12 +163,14 @@ namespace Game.Runtime.View
 
         public void OnWon() => pendingResult = SessionResult.Won;
 
-        public void OnLost()
+        // The shake is played by ArrivedAtSlot when the losing passenger reaches the last slot.
+        public void OnLost() => pendingResult = SessionResult.Lost;
+
+        private void ArrivedAtSlot(PassengerView view)
         {
-            pendingResult = SessionResult.Lost;
-            // The last tapped passenger reaches the road but has no seat: it stops in front of the slots and shakes.
-            if (passengers.TryGetValue(lastExitedId, out PassengerView view))
-                view.WalkAlong(new[] { layout.OverflowPoint }, view.PlayBlockedShake);
+            feedback.PassengerWaiting();
+            // The passenger that took the last free slot lost the level (§2.8): it shakes in its slot.
+            if (pendingResult == SessionResult.Lost && view.Id == lastExitedId) view.PlayBlockedShake();
         }
 
         // --- Per frame: the lane and the end-of-presentation check (an allowed Update, §16.3)

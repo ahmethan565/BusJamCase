@@ -105,8 +105,8 @@ Oyuncu bir hücreye dokunur:
 3. Yolcunun yolu yoksa → `OnPassengerBlocked` olayı yayınlanır, **durum değişmez.**
 4. Yolu varsa yolcu **anında** tahtadan kalkar (`OnPassengerExited`). Sonra:
    - a. Aktif otobüs yolcunun renginde ve dolu değilse → **otobüse biner** (§2.7).
-   - b. Değilse ve bekleme alanında boş koltuk varsa → **en küçük numaralı boş koltuğa** oturur (`OnPassengerWaiting`).
-   - c. Değilse → **kaybedilir** (`OnLost`).
+   - b. Değilse → **en küçük numaralı boş koltuğa** oturur (`OnPassengerWaiting`). Bu oturuşla bekleme alanı **dolduysa** → **kaybedilir** (`OnLost`).
+   - (Oyun sürerken bekleme alanı hiçbir zaman dolu kalmaz; bu yüzden b adımında her zaman boş koltuk vardır.)
 5. Tahtada ve bekleme alanında hiç yolcu kalmadıysa → **kazanılır** (`OnWon`). Bu kontrol **dokunuşun en sonunda, tek bir yerde** yapılır.
 
 ### 2.7 Biniş ve otobüs zinciri
@@ -118,9 +118,10 @@ Yolcu otobüse bindiğinde:
 Bekleme alanında koltuktan kalkan yolcunun yeri boş kalır; **diğer yolcular kaymaz.**
 
 ### 2.8 Kaybetme koşulu (kesin)
-Kaybetme **sadece** §2.6 adım 4c'de olur: yolu olan bir yolcuya dokunuldu, aktif otobüse binemiyor ve bekleme alanında boş koltuk yok.
-- Bekleme alanının dolu olması tek başına kaybettirmez. Oyuncu aktif otobüsün renginde bir yolcuya dokunursa oyun devam eder.
-- Kayıp anında yolcu tahtadan kalkmış olur ve `OnPassengerExited`'dan sonra `OnLost` yayınlanır (görsel karşılığı §10.5'te).
+Kaybetme **sadece** §2.6 adım 4b'de olur: bekleme alanının **son boş koltuğu doldurulduğu anda** oyun kaybedilir.
+- Koltuklar dolduktan sonra oyuncunun başka hamlesi yoktur; aktif otobüsün renginde yolcu olsa bile oyun bitmiştir.
+- Dolayısıyla N koltuklu bir bölümde oyuncu aynı anda en fazla N-1 yolcuyu bekletebilir.
+- Kayıp anında yolcu tahtadan kalkmış ve son koltuğa yerleşmiş olur: olay sırası `OnPassengerExited` → `OnPassengerWaiting` → `OnLost` (görsel karşılığı §10.5'te).
 
 ### 2.9 Kilitlenme (softlock) olmaz
 Bölüm doğrulamayı (§7.3) geçtiyse:
@@ -581,12 +582,16 @@ public void Tap(GridPos cell)
 
     if (buses.Current != null && buses.Current.CanBoard(passenger))
         BoardPassenger(passenger);
-    else if (waitingArea.TryAdd(passenger, out int slot))
-        listener.OnPassengerWaiting(passenger, slot);
     else
     {
-        Finish(SessionResult.Lost);
-        return;
+        // The area is never left full while playing (§2.8), so a free slot always exists here.
+        waitingArea.TryAdd(passenger, out int slot);
+        listener.OnPassengerWaiting(passenger, slot);
+        if (waitingArea.IsFull)
+        {
+            Finish(SessionResult.Lost);
+            return;
+        }
     }
 
     if (board.IsEmpty && waitingArea.IsEmpty)
@@ -932,7 +937,6 @@ public sealed class BoardLayout
     public Vector3 DoorPoint       => BusParkPosition + new Vector3(0f, 0f, -s.DoorOffsetZ);
     public Vector3 BusEnterPosition => BusParkPosition + new Vector3( s.BusOffscreenX, 0f, 0f);
     public Vector3 BusExitPosition  => BusParkPosition + new Vector3(-s.BusOffscreenX, 0f, 0f);
-    public Vector3 OverflowPoint    => new Vector3(0f, 0f, s.RoadOffset * s.CellSize); // kayıpta son yolcunun durduğu yer
 
     // Dünya → hücre (tek bölme işlemi)
     public GridPos WorldToCell(Vector3 world) => new GridPos(
@@ -1088,14 +1092,14 @@ public void ReleaseBus(int busId);
 | `OnBusArrived(bus)` | Havuzdan `BusView` alınır, `Init(bus.Id, material, bus.Capacity, layout.BusEnterPosition, layout.DoorPoint)`; `lane.Enqueue(new BusArriveStep(busView, layout.BusParkPosition, feedback))` | Şerit |
 | `OnPassengerBlocked(p)` | `view.PlayBlockedShake()` + `feedback.PassengerBlocked(pos)` | Serbest |
 | `OnPassengerExited(p, path)` | `lastExitedId = p.Id`; `view.StopIdle()`, `view.PlayTapSquash()` + `feedback.PassengerTapped(pos)`; yol hücreleri dünya noktalarına çevrilir, sonuna `RoadPointAbove(path[path.Count - 1])` eklenir; `view.WalkAlong(points)` | Serbest |
-| `OnPassengerWaiting(p, slot)` | `view.WalkAlong(new[] { SlotPosition(slot) }, onArrived: feedback.PassengerWaiting)` (sıraya eklenir) | Serbest |
+| `OnPassengerWaiting(p, slot)` | `view.WalkAlong(new[] { SlotPosition(slot) }, onArrived: () => ArrivedAtSlot(view))` (sıraya eklenir). `ArrivedAtSlot`: `feedback.PassengerWaiting()`; kayıp bekleniyorsa ve bu son çıkan yolcuysa (`lastExitedId`) `view.PlayBlockedShake()` | Serbest |
 | `OnPassengerLeftWaitingArea(p, slot)` | `fromSlot.Add(p.Id)` (bir sonraki `OnPassengerBoarded` için) | — |
 | `OnPassengerBoarded(p, bus, seat)` | `fromSlot` değilse: `view.WalkAlong(new[] { DoorPoint })` (serbest, sıraya eklenir). Her durumda `lane.Enqueue(new BoardStep(this, view, busView, seat, fromSlot.Remove(p.Id), feedback))` | Serbest + Şerit |
 | `OnBusDeparted(bus)` | `lane.Enqueue(new BusDepartStep(this, busView, layout.BusExitPosition, feedback))` | Şerit |
 | `OnWon()` | `pendingResult = Won` | — |
-| `OnLost()` | `pendingResult = Lost`; son çıkan yolcu (`lastExitedId`): `view.WalkAlong(new[] { OverflowPoint }, onArrived: view.PlayBlockedShake)` | Serbest |
+| `OnLost()` | `pendingResult = Lost` (sallanmayı `ArrivedAtSlot` yapar) | — |
 
-**Kayıp görseli:** Son dokunulan yolcu yola çıkar ama koltuğu yoktur; koltukların önündeki `OverflowPoint`'te durur ve sallanır. Popup, bu yürüyüş bittikten sonra açılır (sallanma beklenmez).
+**Kayıp görseli:** Son dokunulan yolcu son boş koltuğa yürür, oturduğu anda sallanır. Popup, bu yürüyüş bittikten sonra açılır (sallanma beklenmez).
 
 **Bitiş tespiti:**
 ```csharp
@@ -1889,8 +1893,8 @@ var session = TestSessions.From(
 - `Tap_NonMatching_GoesToLowestFreeSlot`
 - `BusFull_Departs_NextArrives_WaitingPassengersBoard` (olay sırası birebir §6.8 örneği)
 - `ChainBoarding_WaitingFillsNextBus_ThenNextArrives`
-- `WaitingFull_TapMatchingPassenger_GameContinues` (§2.8)
-- `WaitingFull_TapNonMatching_Lost_ExitedThenLostOrder`
+- `WaitingOneSlotLeft_TapMatchingPassenger_GameContinues` (§2.8)
+- `LastFreeSlotTaken_Lost_ExitedWaitingLostOrder` (§2.8)
 - `LastPassengerBoards_Won_RaisedOnce` (kazanma tek kez)
 - `TapAfterOver_Ignored`
 - `TappingFrontThenBack_BothLeave` (§2.10)
@@ -1951,7 +1955,7 @@ Her faz **tek başına derlenir ve testleri yeşildir.** Bir faz bitmeden sonrak
 - `LayoutSettings`, `AnimationSettings`, `ColorPalette`; `BoardLayout`, `BoardView`, `WaitingAreaView`, `PassengerView`, `BusView` (yer tutucu küp/kapsül modeller, §10.6'daki katmanlı hiyerarşiyle); `GameplayPresenter`, `BusLane` ve adımlar; `InputHandler`; `CameraFitter`.
 - **`IFeedback` arayüzü ve `NullFeedback`** bu fazda yazılır (presenter ve adımlar ona bağlı); gerçek `FeedbackPlayer` Faz 6'da.
 - Geçici olarak `GameBootstrap` doğrudan 1. bölümü başlatır ve `PresentationFinished` sonucunu konsola yazar.
-- **Kabul:** Editörde ve Device Simulator'da 1. bölüm baştan sona oynanır; hızlı ardışık dokunuşta yolcular paralel yürür, binişler dokunuş sırasıyla olur; kapalı yolcu sallanır; kayıpta son yolcu koltukların önünde durur.
+- **Kabul:** Editörde ve Device Simulator'da 1. bölüm baştan sona oynanır; hızlı ardışık dokunuşta yolcular paralel yürür, binişler dokunuş sırasıyla olur; kapalı yolcu sallanır; son koltuk dolunca oyun kaybedilir ve son yolcu koltuğunda sallanır.
 
 ### Faz 4 — Akış ve UI
 - `IAppState`, `AppStateMachine`, `AppDependencies`, `AppStates`, 4 durum; `ScreenView` ve tüm ekranlar; `SafeAreaFitter`, `UiText`; `BackButtonInput`; çıkış onayı overlay'i.
@@ -2011,7 +2015,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 | 25 | Ayarlar menüsü | **Yok** | Ses aç/kapa popup'ı | Ekip kararı; ses telefonun kendi kontrolleriyle |
 | 26 | Ses zamanlaması | Animasyon anlarına bağlı | Core olaylarına bağlı | Core anında çalıştığı için sesler üst üste binerdi |
 | 27 | Titreşim | **Yok** | `Handheld.Vibrate` | Kaba titreşim + kapatma seçeneği yok |
-| 28 | Kaybetme | Koltuk yokken binemeyen yolcuya dokunmak (§2.8) | "Koltuklar dolunca anında kayıp" | Konuşmada tanımlanan kural; dolu koltukta doğru renge dokunmak oyunu sürdürür |
+| 28 | Kaybetme | **Son koltuk dolunca anında kayıp** (§2.8) | Koltuk yokken binemeyen yolcuya dokunmak | Faz 3 oyun testinde ekip kararıyla değişti: dolu koltuklarla oyunun sürmesi yanlış bulundu |
 | 29 | Unity sürümü | **2022.3.19f1, sabit** | 2022.3.62f2+ | Ekip kararı. Not: Unity'nin CVE-2025-59489 güvenlik bildirimi 2022.3 için yamayı 2022.3.62f2'de yayımladı; risk bilinerek sabit tutuluyor |
 | 30 | Sonsuz/ölçeklenen harita | 5 bölümde doğrudan düğüm | Sanallaştırılmış liste | Gerektiğinde sadece `LevelMapScreen` içi değişir |
 
@@ -2031,6 +2035,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - `GameplayState.Exit` içindeki `DOTween.KillAll()` kaldırıldı; her görsel havuza dönerken kendi tween'lerini öldürür.
 - Editörden başlatılan bölümde ilerleme bellekte tutulur.
 - `CameraFitter` varsayılan `margin` değeri 0.15 → **0.3** (Faz 3'te ölçüldü: 0.15 dikey ekranda alt köşeleri kırpıyordu, §9.4).
+- **Kaybetme kuralı** (Faz 3 oyun testi, ekip kararı): bekleme alanının son koltuğu dolduğu anda kayıp (§2.6, §2.8, karar #28). `OverflowPoint` kaldırıldı; kaybeden yolcu koltuğunda sallanır (§10.5). Koltuk sayıları değişmedi; Bölüm 3–5'in bilinen çözümleri ve rastgele kazanma oranları yeni kurala göre güncellendi (§21.1).
 
 ---
 
@@ -2067,7 +2072,7 @@ Buses:  "RB"     Capacity: 3   Slots: 5
 Bilinen çözüm: (0,0) (1,0) (2,0) (0,1) (2,1) (0,2)
 ```
 
-**Bölüm 2 — `Level_02_Walls`** · 4×4 · 3 renk · 5 koltuk · *Öğrettiği: yolu kapalı yolcular, duvarlar* · Rastgele kazanma: ~%78
+**Bölüm 2 — `Level_02_Walls`** · 4×4 · 3 renk · 5 koltuk · *Öğrettiği: yolu kapalı yolcular, duvarlar* · Rastgele kazanma: ~%59
 ```
 Rows:   "GRRB"
         "R#.G"
@@ -2077,17 +2082,17 @@ Buses:  "RGB"    Capacity: 3   Slots: 5
 Bilinen çözüm: (0,0) (1,0) (2,0) (3,0) (0,1) (3,1) (0,2) (1,2) (3,2)
 ```
 
-**Bölüm 3 — `Level_03_TriangleDown`** · 5×4 ters üçgen · 4 renk · 5 koltuk · *Öğrettiği: void, bekleme alanını akıllı kullanmak* · Rastgele kazanma: ~%31
+**Bölüm 3 — `Level_03_TriangleDown`** · 5×4 ters üçgen · 4 renk · 5 koltuk · *Öğrettiği: void, bekleme alanını akıllı kullanmak* · Rastgele kazanma: ~%14
 ```
 Rows:   "RGBGR"
         "YBRBY"
         "-YG.-"
         "--.--"
 Buses:  "RBGY"   Capacity: 3   Slots: 5
-Bilinen çözüm: (0,0) (1,0) (2,0) (3,0) (4,0) (0,1) (1,1) (2,1) (3,1) (4,1) (1,2) (2,2)
+Bilinen çözüm: (0,0) (1,0) (2,0) (3,0) (4,0) (0,1) (2,1) (1,1) (3,1) (4,1) (1,2) (2,2)
 ```
 
-**Bölüm 4 — `Level_04_Holes`** · 6×5 delikli · 4 renk · 5 koltuk · *Öğrettiği: delikler, aynı renkten birden fazla otobüs, otobüs sırasını düşünmek* · Rastgele kazanma: ~%7
+**Bölüm 4 — `Level_04_Holes`** · 6×5 delikli · 4 renk · 5 koltuk · *Öğrettiği: delikler, aynı renkten birden fazla otobüs, otobüs sırasını düşünmek* · Rastgele kazanma: ~%1
 ```
 Rows:   "RRBBGG"
         "Y-RG-B"
@@ -2095,10 +2100,10 @@ Rows:   "RRBBGG"
         "-BR#G-"
         "-GYRB-"
 Buses:  "GRBYGRB"   Capacity: 3   Slots: 5
-Bilinen çözüm: (0,0) (1,0) (2,0) (3,0) (4,0) (5,0) (0,1) (3,1) (2,1) (5,1) (0,2) (1,2) (2,2) (5,2) (1,3) (2,3) (2,4) (4,3) (1,4) (3,4) (4,4)
+Bilinen çözüm: (0,0) (1,0) (2,0) (3,0) (4,0) (5,0) (3,1) (0,1) (2,1) (5,1) (0,2) (1,2) (2,2) (5,2) (2,3) (2,4) (1,3) (4,3) (1,4) (3,4) (4,4)
 ```
 
-**Bölüm 5 — `Level_05_Peak`** · 6×6 sivri üçgen + duvarlar · 5 renk · **6 koltuk** · *Hepsi bir arada* · Rastgele kazanma: ~%0,5
+**Bölüm 5 — `Level_05_Peak`** · 6×6 sivri üçgen + duvarlar · 5 renk · **6 koltuk** · *Hepsi bir arada* · Rastgele kazanma: ~%0,1
 ```
 Rows:   "--RG--"
         "-BYPG-"
@@ -2107,9 +2112,9 @@ Rows:   "--RG--"
         ".R-GBG"
         "YB.RPG"
 Buses:  "GRPBYRGB"   Capacity: 3   Slots: 6
-Bilinen çözüm: (2,0) (3,0) (1,1) (2,1) (3,1) (4,1) (0,2) (1,2) (0,3) (5,2) (1,3) (3,3) (4,3) (4,4) (4,5) (2,3) (5,3) (1,4) (3,4) (5,4) (0,5) (1,5) (3,5) (5,5)
+Bilinen çözüm: (2,0) (3,0) (1,1) (2,1) (3,1) (4,1) (0,2) (0,3) (1,2) (5,2) (3,3) (4,3) (4,4) (4,5) (1,3) (2,3) (5,3) (1,4) (3,4) (0,5) (5,4) (1,5) (3,5) (5,5)
 ```
-> Bölüm 5'te koltuk sayısı bilinçli olarak 6: 5 koltukla rastgele kazanma oranı ~%0,1'e düşüyordu. Koltuk sayısının bölüm başına bir zorluk ayarı olduğunu da gösterir. Oyun testinde zor gelirse ilk ayar budur.
+> Bölüm 5'te koltuk sayısı bilinçli olarak 6: 5 koltukla rastgele kazanma oranı çok daha düşüktü. Koltuk sayısının bölüm başına bir zorluk ayarı olduğunu da gösterir. Oyun testinde zor gelirse ilk ayar budur.
 
 ### 21.2 Referans simülatör (`Docs/reference/bus_jam_sim.py`)
 - §2'deki oynanış kurallarının Python uygulaması: ayrıştırma, çıkış/yol hesabı, dokunuş, otobüs zinciri, çözücü (DFS + ziyaret kümesi) ve rastgele oyuncu simülasyonu. Doğrulamanın sadece 4–6. kurallarını (renk sayıları, çıkış, erişilebilirlik) uygular; 1–3. kurallar (sürüm, kapasite/koltuk ≥ 1, en az bir yolcu/otobüs) sadece C# tarafında.
