@@ -27,6 +27,7 @@ namespace Game.Runtime.Bootstrap
         [SerializeField] private WaitingAreaView waitingAreaView;
         [SerializeField] private GameplayPresenter presenter;
         [SerializeField] private CameraFitter cameraFitter;
+        [SerializeField] private SessionClock sessionClock;
 
         [Header("Audio")]
         [SerializeField] private AudioPlayer audioPlayer;
@@ -50,6 +51,7 @@ namespace Game.Runtime.Bootstrap
                    .SetCapacity(200, 50);
 
             inputHandler.enabled = false;                     // only GameplayState turns it on
+            sessionClock.enabled = false;                     // same for the level time
 
             // --- Was "play this level" requested from the level editor? (§15.3)
             int requestedLevel = -1;
@@ -82,7 +84,7 @@ namespace Game.Runtime.Bootstrap
             {
                 Catalog = levelCatalog, Progress = progress, PathFinder = pathFinder, Feedback = feedback,
                 LayoutSettings = layoutSettings,
-                BoardView = boardView, WaitingAreaView = waitingAreaView, Presenter = presenter, CameraFitter = cameraFitter,
+                BoardView = boardView, WaitingAreaView = waitingAreaView, Presenter = presenter, CameraFitter = cameraFitter, Clock = sessionClock,
                 Input = inputHandler, BackButton = backButton,
                 MapScreen = mapScreen, Hud = hud, WinScreen = winScreen, LoseScreen = loseScreen,
                 QuitConfirmScreen = quitConfirmScreen,

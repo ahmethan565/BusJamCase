@@ -54,9 +54,12 @@ namespace Game.Runtime.View
         private Vector3[] exitWalk;   // the walk of the passenger that just left the board; the next event in the same tap uses it
         private int walkingCount;
         private SessionResult pendingResult = SessionResult.Playing;
+        private LoseReason pendingLoseReason;
         private bool finishedRaised;
 
-        public event Action<SessionResult> PresentationFinished;
+        public event Action<SessionResult, LoseReason> PresentationFinished;
+        // For the HUD; the presenter does not know the UI, GameplayState forwards it.
+        public event Action<int> TimeChanged;
 
         // Once, in the bootstrap.
         public void Init(ColorPalette colorPalette, AnimationSettings animationSettings,
@@ -118,6 +121,7 @@ namespace Game.Runtime.View
             exitWalk = null;
             walkingCount = 0;   // killed walks never raise WalkFinished
             pendingResult = SessionResult.Playing;
+            pendingLoseReason = LoseReason.NoSpace;
             finishedRaised = false;
         }
 
@@ -205,8 +209,17 @@ namespace Game.Runtime.View
 
         public void OnWon() => pendingResult = SessionResult.Won;
 
-        // The shake is played by ArrivedAtSlot when the losing passenger reaches the last slot.
-        public void OnLost() => pendingResult = SessionResult.Lost;
+        // The HUD already shows the full time; it simply starts counting down with the next TimeChanged.
+        public void OnTimerStarted() { }
+        public void OnTimeChanged(int secondsLeft) => TimeChanged?.Invoke(secondsLeft);
+
+        // No space: the shake is played by ArrivedAtSlot when the losing passenger reaches the last slot.
+        // Time up: nothing extra; the popup opens when the animations have finished, as always.
+        public void OnLost(LoseReason reason)
+        {
+            pendingResult = SessionResult.Lost;
+            pendingLoseReason = reason;
+        }
 
         // --- Per frame: the lane and the end-of-presentation check (an allowed Update, §16.3)
 
@@ -223,7 +236,7 @@ namespace Game.Runtime.View
                 && lane.IsIdle && boardings.Count == 0 && walkingCount == 0 && held.Count == 0)
             {
                 finishedRaised = true;
-                PresentationFinished?.Invoke(pendingResult);
+                PresentationFinished?.Invoke(pendingResult, pendingLoseReason);
             }
         }
 

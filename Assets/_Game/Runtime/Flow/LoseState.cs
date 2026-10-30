@@ -1,3 +1,5 @@
+using Game.Core;
+
 namespace Game.Runtime.Flow
 {
     public sealed class LoseState : IAppState
@@ -6,18 +8,20 @@ namespace Game.Runtime.Flow
         private readonly AppStates states;
         private readonly AppDependencies deps;
         private readonly int levelIndex;
+        private readonly LoseReason reason;
 
-        public LoseState(AppStateMachine machine, AppStates states, AppDependencies deps, int levelIndex)
+        public LoseState(AppStateMachine machine, AppStates states, AppDependencies deps, int levelIndex, LoseReason reason)
         {
             this.machine = machine;
             this.states = states;
             this.deps = deps;
             this.levelIndex = levelIndex;
+            this.reason = reason;
         }
 
         public void Enter()
         {
-            deps.LoseScreen.Show();
+            deps.LoseScreen.Show(reason);
             deps.Feedback.Lost();
 
             deps.LoseScreen.RetryClicked += OnRetryClicked;

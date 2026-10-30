@@ -30,7 +30,7 @@ namespace Game.Core.Levels
         };
 
         public static ParseResult Parse(IReadOnlyList<string> rows, string buses,
-                                        int busCapacity, int waitingSlots, int version)
+                                        int busCapacity, int waitingSlots, int version, float timeLimitSeconds = 0f)
         {
             var errors = new List<string>();
             if (rows == null || rows.Count == 0)
@@ -78,7 +78,7 @@ namespace Game.Core.Levels
 
             if (errors.Count > 0) return ParseResult.Failed(errors);
             return ParseResult.Ok(new LevelData(version, width, height, cells, passengers, busColors,
-                                                busCapacity, waitingSlots));
+                                                busCapacity, waitingSlots, timeLimitSeconds));
         }
     }
 }

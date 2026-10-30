@@ -20,3 +20,4 @@ MonoBehaviour:
   buses: RB
   busCapacity: 3
   waitingSlots: 5
+  timeLimitSeconds: 60

@@ -1,3 +1,5 @@
+using Game.Core;
+
 namespace Game.Runtime.Flow
 {
     // State factory (§11.4): holds the shared dependencies and creates a fresh state object for every change.
@@ -15,6 +17,6 @@ namespace Game.Runtime.Flow
         public IAppState Menu() => new MenuState(machine, this, deps);
         public IAppState Gameplay(int levelIndex) => new GameplayState(machine, this, deps, levelIndex);
         public IAppState Win(int levelIndex) => new WinState(machine, this, deps, levelIndex);
-        public IAppState Lose(int levelIndex) => new LoseState(machine, this, deps, levelIndex);
+        public IAppState Lose(int levelIndex, LoseReason reason) => new LoseState(machine, this, deps, levelIndex, reason);
     }
 }

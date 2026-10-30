@@ -23,6 +23,8 @@ namespace Game.Core.Levels
                 errors.Add("Bus capacity must be at least 1.");
             if (level.WaitingSlots < 1)
                 errors.Add("The waiting area needs at least 1 slot.");
+            if (level.TimeLimitSeconds < 0f)
+                errors.Add($"The time limit cannot be negative ({level.TimeLimitSeconds}); use 0 for no limit.");
             if (level.Passengers.Count == 0)
                 errors.Add("The level has no passengers.");
             if (level.BusColors.Count == 0)

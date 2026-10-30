@@ -12,7 +12,9 @@ namespace Game.Runtime.Data
         [SerializeField] private string buses;
         [SerializeField] private int busCapacity = 3;
         [SerializeField] private int waitingSlots = 5;
+        [Tooltip("Seconds to finish the level, counted from the first tap. 0 = no time limit")]
+        [SerializeField] private float timeLimitSeconds = 0f;
 
-        public ParseResult Parse() => LevelParser.Parse(rows, buses, busCapacity, waitingSlots, version);
+        public ParseResult Parse() => LevelParser.Parse(rows, buses, busCapacity, waitingSlots, version, timeLimitSeconds);
     }
 }

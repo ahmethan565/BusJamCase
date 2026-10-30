@@ -32,6 +32,9 @@ namespace Game.Runtime.Data
         [SerializeField] private float popupTime = 0.25f;
         [SerializeField] private float nodePulseScale = 1.1f;
         [SerializeField] private float nodePulseTime = 0.6f;
+        [Tooltip("HUD timer pulse in the last 10 seconds")]
+        [SerializeField] private float timerPulseScale = 1.15f;
+        [SerializeField] private float timerPulseTime = 0.5f;
 
         public float WalkSpeed => walkSpeed;
         public float StepHeight => stepHeight;
@@ -53,5 +56,7 @@ namespace Game.Runtime.Data
         public float PopupTime => popupTime;
         public float NodePulseScale => nodePulseScale;
         public float NodePulseTime => nodePulseTime;
+        public float TimerPulseScale => timerPulseScale;
+        public float TimerPulseTime => timerPulseTime;
     }
 }

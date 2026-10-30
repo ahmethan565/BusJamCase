@@ -12,7 +12,9 @@ namespace Game.Core
         void OnPassengerLeftWaitingArea(Passenger passenger, int slot);
         void OnPassengerBoarded(Passenger passenger, Bus bus, int seat);
         void OnBusDeparted(Bus bus);
+        void OnTimerStarted();
+        void OnTimeChanged(int secondsLeft);   // only when the whole second shown on screen changes
         void OnWon();
-        void OnLost();
+        void OnLost(LoseReason reason);
     }
 }

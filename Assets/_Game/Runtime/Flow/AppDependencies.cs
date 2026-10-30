@@ -24,6 +24,7 @@ namespace Game.Runtime.Flow
         public WaitingAreaView WaitingAreaView;
         public GameplayPresenter Presenter;
         public CameraFitter CameraFitter;
+        public SessionClock Clock;
 
         // Input
         public InputHandler Input;

@@ -14,6 +14,7 @@ namespace Game.Core
         private readonly WaitingArea waitingArea;
         private readonly IPathFinder pathFinder;
         private readonly IGameListener listener;
+        private readonly LevelTimer timer;
         private bool started;
 
         public GameSession(LevelData level, IPathFinder pathFinder, IGameListener listener)
@@ -23,6 +24,7 @@ namespace Game.Core
             waitingArea = new WaitingArea(level.WaitingSlots);
             this.pathFinder = pathFinder;
             this.listener = listener;
+            timer = new LevelTimer(level.TimeLimitSeconds);
         }
 
         private GameSession(GameSession source, IGameListener listener)
@@ -30,6 +32,7 @@ namespace Game.Core
             board = source.board.Clone();
             buses = source.buses.Clone();
             waitingArea = source.waitingArea.Clone();
+            timer = source.timer.Clone();   // the solver never calls Tick, so time does not affect solvability
             pathFinder = source.pathFinder;
             this.listener = listener;
             started = source.started;
@@ -41,6 +44,7 @@ namespace Game.Core
         public Board Board => board;              // read-only use in tests
         public BusQueue Buses => buses;
         public WaitingArea WaitingArea => waitingArea;
+        public float RemainingTime => timer.Remaining;   // read-only use in tests
 
         public void Start()
         {
@@ -54,6 +58,11 @@ namespace Game.Core
         {
             if (!started) throw new InvalidOperationException("Call Start() before Tap().");
             if (IsOver) return;
+
+            // Any tap on the board starts the time: an empty cell, outside the board or a blocked passenger too.
+            if (timer.StartIfNotRunning())
+                listener.OnTimerStarted();
+
             if (!board.TryGetPassenger(cell, out Passenger passenger)) return;
 
             if (!pathFinder.TryFindPathToExit(board, cell, out List<GridPos> path))
@@ -74,13 +83,28 @@ namespace Game.Core
                 listener.OnPassengerWaiting(passenger, slot);
                 if (waitingArea.IsFull)
                 {
-                    Finish(SessionResult.Lost);
+                    Finish(SessionResult.Lost, LoseReason.NoSpace);
                     return;
                 }
             }
 
             if (board.IsEmpty && waitingArea.IsEmpty)
                 Finish(SessionResult.Won);
+        }
+
+        // Elapsed time from the outside (SessionClock). Core never reads a clock.
+        public void Tick(float deltaSeconds)
+        {
+            if (IsOver || !timer.IsRunning) return;
+
+            int before = timer.RemainingWholeSeconds;
+            bool expired = timer.Tick(deltaSeconds);
+
+            if (timer.RemainingWholeSeconds != before)
+                listener.OnTimeChanged(timer.RemainingWholeSeconds);
+
+            if (expired)
+                Finish(SessionResult.Lost, LoseReason.TimeUp);
         }
 
         // Only for LevelSolver.
@@ -138,11 +162,12 @@ namespace Game.Core
             }
         }
 
-        private void Finish(SessionResult result)
+        private void Finish(SessionResult result, LoseReason reason = LoseReason.NoSpace)
         {
             Result = result;
+            timer.Stop();
             if (result == SessionResult.Won) listener.OnWon();
-            else listener.OnLost();
+            else listener.OnLost(reason);
         }
 
         private static BusQueue CreateBuses(LevelData level)

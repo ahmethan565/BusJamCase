@@ -1,6 +1,7 @@
 using Game.Core;
 using Game.Core.Levels;
 using Game.Runtime.View;
+using UnityEngine;
 
 namespace Game.Runtime.Flow
 {
@@ -41,19 +42,23 @@ namespace Game.Runtime.Flow
             deps.Presenter.Begin(level, layout);
             session = new GameSession(level, deps.PathFinder, deps.Presenter);
 
-            // 6) Input
+            // 6) Input and time (the time waits for the first tap on the board, §2.11)
             deps.Input.SetLayout(layout);
             deps.Input.CellTapped += session.Tap;
             deps.Input.enabled = true;
+            deps.Clock.Bind(session);
+            deps.Clock.enabled = true;
 
             // 7) HUD
             deps.Hud.Show();
             deps.Hud.SetLevel(levelIndex);
+            deps.Hud.SetTimeLimit(Mathf.CeilToInt(level.TimeLimitSeconds));
 
             // 8) Subscriptions
             deps.Hud.RestartClicked += OnRestartClicked;
             deps.BackButton.BackPressed += OnBackPressed;
             deps.Presenter.PresentationFinished += OnPresentationFinished;
+            deps.Presenter.TimeChanged += deps.Hud.SetTime;
 
             // 9) First bus arrives
             session.Start();
@@ -64,14 +69,17 @@ namespace Game.Runtime.Flow
         {
             deps.Input.enabled = false;
             deps.Input.CellTapped -= session.Tap;
+            deps.Clock.enabled = false;
+            deps.Clock.Unbind();
+            deps.Presenter.TimeChanged -= deps.Hud.SetTime;
             deps.Hud.RestartClicked -= OnRestartClicked;
             deps.BackButton.BackPressed -= OnBackPressed;
             deps.Presenter.PresentationFinished -= OnPresentationFinished;
             deps.Hud.Hide();
         }
 
-        private void OnPresentationFinished(SessionResult result) =>
-            machine.ChangeTo(result == SessionResult.Won ? states.Win(levelIndex) : states.Lose(levelIndex));
+        private void OnPresentationFinished(SessionResult result, LoseReason reason) =>
+            machine.ChangeTo(result == SessionResult.Won ? states.Win(levelIndex) : states.Lose(levelIndex, reason));
 
         private void OnRestartClicked() => machine.ChangeTo(states.Gameplay(levelIndex));
 

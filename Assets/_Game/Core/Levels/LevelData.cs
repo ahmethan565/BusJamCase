@@ -7,7 +7,7 @@ namespace Game.Core.Levels
     {
         public LevelData(int version, int width, int height, IReadOnlyList<CellType> cells,
                          IReadOnlyList<PassengerSpawn> passengers, IReadOnlyList<PassengerColor> busColors,
-                         int busCapacity, int waitingSlots)
+                         int busCapacity, int waitingSlots, float timeLimitSeconds = 0f)
         {
             Version = version;
             Width = width;
@@ -17,6 +17,7 @@ namespace Game.Core.Levels
             BusColors = new List<PassengerColor>(busColors).AsReadOnly();
             BusCapacity = busCapacity;
             WaitingSlots = waitingSlots;
+            TimeLimitSeconds = timeLimitSeconds;
         }
 
         public int Version { get; }
@@ -27,5 +28,6 @@ namespace Game.Core.Levels
         public IReadOnlyList<PassengerColor> BusColors { get; }    // arrival order
         public int BusCapacity { get; }
         public int WaitingSlots { get; }
+        public float TimeLimitSeconds { get; }                     // 0 = no time limit (§2.11)
     }
 }

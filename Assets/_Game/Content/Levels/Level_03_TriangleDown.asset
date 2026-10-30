@@ -21,3 +21,4 @@ MonoBehaviour:
   buses: RBGY
   busCapacity: 3
   waitingSlots: 5
+  timeLimitSeconds: 75

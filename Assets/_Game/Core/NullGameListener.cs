@@ -12,7 +12,9 @@ namespace Game.Core
         public void OnPassengerLeftWaitingArea(Passenger passenger, int slot) { }
         public void OnPassengerBoarded(Passenger passenger, Bus bus, int seat) { }
         public void OnBusDeparted(Bus bus) { }
+        public void OnTimerStarted() { }
+        public void OnTimeChanged(int secondsLeft) { }
         public void OnWon() { }
-        public void OnLost() { }
+        public void OnLost(LoseReason reason) { }
     }
 }

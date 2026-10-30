@@ -7,6 +7,7 @@ namespace Game.Core.Tests
     {
         public List<string> Events { get; } = new List<string>();
         public IReadOnlyList<GridPos> LastPath { get; private set; }
+        public LoseReason? LastLoseReason { get; private set; }
 
         public void Clear() => Events.Clear();
 
@@ -24,6 +25,14 @@ namespace Game.Core.Tests
         public void OnPassengerBoarded(Passenger passenger, Bus bus, int seat) => Events.Add($"Boarded {passenger.Id} bus{bus.Id} seat{seat}");
         public void OnBusDeparted(Bus bus) => Events.Add($"BusDeparted bus{bus.Id}");
         public void OnWon() => Events.Add("Won");
-        public void OnLost() => Events.Add("Lost");
+        public void OnTimerStarted() => Events.Add("TimerStarted");
+        public void OnTimeChanged(int secondsLeft) => Events.Add($"Time {secondsLeft}");
+
+        // A no-space loss stays "Lost", so the event-order tests written before the timer keep their expectations.
+        public void OnLost(LoseReason reason)
+        {
+            LastLoseReason = reason;
+            Events.Add(reason == LoseReason.NoSpace ? "Lost" : $"Lost {reason}");
+        }
     }
 }

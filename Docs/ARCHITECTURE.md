@@ -135,6 +135,13 @@ Referans simülatörde 5 bölümün her biri için 3000 rastgele oyunda **0 kili
 - Örnek: Arka arkaya duran A (önde) ve B'ye (arkada) hızlıca dokunulursa, A'nın hücresi mantıkta anında boşaldığı için B'nin de yolu vardır; ikisi de çıkar.
 - Input sadece popup'lar açıkken kapalıdır (§11).
 
+### 2.11 Süre (Faz 9)
+Ayrıntı ve gerekçeler: `Docs/TIMER_DESIGN.md`.
+- Her bölümün bir süresi var (`TimeLimitSeconds`); `0` = zamansız.
+- Süre bölüm açıldığında durur, **tahtaya ilk dokunuşta** başlar (boş hücre, tahta dışı ya da yolu kapalı yolcu da sayılır; UI'ya dokunmak sayılmaz).
+- Süre sıfıra inerse bölüm kaybedilir (`LoseReason.TimeUp`); koltuklar dolunca kaybetme `LoseReason.NoSpace` olur.
+- Bölüm mantıkta kazanıldığı/kaybedildiği anda süre durur. Süre Core'da yaşar; Core saati okumaz, geçen süre dışarıdan `GameSession.Tick(deltaSeconds)` ile verilir.
+
 ---
 
 ## 3. Mimariye Genel Bakış
@@ -1852,7 +1859,7 @@ Menü öğeleri **sadece Play modu dışında** aktiftir (`EditorApplication.isP
 | Karakter modeli | Low-poly, ~500–1500 üçgen; iskelet/Animator **yok** (animasyonlar prosedürel DOTween) |
 
 ### 16.3 Kod kuralları
-- **"Update'te durum yoklama yok" kuralı:** Hiçbir sınıf her karede oyun durumunu kontrol ederek karar vermez; değişiklikler olay (event/callback) ile iletilir. Bilinçli istisnalar sadece üç tane: `InputHandler` ve `BackButtonInput` (input okumak), `GameplayPresenter` (`BusLane.Tick` + bitiş kontrolü). Başka bir sınıfa `Update` eklenmez.
+- **"Update'te durum yoklama yok" kuralı:** Hiçbir sınıf her karede oyun durumunu kontrol ederek karar vermez; değişiklikler olay (event/callback) ile iletilir. Bilinçli istisnalar sadece dört tane: `InputHandler` ve `BackButtonInput` (input okumak), `GameplayPresenter` (`BusLane.Tick` + bitiş kontrolü), `SessionClock` (geçen süreyi Core'a vermek; zaman doğası gereği kare kare ilerler, Faz 9). Başka bir sınıfa `Update` eklenmez.
 - **Her karede sıfır GC tahsisi.** Dokunuş başına küçük tahsisler (yol listesi, `OnComplete` lambda'ları) kabul.
 - BFS tamponları yeniden kullanılır (§6.10).
 - Oyun döngüsünde LINQ, string birleştirme, `GetComponent` yok.
@@ -2032,6 +2039,15 @@ Her faz **tek başına derlenir ve testleri yeşildir.** Bir faz bitmeden sonrak
 
 ---
 
+### Faz 9 — Bölüm süresi
+- Tasarım: `Docs/TIMER_DESIGN.md` (projeye uyarlanmış; §0 farkları listeler).
+- Core: `LevelTimer`, `LoseReason`, `IGameListener` (`OnTimerStarted`, `OnTimeChanged(int)`, `OnLost(LoseReason)`), `GameSession.Tick`, `LevelData.TimeLimitSeconds` + parser/validator.
+- Runtime: `SessionClock`, presenter olayları, `PresentationFinished(result, reason)`, `GameplayState` aç/kapa, HUD süre metni (tahsissiz etiketler, son 10 sn kırmızı + nabız), `LoseScreen.Show(reason)`, `UiText.FormatTime`, bölüm editöründe süre alanı.
+- İçerik: bölüm süreleri 60 / 60 / 75 / 90 / 120 sn (oyun testinde ayarlanır).
+- **Kabul:** `Docs/TIMER_DESIGN.md` §7.
+
+---
+
 ## 19. Karar Kaydı
 
 Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değiştirilmemeli;** değişiklik gerekirse önce bu tablo güncellenir.
@@ -2087,6 +2103,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - `CameraFitter` varsayılan `margin` değeri 0.15 → **0.3** (Faz 3'te ölçüldü: 0.15 dikey ekranda alt köşeleri kırpıyordu, §9.4).
 - `ScreenView.Init` butonları soyut `BindButtons()` ile bağlar (Awake EditMode testlerinde çalışmaz); popup açılışı ortak `PopIn` yardımcısında (§12.2). HUD'daki baştan başlat butonunun metni "Restart" (font'ta ↻ glifi yok).
 - **Dil:** oyuncu metinleri ve editör araçlarının metinleri Türkçeden **İngilizceye** çevrildi (Faz 7 sonrası ekip kararı; §1, §4.4, §7.3, §12.3, §12.5). Testler İngilizce metinleri ve sahnede Türkçe karakter kalmadığını denetler.
+- **Bölüm süresi** (Faz 9): `Docs/TIMER_DESIGN.md` uygulandı (§2.11, §16.3). Kayıp sebebi popup'a taşınır ("Out of space!" / "Time's up!").
 - **Paralel biniş** (oyun testi, ekip kararı): binişler artık şeritte sırayla değil paralel oynar; otobüs park edince koltuktaki yolcuları aynı anda koşar, her yolcu kapıya varınca biner, otobüs son yolcu girince kalkar. Gösterge ve perde binen sayısına göre (§10.5, §10.7, §10.8, §13.3). Kurallar ve testler değişmedi.
 - **Otobüs kuyruğu ve durak kuralı** (Faz 8 sonrası oyun testi, ekip kararı): sıradaki otobüs park noktasının hemen arkasında bekler ve bir kısmı görünür (oyuncu sıradaki rengi görür); öndeki gidince kısa bir mesafe ilerler. Kimse kapıda beklemez: otobüsü park etmemiş yolcu duraktaki boş koltuğa oturur ve oradan biner; ekranda koltuk yoksa hücresinde tutulur (§9.2, §9.3, §10.5, §10.7, §10.8). Kurallar ve mevcut testler değişmedi.
 - Faz 8: yer tutucu low-poly yolcu/otobüs mesh'leri, harita düğümüne gölge + çizilmiş onay işareti ve kilit; cihaz ölçümü için Tools → Game → Configure Development Build ve §16.5 adımları. Cihaz kabulü (60 FPS, 0 GC, < 60 batch) ekip tarafından telefonda ölçülür.

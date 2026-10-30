@@ -29,7 +29,7 @@ namespace Game.Editor
             ('O', "O", new Color(0.98f, 0.55f, 0.15f)),
         };
 
-        private SerializedProperty rows, buses, busCapacity, waitingSlots, version;
+        private SerializedProperty rows, buses, busCapacity, waitingSlots, version, timeLimitSeconds;
         private char brush = 'R';
         private string autoFillWarning;
         private string solveReport;
@@ -41,6 +41,7 @@ namespace Game.Editor
             busCapacity = serializedObject.FindProperty("busCapacity");
             waitingSlots = serializedObject.FindProperty("waitingSlots");
             version = serializedObject.FindProperty("version");
+            timeLimitSeconds = serializedObject.FindProperty("timeLimitSeconds");
         }
 
         public override void OnInspectorGUI()
@@ -62,6 +63,7 @@ namespace Game.Editor
             }
             EditorGUILayout.PropertyField(waitingSlots, new GUIContent("Waiting Slots"));
             EditorGUILayout.PropertyField(busCapacity, new GUIContent("Bus Capacity"));
+            EditorGUILayout.PropertyField(timeLimitSeconds, new GUIContent("Time Limit (s)", "Counted from the first tap. 0 = no time limit"));
             EditorGUILayout.PropertyField(version, new GUIContent("Version"));
 
             // --- Palette and grid
