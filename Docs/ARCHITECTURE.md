@@ -1673,6 +1673,7 @@ Ses **her zaman açık**; oyuncu telefonun ses tuşları/sessiz moduyla kontrol 
 
 ### 14.1 Tek sahne: `Main.unity`
 Menü ve oyun aynı sahnede. Sahne yükleme yok; geçişler anlık; havuzlar bölümler arasında yaşar.
+- Build Settings'te ilk ve tek sahne `Main.unity`'dir. Editörde `MainSceneOnStartup` (Game.Editor, `[InitializeOnLoad]`) Unity açılınca `Main.unity`'yi açar (oturum başına bir kez) ve `EditorSceneManager.playModeStartScene`'i `Main.unity` yapar: hangi sahne açıkken Play'e basılırsa basılsın oyun `Main.unity`'den başlar.
 
 ```
 Main
