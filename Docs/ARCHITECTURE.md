@@ -1074,7 +1074,7 @@ public void Build(int slotCount, BoardLayout layout);
 public void Clear();
 ```
 - `Floor` → `FloorTile`; `Wall` → `FloorTile` + `WallBlock`; `Void` → **hiçbir şey.**
-- **Kenarlar:** Her `Floor`/`Wall` hücresi için 4 yönün her birinde komşu `!Exists` ise o kenara bir `EdgePiece` (yönüne göre döndürülmüş) konur. Auto-tiling algoritması yok.
+- **Kenarlar:** Her `Floor`/`Wall` hücresi için 4 yönün her birinde komşu `!Exists` ise o kenara bir `EdgePiece` (yönüne göre döndürülmüş) konur. **İstisna:** çıkış hücresinin (§2.4, `Board.IsExit`) **üst** kenarı çizilmez; yolcular yola o taraftan çıkar. Ortadaki deliğin altındaki hücre çıkış olmadığı için onun üst kenarı çizilir; duvarların kenarları değişmez. Karar `BoardView.HasEdge(board, cell, direction)` statik metodunda. Auto-tiling algoritması yok.
 
 ### 10.5 `GameplayPresenter : MonoBehaviour, IGameListener`
 Core olaylarını **serbest animasyona** ya da **`BusLane`'e** yönlendirir. (Konuşmada `AnimationQueue` olarak geçen sınıf; artık tek kuyruk olmadığı için adı değişti.)
@@ -2103,6 +2103,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - `CameraFitter` varsayılan `margin` değeri 0.15 → **0.3** (Faz 3'te ölçüldü: 0.15 dikey ekranda alt köşeleri kırpıyordu, §9.4).
 - `ScreenView.Init` butonları soyut `BindButtons()` ile bağlar (Awake EditMode testlerinde çalışmaz); popup açılışı ortak `PopIn` yardımcısında (§12.2). HUD'daki baştan başlat butonunun metni "Restart" (font'ta ↻ glifi yok).
 - **Dil:** oyuncu metinleri ve editör araçlarının metinleri Türkçeden **İngilizceye** çevrildi (Faz 7 sonrası ekip kararı; §1, §4.4, §7.3, §12.3, §12.5). Testler İngilizce metinleri ve sahnede Türkçe karakter kalmadığını denetler.
+- **Çıkış kenarları** (oyun testi, ekip kararı): çıkış hücrelerinin üst kenarında gri `EdgePiece` yok (§10.4).
 - **Bölüm süresi** (Faz 9): `Docs/TIMER_DESIGN.md` uygulandı (§2.11, §16.3). Kayıp sebebi popup'a taşınır ("Out of space!" / "Time's up!").
 - **Paralel biniş** (oyun testi, ekip kararı): binişler artık şeritte sırayla değil paralel oynar; otobüs park edince koltuktaki yolcuları aynı anda koşar, her yolcu kapıya varınca biner, otobüs son yolcu girince kalkar. Gösterge ve perde binen sayısına göre (§10.5, §10.7, §10.8, §13.3). Kurallar ve testler değişmedi.
 - **Otobüs kuyruğu ve durak kuralı** (Faz 8 sonrası oyun testi, ekip kararı): sıradaki otobüs park noktasının hemen arkasında bekler ve bir kısmı görünür (oyuncu sıradaki rengi görür); öndeki gidince kısa bir mesafe ilerler. Kimse kapıda beklemez: otobüsü park etmemiş yolcu duraktaki boş koltuğa oturur ve oradan biner; ekranda koltuk yoksa hücresinde tutulur (§9.2, §9.3, §10.5, §10.7, §10.8). Kurallar ve mevcut testler değişmedi.

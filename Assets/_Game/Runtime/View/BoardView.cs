@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Game.Core;
 using Game.Core.Levels;
@@ -43,6 +44,7 @@ namespace Game.Runtime.View
 
         public void Build(LevelData level, BoardLayout layout)
         {
+            Board board = CellsOnly(level);   // the same exit definition as the rules (§2.4)
             for (int y = 0; y < level.Height; y++)
                 for (int x = 0; x < level.Width; x++)
                 {
@@ -54,17 +56,25 @@ namespace Game.Runtime.View
                     Place(floorTiles, center, Quaternion.identity);
                     if (cell == CellType.Wall) Place(wallBlocks, center, Quaternion.identity);
 
-                    // An edge on every side whose neighbour does not exist. No auto-tiling.
+                    // An edge on every open side, except the top of an exit cell. No auto-tiling.
                     foreach (GridPos direction in GridPos.Directions)
                     {
-                        GridPos neighbour = p + direction;
-                        if (CellAt(level, neighbour.X, neighbour.Y) != CellType.Void) continue;
+                        if (!HasEdge(board, p, direction)) continue;
 
                         Vector3 offset = new Vector3(direction.X, 0f, -direction.Y) * (settings.CellSize / 2f);
                         Quaternion rotation = direction.X == 0 ? Quaternion.identity : Quaternion.Euler(0f, 90f, 0f);
                         Place(edgePieces, center + offset, rotation);
                     }
                 }
+        }
+
+        // A grey edge on a side whose neighbour does not exist; none on the top of an exit cell,
+        // where passengers walk out to the road (§10.4).
+        public static bool HasEdge(Board board, GridPos cell, GridPos direction)
+        {
+            if (board.Exists(cell + direction)) return false;
+            bool up = direction.X == 0 && direction.Y < 0;
+            return !(up && board.IsExit(cell));
         }
 
         public void Clear()
@@ -79,6 +89,14 @@ namespace Game.Runtime.View
             piece.transform.SetPositionAndRotation(position, rotation);
             piece.transform.localScale = Vector3.one * settings.CellSize;
             active.Add((pool, piece));
+        }
+
+        // Passengers do not matter for edges: exits only depend on the cells.
+        private static Board CellsOnly(LevelData level)
+        {
+            var cells = new CellType[level.Cells.Count];
+            for (int i = 0; i < cells.Length; i++) cells[i] = level.Cells[i];
+            return new Board(level.Width, level.Height, cells, Array.Empty<Passenger>());
         }
 
         // Outside the board counts as Void (§2.2).
