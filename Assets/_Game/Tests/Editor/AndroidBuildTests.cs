@@ -5,7 +5,7 @@ using UnityEditor.Build;
 
 namespace Game.Editor.Tests
 {
-    // The Android build setup (§4.2, §16.5): the project settings the APK is built with.
+    // The Android build setup: the project settings the APK is built with.
     public sealed class AndroidBuildTests
     {
         [Test]

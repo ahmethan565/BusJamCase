@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Game.Runtime.Bootstrap
 {
-    // The ONLY place that wires everything together (§14.3). No singletons, no FindObjectOfType, no DI framework.
+    // The ONLY place that wires everything together. No singletons, no FindObjectOfType, no DI framework.
     public sealed class GameBootstrap : MonoBehaviour
     {
         [Header("Content")]
@@ -53,7 +53,7 @@ namespace Game.Runtime.Bootstrap
             inputHandler.enabled = false;                     // only GameplayState turns it on
             sessionClock.enabled = false;                     // same for the level time
 
-            // --- Was "play this level" requested from the level editor? (§15.3)
+            // --- Was "play this level" requested from the level editor?
             int requestedLevel = -1;
             bool launchedFromEditor = false;
 #if UNITY_EDITOR
@@ -92,7 +92,6 @@ namespace Game.Runtime.Bootstrap
             var machine = new AppStateMachine();
             var states = new AppStates(machine, deps);
 
-            // Every screen starts hidden
             foreach (ScreenView screen in screens) screen.Hide();
 
             machine.ChangeTo(launchedFromEditor ? states.Gameplay(requestedLevel) : states.Menu());

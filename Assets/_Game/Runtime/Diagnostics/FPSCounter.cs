@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace Game.Runtime.Diagnostics
 {
-    // Small FPS readout at the top right of the safe area, for testing on a device (§16.5).
+    // Small FPS readout at the top right of the safe area, for testing on a device.
     // Drawn with OnGUI, so it needs no Canvas. Put it on its own root GameObject (DontDestroyOnLoad keeps it).
-    // Its Update is a deliberate exception to "no polling in Update" (§16.3): measuring frames is its job.
+    // Its Update is a deliberate exception to "no polling in Update": measuring frames is its job.
     public sealed class FPSCounter : MonoBehaviour
     {
         private static readonly Color Good = new Color(0.2f, 0.9f, 0.3f);

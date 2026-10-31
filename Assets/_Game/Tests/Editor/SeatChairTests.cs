@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 
 namespace Game.Editor.Tests
 {
-    // A dark chair under every roof seat (§10.7): the empty chairs show how many passengers the bus takes.
+    // A dark chair under every roof seat: the empty chairs show how many passengers the bus takes.
     public sealed class SeatChairTests
     {
         private const string Prefabs = "Assets/_Game/Content/Prefabs/";
@@ -66,7 +66,7 @@ namespace Game.Editor.Tests
             Assert.AreEqual(3, Chairs(true).Length, "the empty chairs show the capacity");
             Assert.IsTrue(Passengers().All(p => !p.gameObject.activeInHierarchy));
 
-            Init(2);   // a pooled bus coming back with a smaller capacity
+            Init(2);   // pooled bus reused with a smaller capacity
             Assert.AreEqual(2, Chairs(true).Length);
         }
 

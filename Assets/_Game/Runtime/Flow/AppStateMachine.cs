@@ -4,7 +4,7 @@ namespace Game.Runtime.Flow
     {
         private IAppState current;
 
-        // Synchronous: no frame is drawn between Exit and Enter (§11.6).
+        // Synchronous: no frame is drawn between Exit and Enter.
         public void ChangeTo(IAppState next)
         {
             current?.Exit();

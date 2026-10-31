@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Game.Runtime.Flow
 {
-    // The level map. The quit confirmation is an overlay owned by this state, not a state of its own (§11.7).
+    // The level map. The quit confirmation is an overlay owned by this state, not a state of its own.
     public sealed class MenuState : IAppState
     {
         private readonly AppStateMachine machine;
@@ -19,7 +19,7 @@ namespace Game.Runtime.Flow
 
         public void Enter()
         {
-            // The previous level's board stayed visible behind the popup; it is cleared here (§11.6).
+            // The previous level's board stayed visible behind the popup; it is cleared here.
             deps.Presenter.Clear();
             deps.BoardView.Clear();
             deps.WaitingAreaView.Clear();

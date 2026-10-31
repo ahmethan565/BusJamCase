@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Game.Editor.Tests
 {
-    // §9.4: with the fixed tilt/FOV and margin 0.3, every catalog level fits on portrait phone screens,
+    // With the fixed tilt/FOV and margin 0.3, every catalog level fits on portrait phone screens,
     // including objects up to one unit tall standing on the outermost cells.
     public sealed class CameraFitterTests
     {

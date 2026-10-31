@@ -9,7 +9,7 @@ namespace Game.Runtime.UI
 {
     public enum LevelNodeState { Completed, Current, Locked }
 
-    // One level on the map (§12.4). Layers, one owner each:
+    // One level on the map. Layers, one owner each:
     //   Node (root) -> anchored position: the locked shake
     //   └── Body    -> scale:             the "current" pulse
     public sealed class LevelNodeView : MonoBehaviour

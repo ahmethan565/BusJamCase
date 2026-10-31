@@ -3,7 +3,7 @@ using Game.Runtime.View;
 
 namespace Game.Runtime.Animation
 {
-    // A passenger gets on the bus. NOT in the BusLane: boardings run in parallel (§10.8). Starts as soon as the bus
+    // A passenger gets on the bus. NOT in the BusLane: boardings run in parallel. Starts as soon as the bus
     // is parked and the passenger is ready (walk finished, not held back), so nobody waits at the door for anyone.
     // A passenger sitting at the stop runs from its seat; otherwise it is already at the door.
     public sealed class BoardStep : IStep

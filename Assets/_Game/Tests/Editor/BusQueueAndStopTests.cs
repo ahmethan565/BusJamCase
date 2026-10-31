@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Game.Editor.Tests
 {
-    // The visible bus queue (§9.3) and the on-screen seats at the stop (§10.5).
+    // The visible bus queue and the on-screen seats at the stop.
     public sealed class BusQueueAndStopTests
     {
         private const float BusLength = 2.4f;

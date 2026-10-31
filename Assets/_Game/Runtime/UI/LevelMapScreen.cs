@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Game.Runtime.UI
 {
-    // The level chain, bottom to top (§12.4). Nodes are built once; Show only refreshes their states.
+    // The level chain, bottom to top. Nodes are built once; Show only refreshes their states.
     public sealed class LevelMapScreen : ScreenView
     {
         private const float BottomPadding = 300f;
@@ -59,10 +59,11 @@ namespace Game.Runtime.UI
 
             int currentIndex = FirstNotCompleted(progress, nodes.Count);
             Canvas.ForceUpdateCanvases();   // without a built layout the scroll position is ignored
-            scrollRect.verticalNormalizedPosition = nodes.Count > 1 ? currentIndex / (float)(nodes.Count - 1) : 0f;   // 0 = bottom
+            // 0 is the bottom of the map.
+            scrollRect.verticalNormalizedPosition = nodes.Count > 1 ? currentIndex / (float)(nodes.Count - 1) : 0f;
         }
 
-        // Nodes are not buttons that change state for sure, so no Fire (§12.2).
+        // A node tap does not always change state (locked nodes shake), so no Fire.
         protected override void BindButtons() { }
 
         protected override void KillTweens()

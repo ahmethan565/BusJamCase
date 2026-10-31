@@ -11,7 +11,7 @@ using UnityEngine.UI;
 
 namespace Game.Editor.Tests
 {
-    // Button prefabs (§12.2): the button art and its label; pressing shrinks the button and tints it.
+    // Button prefabs: the button art and its label; pressing shrinks the button and tints it.
     public sealed class ButtonPrefabTests
     {
         private const string ScenePath = "Assets/_Game/Scenes/Main.unity";

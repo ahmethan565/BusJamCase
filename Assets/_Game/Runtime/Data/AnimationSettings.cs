@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Game.Runtime.Data
 {
-    // Every duration, speed and strength of the game feel (§10.9). Can be tweaked in Play mode; no hard-coded values in code.
+    // Every duration, speed and strength of the game feel, so none is hard-coded. Tweakable in Play mode.
     [CreateAssetMenu(menuName = "Game/Animation Settings")]
     public sealed class AnimationSettings : ScriptableObject
     {

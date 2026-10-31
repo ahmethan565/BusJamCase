@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Game.Editor
 {
-    // Level editor in the Inspector (§15.1): paint the grid, set buses and numbers, live checks, solve, play.
+    // Level editor in the Inspector: paint the grid, set buses and numbers, live checks, solve, play.
     // Every change goes through SerializedObject, so it is undoable and saved.
     [CustomEditor(typeof(LevelAsset))]
     public sealed class LevelAssetEditor : UnityEditor.Editor

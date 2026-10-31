@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Game.Runtime.Data
 {
-    // One level in the text format of §7.1. Kept 1:1 convertible to JSON (string array + a few numbers).
+    // One level in the text format. Kept 1:1 convertible to JSON (string array + a few numbers).
     [CreateAssetMenu(menuName = "Game/Level")]
     public sealed class LevelAsset : ScriptableObject
     {

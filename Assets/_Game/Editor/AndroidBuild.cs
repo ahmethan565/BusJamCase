@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Game.Editor
 {
-    // One-click development APK for testing on a phone (§4.2, §16.5). The Android settings are applied in code,
+    // One-click development APK for testing on a phone. The Android settings are applied in code,
     // so every build uses the same ones. Signed with the debug key; release signing comes with publishing.
     public static class AndroidBuild
     {
@@ -34,11 +34,11 @@ namespace Game.Editor
             BuildSummary summary = report.summary;
             if (summary.result != BuildResult.Succeeded)
                 throw new BuildFailedException($"Android build {summary.result} with {summary.totalErrors} error(s).");
-            float megabytes = new FileInfo(ApkPath).Length / (1024f * 1024f);   // the file, not summary.totalSize (uncompressed)
+            float megabytes = new FileInfo(ApkPath).Length / (1024f * 1024f);   // summary.totalSize is uncompressed
             Debug.Log(string.Format(CultureInfo.InvariantCulture, "Built {0} ({1:0.0} MB). Install with: adb install -r {0}", ApkPath, megabytes));
         }
 
-        // §4.2. Also run once by hand so the values are saved in ProjectSettings.
+        // Also run once by hand so the values are saved in ProjectSettings.
         public static void ApplySettings()
         {
             PlayerSettings.companyName = CompanyName;

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Game.Runtime.Data
 {
-    // SoundId -> clip + volume (§13.4). Changing a sound needs no code.
+    // SoundId -> clip + volume. Changing a sound needs no code.
     [CreateAssetMenu(menuName = "Game/Sound Library")]
     public sealed class SoundLibrary : ScriptableObject
     {

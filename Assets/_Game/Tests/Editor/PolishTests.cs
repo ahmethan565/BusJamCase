@@ -17,7 +17,7 @@ using NoAlloc = UnityEngine.TestTools.Constraints.Is;
 
 namespace Game.Editor.Tests
 {
-    // Phase 8: render settings (§16.2), model budgets (§16.2, §16.4), SRP batching, pool prewarm, zero per-frame GC.
+    // Phase 8: render settings, model budgets, SRP batching, pool prewarm, zero per-frame GC.
     public sealed class PolishTests
     {
         private const string ScenePath = "Assets/_Game/Scenes/Main.unity";
@@ -83,7 +83,7 @@ namespace Game.Editor.Tests
             return AssetDatabase.LoadAssetAtPath<LevelCatalog>(AssetDatabase.GUIDToAssetPath(guids[0]));
         }
 
-        // --- Render settings (§16.2)
+        // --- Render settings
 
         [Test]
         public void Urp_MobileRenderSettings()
@@ -110,7 +110,7 @@ namespace Game.Editor.Tests
             Assert.IsFalse(cam.allowHDR && ((UniversalRenderPipelineAsset)GraphicsSettings.currentRenderPipeline).supportsHDR);
         }
 
-        // --- Models (§16.2: low-poly, ~500-1500 triangles)
+        // --- Models (low-poly, ~500-1500 triangles)
 
         [Test]
         public void Passenger_UsesALowPolyModel()
@@ -184,7 +184,7 @@ namespace Game.Editor.Tests
             }
         }
 
-        // --- Pool prewarm (§10.2): the first frame of any catalog level does not Instantiate
+        // --- Pool prewarm: the first frame of any catalog level does not Instantiate
 
         [Test]
         public void Prewarm_CoversEveryCatalogLevel()
@@ -205,7 +205,7 @@ namespace Game.Editor.Tests
             Assert.GreaterOrEqual(Prewarm(presenter, "busPrewarm"), 3, "arriving, parked and departing bus");
         }
 
-        // --- Zero GC per frame (§16.3)
+        // --- Zero GC per frame
 
         private sealed class RunningStep : IStep
         {

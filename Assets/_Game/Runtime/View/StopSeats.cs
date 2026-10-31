@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Game.Runtime.View
 {
-    // Who sits on which waiting slot ON SCREEN (§10.5). This can differ from the logical slot:
+    // Who sits on which waiting slot ON SCREEN. This can differ from the logical slot:
     // a passenger keeps its seat until it really walks to the bus, and passengers of a bus that
     // has not parked yet also wait here. Keeping one owner per slot means two passengers never overlap.
     public sealed class StopSeats

@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 
 namespace Game.Editor.Tests
 {
-    // Parallel boarding (§10.8): the bus counts who still has to get on, so it leaves after the last one,
+    // Parallel boarding: the bus counts who still has to get on, so it leaves after the last one,
     // and its indicators fill by how many are in (passengers can get on out of seat order).
     public sealed class ParallelBoardingTests
     {

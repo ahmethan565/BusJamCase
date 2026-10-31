@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Game.Runtime.Data
 {
-    // PassengerColor -> one shared material (passengers and buses) and a UI color (§10.3).
+    // PassengerColor -> one shared material (passengers and buses) and a UI color.
     // One material per color; no MaterialPropertyBlock (keeps SRP Batcher working).
     [CreateAssetMenu(menuName = "Game/Color Palette")]
     public sealed class ColorPalette : ScriptableObject

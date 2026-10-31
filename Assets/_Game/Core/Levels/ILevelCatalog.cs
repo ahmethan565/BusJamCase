@@ -4,6 +4,6 @@ namespace Game.Core.Levels
     {
         int Count { get; }
         LevelData Get(int index);
-        bool HasNext(int index);       // index + 1 < Count; the only answer to "is this the last level?"
+        bool HasNext(int index);       // the single "is last level?" check
     }
 }

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Game.Runtime.Animation
 {
-    // The only sequential animation queue: bus arrivals, boardings and departures play in logic order (§10.8).
+    // The only sequential animation queue: bus arrivals, boardings and departures play in logic order.
     public sealed class BusLane
     {
         private readonly Queue<IStep> steps = new Queue<IStep>();

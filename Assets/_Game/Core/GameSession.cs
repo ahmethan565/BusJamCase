@@ -6,7 +6,7 @@ using Game.Core.Path;
 
 namespace Game.Core
 {
-    // The conductor of the rules (§2). Resolves a tap instantly and reports what happened through IGameListener.
+    // The conductor of the rules. Resolves a tap instantly and reports what happened through IGameListener.
     public sealed class GameSession
     {
         private readonly Board board;
@@ -32,7 +32,7 @@ namespace Game.Core
             board = source.board.Clone();
             buses = source.buses.Clone();
             waitingArea = source.waitingArea.Clone();
-            timer = source.timer.Clone();   // the solver never calls Tick, so time does not affect solvability
+            timer = source.timer.Clone();   // solver never ticks: time can't affect solvability
             pathFinder = source.pathFinder;
             this.listener = listener;
             started = source.started;
@@ -59,7 +59,7 @@ namespace Game.Core
             if (!started) throw new InvalidOperationException("Call Start() before Tap().");
             if (IsOver) return;
 
-            // Any tap on the board starts the time: an empty cell, outside the board or a blocked passenger too.
+            // Any tap starts the time, even on an empty cell, off the board or on a blocked passenger.
             if (timer.StartIfNotRunning())
                 listener.OnTimerStarted();
 
@@ -78,7 +78,7 @@ namespace Game.Core
                 BoardPassenger(passenger);
             else
             {
-                // The area is never left full while playing (§2.8), so a free slot always exists here.
+                // The area is never left full while playing, so a free slot always exists here.
                 waitingArea.TryAdd(passenger, out int slot);
                 listener.OnPassengerWaiting(passenger, slot);
                 if (waitingArea.IsFull)

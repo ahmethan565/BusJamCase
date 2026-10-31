@@ -64,6 +64,13 @@
 - Oyuncunun gördüğü metinler ve editör araçlarının metinleri (bölüm editörü, katalog, doğrulama/parser hataları) **İngilizce**. Projede Türkçe metin yoktur; sadece bu doküman Türkçedir.
 - *(Ekip tercihine göre değiştirilebilir; değiştirilirse bu satır güncellenmeli.)*
 
+### Yorum kuralları
+- Yorum **neden**i anlatır; kodun zaten söylediğini tekrar etmez. Bariz yorum yazılmaz.
+- Kısa ve tek cümle tercih edilir; blok yorum en fazla 2–3 satır (hiyerarşi şeması gibi tablolar hariç).
+- Satır sonu yorumu birkaç kelimelik olur; uzunsa satırın **üstüne** taşınır. Hiçbir satır 120 karakteri geçmez.
+- `//` ve bir boşluk; satır yorumu büyük harfle başlar. XML doc (`///`) kullanılmaz. `// --- Başlık` bölüm ayracı serbesttir.
+- Yorumlarda doküman bölüm referansı (`§`) kullanılmaz; doküman metni yoruma kopyalanmaz.
+
 ---
 
 ## 2. Oyun Kuralları (Kesin Tanım)
@@ -2127,6 +2134,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - **Tahta ve koltuk zeminleri** (ekip kararı): tahtanın ve koltuk sırasının altında bitişik iki zemin (§9.2, §9.3, §10.4); kamera sığdırması zeminleri kapsar.
 - **Oturan yolcular** (ekip kararı): otobüs doluluğu beyaz noktalar yerine tavandaki koltuklarda beliren yolcularla gösterilir; yolcular koltukta hazır bekler, binişle açılır (§10.1, §10.7). `BusIndicator` ve iki gösterge malzemesi kaldırıldı. Kapasite okunsun diye her koltukta koyu bir kutu var. Koltuk ve yolcu tek `BusSeat` prefab'ında; büyük kapasitede ikisi birlikte küçülür (önce ayrı prefab'lardı, küçülünce yolcunun sadece kafası kalıyordu).
 - **Bölüm düğümü görseli** (ekip kararı): düğüm gövdesi `level1.png` (§12.4).
+- **Yorum kuralları** (ekip kararı): kod yorumları kısaltıldı ve §1'deki yorum kurallarına göre düzenlendi; kod davranışı değişmedi.
 - **Arayüz sesleri** (ekip kararı): buton tıklaması `Switch.ogg`, yürüyebilen yolcuya dokunuş `Drop.ogg`, yürüyemeyen yolcuya dokunuş `Error.ogg` (Kenney Interface Sounds, §13.3); otobüs durma sesi `BusStop.ogg` (baştaki/sondaki sessizlik kesildi, 1.2× hızlandırıldı: 0.75 sn). Sadece ses dosyaları değişti (eski GUID'ler korundu); eski `Click`/`Pop`/`Bonk`/`Brake` wav dosyaları silindi.
 - **Android build** (ekip kararı): `Game.Editor.AndroidBuild` Android ayarlarını kodla uygular ve tek tıkla development APK üretir (§4.2, §16.5). Sadece development build; release ve imzalama anahtarı (keystore) yayın aşamasına kaldı (debug anahtarı kullanılır).
 - **FPS göstergesi** (cihaz testi): sadece development build'de görünen `FPSCounter` (§16.5); `Update` kuralına beşinci, sadece hata ayıklama amaçlı istisna (§16.3).

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Game.Runtime.Flow
 {
-    // One level being played. Restart and retry build a NEW GameplayState: nothing is reset in place (§11.5).
+    // One level being played. Restart and retry build a NEW GameplayState: nothing is reset in place.
     public sealed class GameplayState : IAppState
     {
         private readonly AppStateMachine machine;
@@ -24,7 +24,7 @@ namespace Game.Runtime.Flow
 
         public void Enter()
         {
-            // 1) Clear the previous level's visuals (they stayed behind the popup, §11.6)
+            // 1) Clear the previous level's visuals (they stayed behind the popup)
             deps.Presenter.Clear();
             deps.BoardView.Clear();
             deps.WaitingAreaView.Clear();
@@ -42,7 +42,7 @@ namespace Game.Runtime.Flow
             deps.Presenter.Begin(level, layout);
             session = new GameSession(level, deps.PathFinder, deps.Presenter);
 
-            // 6) Input and time (the time waits for the first tap on the board, §2.11)
+            // 6) Input and time (the time waits for the first tap on the board)
             deps.Input.SetLayout(layout);
             deps.Input.CellTapped += session.Tap;
             deps.Input.enabled = true;
@@ -64,7 +64,7 @@ namespace Game.Runtime.Flow
             session.Start();
         }
 
-        // Board visuals and their tweens are NOT cleared here: the popup opens over the finished board (§11.6).
+        // Board visuals and their tweens are NOT cleared here: the popup opens over the finished board.
         public void Exit()
         {
             deps.Input.enabled = false;

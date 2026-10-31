@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Game.Runtime.Bootstrap
 {
-    // Reads the "play this level" request written by EditorLevelLauncher (§15.3).
+    // Reads the "play this level" request written by EditorLevelLauncher.
     // The key travels through PlayerPrefs because Game.Runtime cannot reference Game.Editor.
     public static class EditorLevelRequest
     {

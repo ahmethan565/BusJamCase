@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Game.Runtime.Progress
 {
-    // The chosen storage (§8.3): one JSON string in PlayerPrefs.
+    // The chosen storage: one JSON string in PlayerPrefs.
     public sealed class PlayerPrefsProgressStorage : IProgressStorage
     {
         public const string DefaultKey = "progress";

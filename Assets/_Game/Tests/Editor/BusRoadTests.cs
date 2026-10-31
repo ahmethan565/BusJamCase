@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 
 namespace Game.Editor.Tests
 {
-    // The road under the bus lane (§9.3, §10.4).
+    // The road under the bus lane.
     public sealed class BusRoadTests
     {
         private const string ScenePath = "Assets/_Game/Scenes/Main.unity";

@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace Game.Editor.Tests
 {
-    // Popup look (§12.3): content centered with fixed spacing, panel 1 background, wide buttons in the sprite's ratio.
+    // Popup look: content centered with fixed spacing, panel 1 background, wide buttons in the sprite's ratio.
     public sealed class PopupLayoutTests
     {
         private const string ScenePath = "Assets/_Game/Scenes/Main.unity";

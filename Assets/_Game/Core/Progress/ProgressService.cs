@@ -12,7 +12,7 @@ namespace Game.Core.Progress
         {
             this.storage = storage;
             data = storage.Load() ?? new SaveData();
-            // If an update removed levels, clamp
+            // Clamp in case an update removed levels.
             data.HighestCompletedIndex = Math.Min(data.HighestCompletedIndex, levelCount - 1);
         }
 

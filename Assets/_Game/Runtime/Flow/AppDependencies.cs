@@ -9,7 +9,7 @@ using Game.Runtime.View;
 
 namespace Game.Runtime.Flow
 {
-    // A plain data bundle (§14.2), NOT a service locator: only GameBootstrap fills it, only the states read it.
+    // A plain data bundle, NOT a service locator: only GameBootstrap fills it, only the states read it.
     public sealed class AppDependencies
     {
         // Core / services

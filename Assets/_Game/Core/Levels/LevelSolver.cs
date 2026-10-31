@@ -4,7 +4,7 @@ using Game.Core.Path;
 
 namespace Game.Core.Levels
 {
-    // Depth-first search with a visited-state set (§7.4). Same algorithm as Docs/reference/bus_jam_sim.py.
+    // Depth-first search with a visited-state set. Same algorithm as Docs/reference/bus_jam_sim.py.
     public sealed class LevelSolver
     {
         private readonly IPathFinder pathFinder;
@@ -20,7 +20,7 @@ namespace Game.Core.Levels
             return new SolveResult(solved, solution, search.Visited.Count, hitLimit: !solved && search.HitLimit);
         }
 
-        // Random player simulation: win rate (0..1). Only for the editor and tests; compares levels, not absolute.
+        // Random-play win rate (0..1) for the editor and tests; only meaningful when comparing levels.
         public float EstimateRandomWinRate(LevelData level, int games, int seed)
         {
             if (games <= 0) throw new ArgumentOutOfRangeException(nameof(games));

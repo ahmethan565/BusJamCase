@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Game.Editor.Tests
 {
-    // Default values from ARCHITECTURE.md §9.2 and §10.9.
+    // Documented default values of the settings assets.
     public sealed class SettingsDefaultsTests
     {
         [Test]

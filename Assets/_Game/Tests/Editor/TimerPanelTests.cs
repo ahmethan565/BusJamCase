@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace Game.Editor.Tests
 {
-    // The time sits in the dark slot of the timer art (§12.3).
+    // The time sits in the dark slot of the timer art.
     public sealed class TimerPanelTests
     {
         private const string ScenePath = "Assets/_Game/Scenes/Main.unity";

@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Game.Editor.Tests
 {
-    // The logic behind the level editor, the catalog editor and "play this level" (§15).
+    // The logic behind the level editor, the catalog editor and "play this level".
     public sealed class LevelEditorToolsTests
     {
         private static LevelCatalog LoadCatalog()
@@ -35,7 +35,7 @@ namespace Game.Editor.Tests
         [TearDown]
         public void TearDown() => PlayerPrefs.DeleteKey(EditorLevelRequest.Key);
 
-        // --- Grid editing (§15.1)
+        // --- Grid editing
 
         [Test]
         public void Resize_Grow_KeepsContent_NewCellsAreFloor()
@@ -86,7 +86,7 @@ namespace Game.Editor.Tests
             StringAssert.Contains("4", warning, "says how many passengers the color has");
         }
 
-        // --- Live checks (§15.1, §15.2)
+        // --- Live checks
 
         [Test]
         public void Check_EveryCatalogLevel_HasNoErrors()
@@ -109,7 +109,7 @@ namespace Game.Editor.Tests
             Object.DestroyImmediate(wrongCount);
         }
 
-        // --- "Play this level" (§15.3)
+        // --- "Play this level"
 
         [Test]
         public void FindIndex_CatalogLevel_ReturnsItsPosition_OtherwiseMinusOne()

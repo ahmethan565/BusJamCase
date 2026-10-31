@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Game.Runtime.Feedback
 {
-    // A fixed pool of AudioSources used round-robin; no source is created at runtime (§13.4).
+    // A fixed pool of AudioSources used round-robin; no source is created at runtime.
     public sealed class AudioPlayer : MonoBehaviour
     {
         [SerializeField] private AudioSource[] sources;

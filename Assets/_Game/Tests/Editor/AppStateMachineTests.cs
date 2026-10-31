@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace Game.Editor.Tests
 {
-    // §11.3: Exit of the current state runs before Enter of the next one.
+    // Exit of the current state runs before Enter of the next one.
     public sealed class AppStateMachineTests
     {
         private sealed class LoggingState : IAppState
@@ -48,7 +48,7 @@ namespace Game.Editor.Tests
         [Test]
         public void ChangeTo_SameKindAgain_RebuildsWithExitThenEnter()
         {
-            // "Restart" and "retry" are a change to a NEW gameplay state, never a reset (§11.5).
+            // "Restart" and "retry" are a change to a NEW gameplay state, never a reset.
             var log = new List<string>();
             var machine = new AppStateMachine();
             machine.ChangeTo(new LoggingState("Gameplay", log));

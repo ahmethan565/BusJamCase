@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Game.Editor
 {
-    // Tools -> Game (§15.4). Only active outside Play mode: in Play mode ProgressService keeps the data in
+    // Tools -> Game. Only active outside Play mode: in Play mode ProgressService keeps the data in
     // memory and would overwrite the change with its next save.
     public static class DebugMenu
     {
@@ -33,7 +33,7 @@ namespace Game.Editor
         [MenuItem(UnlockItem, true)]
         public static bool CanEditProgress() => !EditorApplication.isPlaying;
 
-        // A build the Unity Profiler can attach to on the phone (§16.5). These are per-user editor settings.
+        // A build the Unity Profiler can attach to on the phone. These are per-user editor settings.
         [MenuItem("Tools/Game/Configure Development Build")]
         private static void ConfigureDevelopmentBuild()
         {

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Game.Editor.Tests
 {
-    // The wall is a very flat dome so it never hides the passengers behind it (§10.2).
+    // The wall is a very flat dome so it never hides the passengers behind it.
     public sealed class WallModelTests
     {
         private const float PassengerHeight = 0.92f;

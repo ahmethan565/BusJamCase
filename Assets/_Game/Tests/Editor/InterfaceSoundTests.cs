@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Game.Editor.Tests
 {
-    // Which clip the tap and button sounds use (§13.3). Read-only.
+    // Which clip the tap and button sounds use. Read-only.
     public sealed class InterfaceSoundTests
     {
         [TestCase(SoundId.Click, "Switch.ogg")]

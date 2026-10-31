@@ -106,7 +106,7 @@ namespace Game.Core.Tests
         [TestCaseSource(typeof(DocumentedLevels), nameof(DocumentedLevels.All))]
         public void EstimateRandomWinRate_DocumentedLevels_NoSoftlock(DocumentedLevels.Entry entry)
         {
-            // A softlock (game not over, nobody can move) would throw (§2.9).
+            // A softlock (game not over, nobody can move) would throw.
             float rate = 0f;
             Assert.DoesNotThrow(() => rate = solver.EstimateRandomWinRate(entry.Level, games: 300, seed: 7));
             Assert.That(rate, Is.InRange(0f, 1f));

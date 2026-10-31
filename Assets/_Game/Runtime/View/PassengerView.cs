@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Game.Runtime.View
 {
-    // Visual of one passenger. Every transform layer has exactly one owner (§10.6):
+    // Visual of one passenger. Every transform layer has exactly one owner:
     //   Passenger (root) -> position + rotation: walking (DOPath), hop into the bus (DOJump)
     //   └── Bounce       -> local position:      step bounce while walking, blocked shake
     //       └── Body     -> local scale:         intro pop, tap squash, shrink into the bus

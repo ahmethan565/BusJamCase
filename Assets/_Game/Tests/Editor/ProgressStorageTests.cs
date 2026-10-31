@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Game.Editor.Tests
 {
-    // §8.3, §8.4, §15.4. Every test uses its own key; the real save ("progress") is never touched.
+    // Every test uses its own key; the real save ("progress") is never touched.
     public sealed class ProgressStorageTests
     {
         private const string TestKey = "progress_test";

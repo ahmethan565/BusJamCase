@@ -6,7 +6,7 @@ using NUnit.Framework;
 
 namespace Game.Editor.Tests
 {
-    // Grey board edges (§10.4): no edge on the top side of an exit cell, where passengers walk out to the road.
+    // Grey board edges: no edge on the top side of an exit cell, where passengers walk out to the road.
     public sealed class BoardEdgeTests
     {
         private static readonly GridPos Up = new GridPos(0, -1);

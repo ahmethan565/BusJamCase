@@ -5,7 +5,7 @@ using UnityEditor.SceneManagement;
 
 namespace Game.Editor.Tests
 {
-    // The editor opens and plays the game scene (§14.1).
+    // The editor opens and plays the game scene.
     public sealed class StartupSceneTests
     {
         [Test]

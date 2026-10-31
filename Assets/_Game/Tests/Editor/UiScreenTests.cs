@@ -13,7 +13,7 @@ using UnityEngine.SceneManagement;
 
 namespace Game.Editor.Tests
 {
-    // Screen behaviour (§11.9, §12). Each test works on a COPY of the scene's screen inside a preview scene,
+    // Screen behaviour. Each test works on a COPY of the scene's screen inside a preview scene,
     // so Main.unity is never modified.
     public sealed class UiScreenTests
     {

@@ -12,7 +12,7 @@ using Object = UnityEngine.Object;
 
 namespace Game.Editor.Tests
 {
-    // Sound and effects (§13). Players are built in a preview scene; real assets are only read.
+    // Sound and effects. Players are built in a preview scene; real assets are only read.
     public sealed class FeedbackTests
     {
         private const string VfxFolder = "Assets/_Game/Content/Prefabs/Vfx/";
@@ -172,7 +172,7 @@ namespace Game.Editor.Tests
             Assert.AreSame(first, vfxPlayer.Play(VfxId.Confetti, Vector3.zero), "the pooled instance is reused");
         }
 
-        // --- FeedbackPlayer (§13.3)
+        // --- FeedbackPlayer
 
         [Test]
         public void Boarding_PitchRisesWithTheSeat()

@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace Game.Editor.Tests
 {
-    // The device-test FPS readout (§16.5): averaged label, colour by performance, Inspector defaults.
+    // The device-test FPS readout: averaged label, colour by performance, Inspector defaults.
     public sealed class FPSCounterTests
     {
         [Test]

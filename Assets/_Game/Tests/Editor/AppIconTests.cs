@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Game.Editor.Tests
 {
-    // The app icon (§4.2): one 1024x1024 default icon that every platform uses.
+    // The app icon: one 1024x1024 default icon that every platform uses.
     public sealed class AppIconTests
     {
         private const string IconPath = "Assets/_Game/Content/Images/AppIcon.png";

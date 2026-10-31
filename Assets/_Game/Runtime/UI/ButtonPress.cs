@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Game.Runtime.UI
 {
-    // A pressed button shrinks a little while the finger is down (§12.2).
+    // A pressed button shrinks a little while the finger is down.
     // The colour change on press is the Button's own ColorTint.
     [RequireComponent(typeof(Button))]
     public sealed class ButtonPress : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler

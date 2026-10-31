@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Game.Runtime.View
 {
-    // Pure calculation class (§9.3). ALL world-coordinate math lives here and only here.
+    // Pure calculation class. ALL world-coordinate math lives here and only here.
     public sealed class BoardLayout
     {
         private readonly LayoutSettings s;
@@ -40,7 +40,7 @@ namespace Game.Runtime.View
         public Vector3 BusEnterPosition => BusParkPosition + new Vector3(s.BusOffscreenX, 0f, 0f);
         public Vector3 BusExitPosition => BusParkPosition + new Vector3(-s.BusOffscreenX, 0f, 0f);
 
-        // The next bus waits here, right behind the parked one; only part of it is on screen (it is not in ContentBounds).
+        // The next bus waits right behind the parked one, partly off screen (not in ContentBounds).
         public Vector3 BusQueuePosition => BusParkPosition + new Vector3(s.BusQueueOffsetX, 0f, 0f);
         // A follower drives in one queue offset behind its leader.
         public Vector3 BusQueueEnterPosition => BusEnterPosition + new Vector3(s.BusQueueOffsetX, 0f, 0f);

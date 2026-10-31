@@ -1,6 +1,6 @@
 namespace Game.Runtime.Flow
 {
-    // One app screen state (§11.3). Exactly one is active at a time.
+    // One app screen state. Exactly one is active at a time.
     public interface IAppState
     {
         void Enter();

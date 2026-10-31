@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Game.Editor
 {
-    // The catalog list with each level's check status and the "append only" warning (§15.2).
+    // The catalog list with each level's check status and the "append only" warning.
     [CustomEditor(typeof(LevelCatalog))]
     public sealed class LevelCatalogEditor : UnityEditor.Editor
     {

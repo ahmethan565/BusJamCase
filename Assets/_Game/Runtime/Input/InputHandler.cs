@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 
 namespace Game.Runtime.Input
 {
-    // Turns a pointer press (finger or mouse) into a board cell. No physics: the camera ray hits the y = 0 plane (§9.5).
+    // Turns a finger or mouse press into a board cell. No physics: the camera ray hits the y = 0 plane.
     // Runs AFTER the EventSystem, so IsPointerOverGameObject knows about this frame's touch.
     [DefaultExecutionOrder(100)]
     public sealed class InputHandler : MonoBehaviour
@@ -21,7 +21,7 @@ namespace Game.Runtime.Input
 
         public void SetLayout(BoardLayout boardLayout) => layout = boardLayout;
 
-        // Reading input in Update is a deliberate exception to "no polling in Update" (§16.3).
+        // Reading input in Update is a deliberate exception to "no polling in Update".
         private void Update()
         {
             Pointer pointer = Pointer.current;

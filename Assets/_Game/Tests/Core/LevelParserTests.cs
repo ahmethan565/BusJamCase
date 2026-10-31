@@ -92,7 +92,7 @@ namespace Game.Core.Tests
         [Test]
         public void Parse_EmptyBuses_IsNotAParseError()
         {
-            // "At least one bus" is a validation rule (§7.3), not a parse rule.
+            // "At least one bus" is a validation rule, not a parse rule.
             Assert.IsTrue(Parse(new[] { "R" }, "").Success);
             Assert.IsTrue(Parse(new[] { "R" }, null).Success);
         }

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Game.Editor
 {
-    // "Play this level" (§15.3): writes the request, opens Main.unity and enters Play mode.
+    // "Play this level": writes the request, opens Main.unity and enters Play mode.
     // GameBootstrap reads it through EditorLevelRequest and keeps progress in memory for that session.
     public static class EditorLevelLauncher
     {

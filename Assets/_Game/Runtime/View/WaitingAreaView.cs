@@ -5,7 +5,7 @@ using UnityEngine.Pool;
 
 namespace Game.Runtime.View
 {
-    // Waiting slot markers, the stop backdrop and the road (§10.4). Owns the SlotMarker pool.
+    // Waiting slot markers, the stop backdrop and the road. Owns the SlotMarker pool.
     public sealed class WaitingAreaView : MonoBehaviour
     {
         [SerializeField] private GameObject slotMarkerPrefab;

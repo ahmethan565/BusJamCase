@@ -10,7 +10,7 @@ using UnityEngine.SceneManagement;
 
 namespace Game.Editor.Tests
 {
-    // Roof seats fit any capacity (§10.7): when they would not fit, the whole seat (chair + passenger) shrinks.
+    // Roof seats fit any capacity: when they would not fit, the whole seat (chair + passenger) shrinks.
     public sealed class SeatFitTests
     {
         private const string Prefabs = "Assets/_Game/Content/Prefabs/";

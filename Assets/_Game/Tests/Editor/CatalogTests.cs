@@ -7,7 +7,7 @@ using UnityEditor;
 
 namespace Game.Editor.Tests
 {
-    // §17.3 safety net: the real LevelCatalog asset must only contain valid, solvable levels.
+    // Safety net: the real LevelCatalog asset must only contain valid, solvable levels.
     public sealed class CatalogTests
     {
         private static LevelCatalog LoadCatalog()

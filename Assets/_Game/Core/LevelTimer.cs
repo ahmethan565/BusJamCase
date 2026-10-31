@@ -2,7 +2,7 @@ using System;
 
 namespace Game.Core
 {
-    // The level's countdown (§2.11). It never reads a clock: elapsed time is handed in with Tick.
+    // The level's countdown. It never reads a clock: elapsed time is handed in with Tick.
     public sealed class LevelTimer
     {
         private readonly float limit;

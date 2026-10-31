@@ -7,7 +7,7 @@ using UnityEditor;
 
 namespace Game.Editor.Tests
 {
-    // Levels 7-16 each push one rule or limit to its edge (§21.1). CatalogTests already checks that every
+    // Levels 7-16 each push one rule or limit to its edge. CatalogTests already checks that every
     // catalog level is valid and solvable; these tests make sure each level keeps the edge it is there for.
     public sealed class EdgeCaseLevelTests
     {

@@ -10,12 +10,11 @@ using UnityEngine.Pool;
 
 namespace Game.Runtime.View
 {
-    // Turns Core events into animations: free animations or the sequential BusLane (§10.5).
-    // Owns the passenger and bus pools; only this class gives those visuals back to their pools.
+    // Turns Core events into animations: free ones or the sequential BusLane.
+    // Owns the passenger and bus pools; only this class returns those visuals to them.
     //
-    // Stop rule (§10.5): nobody waits at the door. A passenger walks to the door only when its bus is parked;
-    // otherwise it sits on a free seat at the stop and boards from there. If every seat is taken on screen,
-    // the passenger is held back on its cell until a seat frees up or its bus parks.
+    // Stop rule: nobody waits at the door. A passenger walks to the door only once its bus is parked;
+    // otherwise it takes a free stop seat, or is held on its cell until a seat frees up or its bus parks.
     public sealed class GameplayPresenter : MonoBehaviour, IGameListener
     {
         // A passenger that left the board but has no seat on screen yet.
@@ -38,7 +37,7 @@ namespace Game.Runtime.View
         private readonly Dictionary<int, BusView> buses = new Dictionary<int, BusView>();
         private readonly StopSeats seats = new StopSeats();
         private readonly List<HeldPassenger> held = new List<HeldPassenger>();
-        private readonly List<BoardStep> boardings = new List<BoardStep>();   // in parallel, not in the lane (§10.8)
+        private readonly List<BoardStep> boardings = new List<BoardStep>();   // in parallel, not in the lane
 
         private ColorPalette palette;
         private AnimationSettings anim;
@@ -51,7 +50,8 @@ namespace Game.Runtime.View
         private int busCapacity;
 
         private int lastExitedId = -1;
-        private Vector3[] exitWalk;   // the walk of the passenger that just left the board; the next event in the same tap uses it
+        // Walk of the passenger that just left the board; the next event of the same tap consumes it.
+        private Vector3[] exitWalk;
         private int walkingCount;
         private SessionResult pendingResult = SessionResult.Playing;
         private LoseReason pendingLoseReason;
@@ -91,7 +91,7 @@ namespace Game.Runtime.View
             foreach (BusView view in takenBuses) busPool.Release(view);
         }
 
-        // Builds the passenger visuals and plays the intro. Visuals are bound to Ids, so this can run before the GameSession exists.
+        // Builds passenger visuals and plays the intro; bound to Ids, so it can run before the GameSession exists.
         public void Begin(LevelData level, BoardLayout boardLayout)
         {
             layout = boardLayout;
@@ -196,7 +196,7 @@ namespace Game.Runtime.View
 
             if (walk == null) AssignBusToHeld(passenger.Id, busView);           // already at the stop (seated or held)
             else if (busView.IsParked) view.WalkAlong(Append(walk, layout.DoorPoint));
-            else GoToStop(view, walk, -1, busView);                              // the bus is not here yet: wait at the stop
+            else GoToStop(view, walk, -1, busView);                              // bus not parked: wait at the stop
 
             busView.ExpectBoarding();
             boardings.Add(new BoardStep(this, view, busView, feedback));
@@ -221,7 +221,7 @@ namespace Game.Runtime.View
             pendingLoseReason = reason;
         }
 
-        // --- Per frame: the lane and the end-of-presentation check (an allowed Update, §16.3)
+        // --- Per frame: the lane and the end-of-presentation check (an allowed Update)
 
         private void Update()
         {
@@ -319,7 +319,7 @@ namespace Game.Runtime.View
         private void ArrivedAtSlot(PassengerView view)
         {
             feedback.PassengerWaiting();
-            // The passenger that took the last free slot lost the level (§2.8): it shakes in its slot.
+            // The passenger that took the last free slot lost the level: it shakes in its slot.
             if (pendingResult == SessionResult.Lost && view.Id == lastExitedId) view.PlayBlockedShake();
         }
 

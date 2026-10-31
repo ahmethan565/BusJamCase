@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Game.Runtime.View
 {
-    // Fixed perspective camera that frames the level content at the start of each level (§9.4).
+    // Fixed perspective camera that frames the level content at the start of each level.
     public sealed class CameraFitter : MonoBehaviour
     {
         [SerializeField] private Camera cam;

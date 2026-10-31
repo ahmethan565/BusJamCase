@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace Game.Editor.Tests
 {
-    // [Audio] in Main.unity (§13.4, §14.1). Read-only.
+    // [Audio] in Main.unity. Read-only.
     public sealed class AudioWiringTests
     {
         private const string ScenePath = "Assets/_Game/Scenes/Main.unity";

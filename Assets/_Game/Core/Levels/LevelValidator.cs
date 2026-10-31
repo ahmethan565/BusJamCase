@@ -3,7 +3,7 @@ using Game.Core.Path;
 
 namespace Game.Core.Levels
 {
-    // Checks the rules of §7.3. Every rule is checked; it does not stop at the first error.
+    // Checks every level rule and does not stop at the first error.
     public sealed class LevelValidator
     {
         public const int SupportedVersion = 1;

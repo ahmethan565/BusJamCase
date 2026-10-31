@@ -79,8 +79,8 @@ namespace Game.Core.Tests
 
             var data = new SaveData { HighestCompletedIndex = 2 };
             storage.Save(data);
-            data.HighestCompletedIndex = 4;           // changing the caller's object after saving
-            storage.Load().HighestCompletedIndex = 7; // changing a loaded object without saving
+            data.HighestCompletedIndex = 4;           // mutate the caller's copy after saving
+            storage.Load().HighestCompletedIndex = 7; // mutate a loaded copy without saving
 
             Assert.AreEqual(2, storage.Load().HighestCompletedIndex);
         }

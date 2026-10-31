@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Game.Runtime.View
 {
-    // Visual of one bus: body + roof seats under SeatRoot (§10.7). A seat is a dark chair and its passenger.
+    // Visual of one bus: body + roof seats under SeatRoot. A seat is a dark chair and its passenger.
     // Trick: everyone is already in their seat, hidden; each boarding reveals the next one.
     // The empty chairs stay visible, so they show how many get on.
     public sealed class BusView : MonoBehaviour
@@ -20,16 +20,17 @@ namespace Game.Runtime.View
         private readonly List<Renderer> passengers = new List<Renderer>();   // seats[i]'s passenger
         private AnimationSettings anim;
         private int capacity;
-        private float seatFit = 1f;   // < 1 when the seats would not fit on the roof: spacing and seat size shrink together
+        // Below 1 when the seats would not fit on the roof: spacing and seat size shrink together.
+        private float seatFit = 1f;
 
         public int Id { get; private set; }
         public Vector3 DoorPoint { get; private set; }
 
-        // True from the end of the arrival until the departure starts. Passengers only walk to the door of a parked bus.
+        // True from the end of the arrival until departure starts; passengers only walk to a parked bus.
         public bool IsParked { get; private set; }
         public event Action<BusView> Parked;
 
-        // Boardings run in parallel (§10.8): the bus leaves when nobody is left to get on, and
+        // Boardings run in parallel: the bus leaves when nobody is left to get on, and
         // the seats fill by how many are in, because passengers can get on out of seat order.
         public int PendingBoardings { get; private set; }
         private int boarded;

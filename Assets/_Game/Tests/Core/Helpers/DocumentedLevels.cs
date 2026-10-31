@@ -3,7 +3,7 @@ using Game.Core.Levels;
 
 namespace Game.Core.Tests
 {
-    // The 5 levels and their known solutions from ARCHITECTURE.md §21.1 (also Docs/reference/levels.py).
+    // The 5 documented levels and their known solutions (also Docs/reference/levels.py).
     public static class DocumentedLevels
     {
         public sealed class Entry

@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 
 namespace Game.Editor.Tests
 {
-    // Boarding shows up as passengers sitting on the bus roof (§10.7): they are already in their seats,
+    // Boarding shows up as passengers sitting on the bus roof: they are already in their seats,
     // hidden, and each boarding reveals the next one.
     public sealed class SeatedPassengerTests
     {

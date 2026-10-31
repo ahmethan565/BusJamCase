@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace Game.Editor.Tests
 {
-    // Every UI text uses the Zany font (§4.4).
+    // Every UI text uses the Zany font.
     public sealed class FontTests
     {
         private const string ScenePath = "Assets/_Game/Scenes/Main.unity";

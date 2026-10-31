@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace Game.Editor.Tests
 {
-    // §12.5: code counts levels from 0, the player sees numbers from 1.
+    // Code counts levels from 0, the player sees numbers from 1.
     public sealed class UiTextTests
     {
         [Test]

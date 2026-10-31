@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Game.Editor.Tests
 {
-    // World layout math of §9.3 with the default LayoutSettings of §9.2.
+    // World layout math with the default LayoutSettings.
     public sealed class BoardLayoutTests
     {
         private LayoutSettings settings;

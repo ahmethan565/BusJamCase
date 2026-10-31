@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Game.Runtime.Data
 {
-    // World placement values (§9.2). All world-coordinate math using them lives in BoardLayout.
+    // World placement values. All world-coordinate math using them lives in BoardLayout.
     [CreateAssetMenu(menuName = "Game/Layout Settings")]
     public sealed class LayoutSettings : ScriptableObject
     {

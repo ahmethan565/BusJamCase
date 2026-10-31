@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Game.Core.Levels
 {
-    // Turns the text format (§7.1) into LevelData. Does not validate rules; that is LevelValidator's job.
+    // Turns the text format into LevelData. Does not validate rules; that is LevelValidator's job.
     public static class LevelParser
     {
         private readonly struct Symbol
@@ -69,7 +69,7 @@ namespace Game.Core.Levels
             var busColors = new List<PassengerColor>();
             foreach (char letter in buses ?? "")
             {
-                if (letter == ' ') continue;   // spaces are ignored
+                if (letter == ' ') continue;
                 if (Symbols.TryGetValue(letter, out Symbol symbol) && symbol.HasPassenger)
                     busColors.Add(symbol.Color);
                 else

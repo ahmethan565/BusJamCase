@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Game.Runtime.Feedback
 {
-    // Sound/effects, triggered at animation moments (not at Core events, §13.1).
+    // Sound/effects, triggered at animation moments (not at Core events).
     public interface IFeedback
     {
         void PassengerTapped(Vector3 at);

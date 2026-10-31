@@ -10,7 +10,7 @@ using UnityEngine.Rendering;
 
 namespace Game.Editor.Tests
 {
-    // The board and stop backdrops (§9.3, §10.4): they cover their area and touch, so board and seats look joined.
+    // The board and stop backdrops: they cover their area and touch, so board and seats look joined.
     public sealed class BackdropTests
     {
         private const float BusHalfDepth = 0.5f;   // bus body is 1 deep, parked at BusParkPosition

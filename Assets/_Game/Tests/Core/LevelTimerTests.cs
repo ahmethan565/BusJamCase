@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace Game.Core.Tests
 {
-    // Level time limit (§2.11, Docs/TIMER_DESIGN.md §6). Time is handed in with Tick; no real waiting.
+    // Level time limit. Time is handed in with Tick; no real waiting.
     public sealed class LevelTimerTests
     {
         private RecordingGameListener recorder;
@@ -13,7 +13,7 @@ namespace Game.Core.Tests
         [SetUp]
         public void SetUp() => recorder = new RecordingGameListener();
 
-        // Two reds on the top row, a red bus of 2 and one slot: tapping both wins, the board is easy to reason about.
+        // Two reds on the top row, a red bus of 2 and two slots: tapping both wins.
         private GameSession Session(float timeLimit, string[] rows = null, string buses = "R", int capacity = 2, int slots = 2)
         {
             LevelData level = LevelParser.Parse(rows ?? new[] { "RR.", "..." }, buses, capacity, slots, 1, timeLimit).Level;

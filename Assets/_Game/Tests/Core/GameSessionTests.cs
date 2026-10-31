@@ -6,7 +6,7 @@ using NUnit.Framework;
 
 namespace Game.Core.Tests
 {
-    // Rules from ARCHITECTURE.md §2. Expected outcomes cross-checked with Docs/reference/bus_jam_sim.py.
+    // Game rules. Expected outcomes cross-checked with Docs/reference/bus_jam_sim.py.
     public sealed class GameSessionTests
     {
         private RecordingGameListener recorder;
@@ -113,7 +113,7 @@ namespace Game.Core.Tests
         [Test]
         public void BusFull_Departs_NextArrives_WaitingPassengersBoard()
         {
-            // Exactly the example in §6.8: red bus has one free seat, next bus is blue, one blue is waiting.
+            // Red bus has one free seat, next bus is blue, one blue is waiting.
             GameSession session = TestSessions.From(new[] { "RBR",
                                                             "B.." }, "RB", capacity: 2, slots: 5, listener: recorder);
             session.Tap(new GridPos(0, 0));   // red 0 boards seat 0

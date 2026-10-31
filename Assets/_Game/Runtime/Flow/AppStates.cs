@@ -2,7 +2,7 @@ using Game.Core;
 
 namespace Game.Runtime.Flow
 {
-    // State factory (§11.4): holds the shared dependencies and creates a fresh state object for every change.
+    // State factory: holds the shared dependencies and creates a fresh state object for every change.
     public sealed class AppStates
     {
         private readonly AppStateMachine machine;

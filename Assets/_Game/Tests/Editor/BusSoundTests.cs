@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Game.Editor.Tests
 {
-    // The bus stop sound (§13.3). Read-only.
+    // The bus stop sound. Read-only.
     public sealed class BusSoundTests
     {
         [Test]

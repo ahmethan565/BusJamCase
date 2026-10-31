@@ -8,7 +8,7 @@ using UnityEngine.Pool;
 
 namespace Game.Runtime.View
 {
-    // Static board pieces (§10.4). Owns the FloorTile, WallBlock and EdgePiece pools.
+    // Static board pieces. Owns the FloorTile, WallBlock and EdgePiece pools.
     public sealed class BoardView : MonoBehaviour
     {
         [SerializeField] private GameObject floorTilePrefab;
@@ -49,7 +49,7 @@ namespace Game.Runtime.View
         public void Build(LevelData level, BoardLayout layout)
         {
             PieceFactory.PlaceBackdrop(backdrop, layout.BoardBackdrop, settings.CellSize);
-            Board board = CellsOnly(level);   // the same exit definition as the rules (§2.4)
+            Board board = CellsOnly(level);   // the same exit definition as the rules
             for (int y = 0; y < level.Height; y++)
                 for (int x = 0; x < level.Width; x++)
                 {
@@ -74,7 +74,7 @@ namespace Game.Runtime.View
         }
 
         // A grey edge on a side whose neighbour does not exist; none on the top of an exit cell,
-        // where passengers walk out to the road (§10.4).
+        // where passengers walk out to the road.
         public static bool HasEdge(Board board, GridPos cell, GridPos direction)
         {
             if (board.Exists(cell + direction)) return false;
@@ -105,7 +105,7 @@ namespace Game.Runtime.View
             return new Board(level.Width, level.Height, cells, Array.Empty<Passenger>());
         }
 
-        // Outside the board counts as Void (§2.2).
+        // Outside the board counts as Void.
         private static CellType CellAt(LevelData level, int x, int y)
         {
             if (x < 0 || y < 0 || x >= level.Width || y >= level.Height) return CellType.Void;

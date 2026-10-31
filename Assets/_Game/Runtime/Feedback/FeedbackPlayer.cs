@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Game.Runtime.Feedback
 {
-    // Which sound and effect for which animation moment (§13.3).
+    // Which sound and effect for which animation moment.
     public sealed class FeedbackPlayer : IFeedback
     {
         private readonly AudioPlayer audioPlayer;
@@ -19,7 +19,7 @@ namespace Game.Runtime.Feedback
 
         public void PassengerTapped(Vector3 at) => Play(SoundId.Pop);
         public void PassengerBlocked(Vector3 at) => Play(SoundId.Bonk);
-        public void PassengerBoarded(int seat) => Play(SoundId.Board, 1f + seat * 0.1f);   // "do-re-mi" as the bus fills
+        public void PassengerBoarded(int seat) => Play(SoundId.Board, 1f + seat * 0.1f);   // pitch rises per seat
         public void PassengerWaiting() => Play(SoundId.Seat);
         public void BusArrived() => Play(SoundId.Brake);
         public void Lost() => Play(SoundId.Lose);
@@ -31,7 +31,7 @@ namespace Game.Runtime.Feedback
             vfxPlayer.Play(VfxId.ExhaustPuff, at);
         }
 
-        // The board centre is the world origin (§9.3); the confetti bursts above it.
+        // The board centre is the world origin; the confetti bursts above it.
         public void Won()
         {
             Play(SoundId.Win);

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Game.Editor
 {
-    // The editor works on the game scene (§14.1): Unity opens Main.unity when it starts, and Play always
+    // The editor works on the game scene: Unity opens Main.unity when it starts, and Play always
     // starts from Main.unity, whichever scene is open (it comes back to that scene after Play).
     [InitializeOnLoad]
     public static class MainSceneOnStartup

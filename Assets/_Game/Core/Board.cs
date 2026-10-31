@@ -102,7 +102,7 @@ namespace Game.Core
             PassengerCount++;
         }
 
-        // §2.4: a floor cell is an exit if every cell above it in its column is Void.
+        // A floor cell is an exit if every cell above it in its column is Void.
         private bool ComputeIsExit(GridPos p)
         {
             if (GetCell(p) != CellType.Floor) return false;

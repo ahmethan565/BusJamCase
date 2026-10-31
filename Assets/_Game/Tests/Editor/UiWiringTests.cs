@@ -12,7 +12,7 @@ using UnityEngine.UI;
 
 namespace Game.Editor.Tests
 {
-    // UI wiring in Main.unity (§12, §14.1). Read-only: nothing in the scene is changed.
+    // UI wiring in Main.unity. Read-only: nothing in the scene is changed.
     public sealed class UiWiringTests
     {
         private const string ScenePath = "Assets/_Game/Scenes/Main.unity";

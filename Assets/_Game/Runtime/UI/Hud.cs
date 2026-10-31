@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Game.Runtime.UI
 {
-    // Level number + time + restart. Nothing else (§12.3).
+    // Level number + time + restart. Nothing else.
     public sealed class Hud : ScreenView
     {
         private const int WarningSeconds = 10;

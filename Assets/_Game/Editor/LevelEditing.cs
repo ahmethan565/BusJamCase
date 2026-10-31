@@ -8,7 +8,7 @@ using Game.Runtime.Data;
 
 namespace Game.Editor
 {
-    // The pure logic behind the level editor (§15.1), kept apart from the IMGUI code so it can be tested.
+    // The pure logic behind the level editor, kept apart from the IMGUI code so it can be tested.
     public static class LevelEditing
     {
         public const char Floor = '.';
@@ -21,7 +21,7 @@ namespace Game.Editor
 
         public static char Letter(PassengerColor color) => Letters[color];
 
-        // Growing adds floor cells, shrinking crops (§15.1).
+        // Growing adds floor cells, shrinking crops.
         public static string[] Resize(IReadOnlyList<string> rows, int width, int height)
         {
             var result = new string[height];
@@ -69,7 +69,7 @@ namespace Game.Editor
             return problems.Count == 0;
         }
 
-        // Parse + validation errors of a level asset; empty = valid (§15.1 live check, §15.2 status).
+        // Parse + validation errors of a level asset; empty = valid.
         public static IReadOnlyList<string> Check(LevelAsset asset)
         {
             ParseResult parsed = asset.Parse();

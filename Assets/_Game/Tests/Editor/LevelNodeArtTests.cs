@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Game.Editor.Tests
 {
-    // The level node body is the level1.png art, tinted by the node state (§12.4).
+    // The level node body is the level1.png art, tinted by the node state.
     public sealed class LevelNodeArtTests
     {
         [Test]

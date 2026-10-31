@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Game.Runtime.Data
 {
-    // The ordered level list. Order here = order in the game. Release rule: only append at the end (§7.7).
+    // The ordered level list. Order here = order in the game. Release rule: only append at the end.
     [CreateAssetMenu(menuName = "Game/Level Catalog")]
     public sealed class LevelCatalog : ScriptableObject, ILevelCatalog
     {

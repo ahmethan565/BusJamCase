@@ -2,11 +2,11 @@ using UnityEngine;
 
 namespace Game.Runtime.UI
 {
-    // Fits a screen's root panel into Screen.safeArea, so notches and rounded corners never cut buttons (§12.6).
+    // Fits a screen's root panel into Screen.safeArea, so notches and rounded corners never cut buttons.
     [RequireComponent(typeof(RectTransform))]
     public sealed class SafeAreaFitter : MonoBehaviour
     {
-        // Portrait is locked, so the safe area does not change after start (no Update, §16.3).
+        // Portrait is locked, so the safe area does not change after start (no Update).
         private void Awake()
         {
             Rect area = Screen.safeArea;

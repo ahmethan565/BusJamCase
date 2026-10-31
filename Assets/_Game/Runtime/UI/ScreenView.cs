@@ -5,14 +5,14 @@ using UnityEngine;
 
 namespace Game.Runtime.UI
 {
-    // Base of every screen (§12.2). Each screen has its own Canvas; hiding disables the canvas, never the GameObject.
+    // Base of every screen. Each screen has its own Canvas; hiding disables the canvas, never the GameObject.
     public abstract class ScreenView : MonoBehaviour
     {
         [SerializeField] private Canvas canvas;
         [SerializeField] private CanvasGroup group;
         protected IFeedback Feedback { get; private set; }
 
-        // Once, in the bootstrap. Buttons are bound here in code, never in the Inspector (§12.1).
+        // Once, in the bootstrap. Buttons are bound here in code, never in the Inspector.
         public void Init(IFeedback feedback)
         {
             Feedback = feedback;
@@ -48,7 +48,7 @@ namespace Game.Runtime.UI
             action?.Invoke();
         }
 
-        // Popups open their panel with scale 0.8 -> 1 and a fade (§12.2). Unscaled time, so it works while paused.
+        // Popups open their panel with scale 0.8 -> 1 and a fade. Unscaled time, so it works while paused.
         protected void PopIn(Transform panel, float time)
         {
             panel.localScale = Vector3.one * 0.8f;
