@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 
 namespace Game.Editor.Tests
 {
-    // The road under the bus lane and the bus stop sign at the park point (§9.3, §10.4).
+    // The road under the bus lane (§9.3, §10.4).
     public sealed class BusRoadTests
     {
         private const string ScenePath = "Assets/_Game/Scenes/Main.unity";
@@ -64,14 +64,6 @@ namespace Game.Editor.Tests
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>($"Assets/_Game/Content/Prefabs/{name}.prefab");
             Assert.IsNotNull(prefab, name);
             return prefab;
-        }
-
-        [Test]
-        public void SignOffset_Default_AndUsedAsIs()
-        {
-            Assert.AreEqual(1.85f, settings.BusStopSignOffsetX);
-            var layout = new BoardLayout(Catalog().Get(0), settings);
-            Assert.AreEqual(layout.BusParkPosition.x - settings.BusStopSignOffsetX, layout.BusStopSignPosition.x, 1e-4f);
         }
 
         [Test]
@@ -135,43 +127,11 @@ namespace Game.Editor.Tests
         }
 
         [Test]
-        public void EveryCatalogLevel_SignStandsOnTheCurbInFrontOfTheParkedBus()
+        public void RoadPrefab_IsSimpleLitWithoutShadowsOrColliders()
         {
-            LevelCatalog catalog = Catalog();
-            for (int i = 0; i < catalog.Count; i++)
-            {
-                LevelData level = catalog.Get(i);
-                var layout = new BoardLayout(level, settings);
-                Vector3 sign = layout.BusStopSignPosition;
-                Vector3 park = layout.BusParkPosition;
-                string at = $"level {i}";
-
-                Assert.AreEqual(layout.BusRoad.min.z, sign.z, 1e-4f, $"{at}: on the seat side edge of the road");
-                Assert.AreEqual(0f, sign.y, 1e-4f, at);
-                Assert.Less(sign.x, park.x - BusHalfLength, $"{at}: ahead of the parked bus's nose");
-                Assert.Greater(sign.x, park.x - BusHalfLength - 1f, $"{at}: right at the bus");
-
-                // Not on any seat -> door walk
-                Vector3 door = layout.DoorPoint;
-                for (int s = 0; s < level.WaitingSlots; s++)
-                {
-                    Vector3 seat = layout.SlotPosition(s);
-                    Vector3 closest = seat + Vector3.Project(sign - seat, door - seat);
-                    float t = Vector3.Dot(sign - seat, door - seat) / (door - seat).sqrMagnitude;
-                    if (t < 0f || t > 1f) continue;
-                    Assert.Greater(Vector3.Distance(sign, closest), 0.3f, $"{at}: seat {s} walks past the sign");
-                }
-            }
-        }
-
-        [TestCase("Road")]
-        [TestCase("BusStopSign")]
-        public void Prefab_IsSimpleLitWithoutShadowsOrColliders(string name)
-        {
-            GameObject prefab = Prefab(name);
+            GameObject prefab = Prefab("Road");
             Assert.IsEmpty(prefab.GetComponentsInChildren<Collider>(true));
-            MeshRenderer[] renderers = prefab.GetComponentsInChildren<MeshRenderer>(true)
-                .Where(r => r.GetComponent<TMPro.TMP_Text>() == null).ToArray();
+            MeshRenderer[] renderers = prefab.GetComponentsInChildren<MeshRenderer>(true);
             Assert.IsNotEmpty(renderers);
             foreach (MeshRenderer renderer in renderers)
             {
@@ -181,22 +141,7 @@ namespace Game.Editor.Tests
         }
 
         [Test]
-        public void SignModel_StandsOnTheGroundAndIsAboutAPassengerAndAHalfTall()
-        {
-            GameObject sign = Object.Instantiate(Prefab("BusStopSign"));
-            SceneManager.MoveGameObjectToScene(sign, preview);
-            Renderer[] renderers = sign.GetComponentsInChildren<MeshRenderer>(true)
-                .Where(r => r.GetComponent<TMPro.TMP_Text>() == null).ToArray();
-            Bounds b = renderers[0].bounds;
-            foreach (Renderer r in renderers) b.Encapsulate(r.bounds);
-
-            Assert.AreEqual(0f, b.min.y, 0.02f, "stands on the ground");
-            Assert.That(b.size.y, Is.InRange(1.1f, 1.6f));
-            Assert.Less(b.size.z, 0.3f, "a thin sign");
-        }
-
-        [Test]
-        public void Build_PlacesRoadAndSign_ClearHidesThem()
+        public void Build_PlacesTheRoad_ClearHidesIt()
         {
             WaitingAreaView source = scene.GetRootGameObjects()
                 .Select(go => go.GetComponentInChildren<WaitingAreaView>(true)).First(v => v != null);
@@ -213,16 +158,14 @@ namespace Game.Editor.Tests
             view.Build(level.WaitingSlots, layout);
 
             Transform road = copy.transform.Cast<Transform>().Single(t => t.name.StartsWith("Road"));
-            Transform sign = copy.transform.Cast<Transform>().Single(t => t.name.StartsWith("BusStopSign"));
-            Assert.IsTrue(road.gameObject.activeSelf && sign.gameObject.activeSelf);
+            Assert.IsTrue(road.gameObject.activeSelf);
             Assert.AreEqual(layout.BusRoad.center.x, road.position.x, 1e-4f);
             Assert.AreEqual(layout.BusRoad.center.z, road.position.z, 1e-4f);
             Assert.AreEqual(layout.BusRoad.size.x, road.localScale.x, 1e-4f);
             Assert.AreEqual(layout.BusRoad.size.z, road.localScale.z, 1e-4f);
-            Assert.AreEqual(layout.BusStopSignPosition, sign.position);
 
             view.Clear();
-            Assert.IsFalse(road.gameObject.activeSelf || sign.gameObject.activeSelf);
+            Assert.IsFalse(road.gameObject.activeSelf);
         }
     }
 }

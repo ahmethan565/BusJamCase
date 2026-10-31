@@ -22,8 +22,6 @@ namespace Game.Runtime.Data
         [SerializeField] private float backdropPadding = 0.2f;
         [Tooltip("How far right of the parked bus the next bus waits (bus length 2.4 + a small gap)")]
         [SerializeField] private float busQueueOffsetX = 2.7f;
-        [Tooltip("How far left of the park point (ahead of the parked bus) the bus stop sign stands; the bus nose is at 1.2, the sign plate is 0.62 wide")]
-        [SerializeField] private float busStopSignOffsetX = 1.85f;
 
         public float CellSize => cellSize;
         public float RoadOffset => roadOffset;
@@ -33,7 +31,6 @@ namespace Game.Runtime.Data
         public float DoorOffsetZ => doorOffsetZ;
         public float BusOffscreenX => busOffscreenX;
         public float BusQueueOffsetX => busQueueOffsetX;
-        public float BusStopSignOffsetX => busStopSignOffsetX;
         public float BackdropPadding => backdropPadding;
     }
 }
