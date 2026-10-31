@@ -1647,7 +1647,7 @@ public interface IFeedback
 | Otobüse biniş | Zıplama bitince | `Board`, perde `1 + index * 0.1` (index = o otobüse binen sayısı − 1) | — |
 | Koltuğa varış | Koltuk yürüyüşü bitince (`WalkAlong` `onArrived`) | `Seat` | — |
 | Otobüs gidiyor | Gidiş başlarken | `Horn` | `ExhaustPuff` |
-| Otobüs geliyor | Geliş bitince (`BusArriveStep`) | `Brake` | — |
+| Otobüs geliyor | Geliş bitince (`BusArriveStep`) | `Brake` (`BusStop.ogg`) | — |
 | Kazanma | Popup açılırken (`WinState.Enter` → `feedback.Won()`) | `Win` | `Confetti` |
 | Kaybetme | Popup açılırken (`LoseState.Enter` → `feedback.Lost()`) | `Lose` | — |
 | UI butonu | Tıklanınca | `Click` (`Switch.ogg`) | — |
@@ -2127,7 +2127,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - **Tahta ve koltuk zeminleri** (ekip kararı): tahtanın ve koltuk sırasının altında bitişik iki zemin (§9.2, §9.3, §10.4); kamera sığdırması zeminleri kapsar.
 - **Oturan yolcular** (ekip kararı): otobüs doluluğu beyaz noktalar yerine tavandaki koltuklarda beliren yolcularla gösterilir; yolcular koltukta hazır bekler, binişle açılır (§10.1, §10.7). `BusIndicator` ve iki gösterge malzemesi kaldırıldı. Kapasite okunsun diye her koltukta koyu bir kutu var. Koltuk ve yolcu tek `BusSeat` prefab'ında; büyük kapasitede ikisi birlikte küçülür (önce ayrı prefab'lardı, küçülünce yolcunun sadece kafası kalıyordu).
 - **Bölüm düğümü görseli** (ekip kararı): düğüm gövdesi `level1.png` (§12.4).
-- **Arayüz sesleri** (ekip kararı): buton tıklaması `Switch.ogg`, yürüyebilen yolcuya dokunuş `Drop.ogg`, yürüyemeyen yolcuya dokunuş `Error.ogg` (Kenney Interface Sounds, §13.3). Sadece `SoundLibrary` verisi değişti; eski `Click`/`Pop`/`Bonk` wav dosyaları silindi.
+- **Arayüz sesleri** (ekip kararı): buton tıklaması `Switch.ogg`, yürüyebilen yolcuya dokunuş `Drop.ogg`, yürüyemeyen yolcuya dokunuş `Error.ogg` (Kenney Interface Sounds, §13.3); otobüs durma sesi `BusStop.ogg`. Sadece ses dosyaları değişti (eski GUID'ler korundu); eski `Click`/`Pop`/`Bonk`/`Brake` wav dosyaları silindi.
 - **Android build** (ekip kararı): `Game.Editor.AndroidBuild` Android ayarlarını kodla uygular ve tek tıkla development APK üretir (§4.2, §16.5). Sadece development build; release ve imzalama anahtarı (keystore) yayın aşamasına kaldı (debug anahtarı kullanılır).
 - **FPS göstergesi** (cihaz testi): sadece development build'de görünen `FPSCounter` (§16.5); `Update` kuralına beşinci, sadece hata ayıklama amaçlı istisna (§16.3).
 - **Yol** (ekip kararı): otobüs şeridinin altında ekranı yatayda kaplayan bir yol (§9.3, §10.4). Park noktasındaki durak tabelası denendi, sonra kaldırıldı.
