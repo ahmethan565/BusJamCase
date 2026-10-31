@@ -40,23 +40,27 @@ namespace Game.Editor.Tests
             EditorSceneManager.ClosePreviewScene(preview);
         }
 
-        private Renderer[] Seats() => bus.transform.Find("SeatRoot").GetComponentsInChildren<Renderer>(true);
+        // The passenger of every seat, front to back.
+        private Renderer[] Seats() => bus.transform.Find("SeatRoot").Cast<Transform>()
+            .OrderBy(seat => seat.position.x)
+            .Select(seat => seat.Find("Passenger").GetComponent<Renderer>()).ToArray();
 
         private static Bounds BodyBounds(BusView view) =>
             view.transform.Find("Body").GetComponent<Renderer>().bounds;
 
         [Test]
-        public void SeatedPassengerPrefab_IsThePassengerModelWithoutScriptsOrShadows()
+        public void SeatPrefab_PassengerIsThePassengerModel_NoScriptsOrShadows()
         {
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(Prefabs + "SeatedPassenger.prefab");
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(Prefabs + "BusSeat.prefab");
             Assert.IsNotNull(prefab);
             var passengerMesh = AssetDatabase.LoadAssetAtPath<Mesh>("Assets/_Game/Content/Models/Passenger.asset");
 
-            MeshFilter[] filters = prefab.GetComponentsInChildren<MeshFilter>(true);
-            Assert.AreEqual(1, filters.Length, "one model, no blob shadow");
-            Assert.AreSame(passengerMesh, filters[0].sharedMesh);
-            Assert.AreEqual(ShadowCastingMode.Off, filters[0].GetComponent<MeshRenderer>().shadowCastingMode);
-            Assert.IsEmpty(prefab.GetComponentsInChildren<MonoBehaviour>(true), "a plain model: the bus owns it");
+            Transform passenger = prefab.transform.Find("Passenger");
+            Assert.IsNotNull(passenger, "BusSeat -> Passenger");
+            Assert.AreSame(passengerMesh, passenger.GetComponent<MeshFilter>().sharedMesh);
+            Assert.AreEqual(ShadowCastingMode.Off, passenger.GetComponent<MeshRenderer>().shadowCastingMode);
+            Assert.AreEqual(2, prefab.GetComponentsInChildren<MeshFilter>(true).Length, "a chair and a passenger, no blob shadow");
+            Assert.IsEmpty(prefab.GetComponentsInChildren<MonoBehaviour>(true), "plain models: the bus owns them");
         }
 
         [Test]
@@ -87,7 +91,7 @@ namespace Game.Editor.Tests
                 Assert.AreEqual(body.center.z, b.center.z, 0.05f, $"{seat.name}: on the middle line");
             }
 
-            Renderer[] row = Seats().OrderBy(s => s.transform.position.x).ToArray();
+            Renderer[] row = Seats();
             for (int i = 1; i < row.Length; i++)
                 Assert.Less(row[i - 1].bounds.max.x, row[i].bounds.min.x, "they do not overlap");
         }
@@ -106,7 +110,7 @@ namespace Game.Editor.Tests
         {
             bus.SetFilledCount(3);
             bus.ResetForPool();
-            Assert.IsTrue(Seats().All(s => !s.gameObject.activeSelf));
+            Assert.IsTrue(Seats().All(s => !s.gameObject.activeInHierarchy));
         }
     }
 }

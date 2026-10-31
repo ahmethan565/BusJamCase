@@ -145,7 +145,7 @@ namespace Game.Editor.Tests
         public void HardestLevel_StaysUnderTheTriangleBudget()
         {
             int passenger = Triangles(Prefab("Passenger"));
-            int bus = Triangles(Prefab("Bus")) + 3 * Triangles(Prefab("SeatedPassenger"));
+            int bus = Triangles(Prefab("Bus")) + 3 * Triangles(Prefab("BusSeat"));
             int floor = Triangles(Prefab("FloorTile"));
             int wall = Triangles(Prefab("WallBlock"));
             int edge = Triangles(Prefab("EdgePiece"));
@@ -169,7 +169,7 @@ namespace Game.Editor.Tests
         [Test]
         public void WorldPrefabs_UseSimpleLitExceptTheBlobShadow()
         {
-            foreach (string name in new[] { "Passenger", "Bus", "SeatedPassenger", "FloorTile", "WallBlock", "EdgePiece", "SlotMarker" })
+            foreach (string name in new[] { "Passenger", "Bus", "BusSeat", "FloorTile", "WallBlock", "EdgePiece", "SlotMarker" })
             {
                 foreach (MeshRenderer renderer in Prefab(name).GetComponentsInChildren<MeshRenderer>(true))
                 {

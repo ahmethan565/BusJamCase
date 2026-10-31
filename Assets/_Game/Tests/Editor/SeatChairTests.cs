@@ -38,19 +38,21 @@ namespace Game.Editor.Tests
         private void Init(int capacity) =>
             bus.Init(0, AssetDatabase.LoadAssetAtPath<Material>("Assets/_Game/Content/Materials/Passenger_Red.mat"), capacity, Vector3.zero, Vector3.zero);
 
-        private Renderer[] Chairs(bool visibleOnly) => bus.transform.Find("ChairRoot").GetComponentsInChildren<Renderer>(true)
-            .Where(r => !visibleOnly || r.gameObject.activeInHierarchy).OrderBy(r => r.bounds.center.x).ToArray();
-
-        private Renderer[] Passengers() => bus.transform.Find("SeatRoot").GetComponentsInChildren<Renderer>(true)
+        private Renderer[] Part(string name, bool visibleOnly) => bus.transform.Find("SeatRoot").Cast<Transform>()
+            .Select(seat => seat.Find(name).GetComponent<Renderer>())
+            .Where(r => !visibleOnly || r.gameObject.activeInHierarchy)
             .OrderBy(r => r.transform.position.x).ToArray();
 
+        private Renderer[] Chairs(bool visibleOnly) => Part("Chair", visibleOnly);
+        private Renderer[] Passengers() => Part("Passenger", false);
+
         [Test]
-        public void ChairPrefab_IsADarkSimpleLitBoxWithoutShadowsOrColliders()
+        public void Chair_IsADarkSimpleLitBoxWithoutShadowsOrColliders()
         {
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(Prefabs + "SeatChair.prefab");
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(Prefabs + "BusSeat.prefab");
             Assert.IsNotNull(prefab);
             Assert.IsEmpty(prefab.GetComponentsInChildren<Collider>(true));
-            MeshRenderer renderer = prefab.GetComponentsInChildren<MeshRenderer>(true).Single();
+            var renderer = prefab.transform.Find("Chair").GetComponent<MeshRenderer>();
             Assert.AreEqual("Universal Render Pipeline/Simple Lit", renderer.sharedMaterial.shader.name);
             Assert.AreEqual(ShadowCastingMode.Off, renderer.shadowCastingMode);
             Color c = renderer.sharedMaterial.GetColor("_BaseColor");

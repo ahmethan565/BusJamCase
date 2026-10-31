@@ -6,22 +6,21 @@ using UnityEngine;
 
 namespace Game.Runtime.View
 {
-    // Visual of one bus: body + the passengers seated on its roof under SeatRoot (§10.7).
+    // Visual of one bus: body + roof seats under SeatRoot (§10.7). A seat is a dark chair and its passenger.
     // Trick: everyone is already in their seat, hidden; each boarding reveals the next one.
-    // A dark chair under each seat (ChairRoot) stays visible, so the empty chairs show how many get on.
+    // The empty chairs stay visible, so they show how many get on.
     public sealed class BusView : MonoBehaviour
     {
         [SerializeField] private Renderer bodyRenderer;
         [SerializeField] private Transform seatRoot;
-        [SerializeField] private Renderer seatedPassengerPrefab;
-        [SerializeField] private Transform chairRoot;
-        [SerializeField] private GameObject seatChairPrefab;
+        [SerializeField] private Transform seatPrefab;
 
         // Kept with the pooled bus; only grows when a bus with a bigger capacity shows up.
-        private readonly List<Renderer> seats = new List<Renderer>();
-        private readonly List<GameObject> chairs = new List<GameObject>();
+        private readonly List<Transform> seats = new List<Transform>();
+        private readonly List<Renderer> passengers = new List<Renderer>();   // seats[i]'s passenger
         private AnimationSettings anim;
         private int capacity;
+        private float seatFit = 1f;   // < 1 when the seats would not fit on the roof: spacing and seat size shrink together
 
         public int Id { get; private set; }
         public Vector3 DoorPoint { get; private set; }
@@ -51,21 +50,24 @@ namespace Game.Runtime.View
             transform.SetPositionAndRotation(enterPosition, Quaternion.identity);
 
             while (seats.Count < capacity)
-                seats.Add(Instantiate(seatedPassengerPrefab, seatRoot));
-            while (chairs.Count < capacity)
-                chairs.Add(Instantiate(seatChairPrefab, chairRoot));
+            {
+                Transform seat = Instantiate(seatPrefab, seatRoot);
+                seats.Add(seat);
+                passengers.Add(seat.Find("Passenger").GetComponent<Renderer>());
+            }
+
+            seatFit = Mathf.Min(1f, bodyRenderer.localBounds.size.x / (capacity * anim.SeatSpacing));
 
             // Everyone is seated in the bus colour (passengers and buses share it) and hidden until they board.
+            // Scaling the seat scales its chair, its passenger and how deep the passenger sinks into the roof.
             for (int i = 0; i < seats.Count; i++)
             {
-                Renderer seat = seats[i];
-                seat.gameObject.SetActive(false);
-                seat.sharedMaterial = material;
-                seat.transform.localPosition = SeatPosition(i);
-
-                GameObject chair = chairs[i];
-                chair.SetActive(i < capacity);
-                chair.transform.localPosition = SeatPosition(i);
+                Transform seat = seats[i];
+                seat.gameObject.SetActive(i < capacity);
+                seat.localPosition = SeatPosition(i);
+                seat.localScale = Vector3.one * seatFit;
+                passengers[i].gameObject.SetActive(false);
+                passengers[i].sharedMaterial = material;
             }
         }
 
@@ -113,10 +115,10 @@ namespace Game.Runtime.View
         public void SetFilledCount(int count)
         {
             for (int i = 0; i < capacity; i++)
-                seats[i].gameObject.SetActive(i < count);
+                passengers[i].gameObject.SetActive(i < count);
 
             if (count < 1 || count > capacity) return;
-            Transform newcomer = seats[count - 1].transform;
+            Transform newcomer = passengers[count - 1].transform;
             newcomer.DOKill(complete: true);
             newcomer.DOPunchScale(anim.TapSquash, anim.TapSquashTime)
                 .SetLink(newcomer.gameObject, LinkBehaviour.KillOnDisable);
@@ -128,17 +130,17 @@ namespace Game.Runtime.View
             PendingBoardings = 0;
             boarded = 0;
             transform.DOKill();
-            foreach (Renderer seat in seats)
+            foreach (Renderer passenger in passengers)
             {
-                seat.transform.DOKill();
-                seat.transform.localScale = Vector3.one;
-                seat.gameObject.SetActive(false);
+                passenger.transform.DOKill();
+                passenger.transform.localScale = Vector3.one;
+                passenger.gameObject.SetActive(false);
             }
-            foreach (GameObject chair in chairs)
-                chair.SetActive(false);
+            foreach (Transform seat in seats)
+                seat.gameObject.SetActive(false);
         }
 
-        // Seat i along the roof, centred on the bus (passengers and chairs share it).
-        private Vector3 SeatPosition(int i) => new Vector3((i - (capacity - 1) / 2f) * anim.SeatSpacing, 0f, 0f);
+        // Seat i along the roof, centred on the bus.
+        private Vector3 SeatPosition(int i) => new Vector3((i - (capacity - 1) / 2f) * anim.SeatSpacing * seatFit, 0f, 0f);
     }
 }
