@@ -1,7 +1,10 @@
+using System.Linq;
 using Game.Runtime.Diagnostics;
 using NUnit.Framework;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Game.Editor.Tests
 {
@@ -41,6 +44,27 @@ namespace Game.Editor.Tests
             finally
             {
                 Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
+        public void MainScene_HasOneCounter_OnItsOwnRootObject()
+        {
+            const string path = "Assets/_Game/Scenes/Main.unity";
+            Scene scene = SceneManager.GetSceneByPath(path);
+            bool opened = !scene.isLoaded;
+            if (opened) scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
+            try
+            {
+                FPSCounter[] counters = scene.GetRootGameObjects()
+                    .SelectMany(go => go.GetComponentsInChildren<FPSCounter>(true)).ToArray();
+                Assert.AreEqual(1, counters.Length);
+                Assert.IsNull(counters[0].transform.parent, "a root object: DontDestroyOnLoad needs one");
+                Assert.AreEqual(2, counters[0].GetComponents<Component>().Length, "only Transform + FPSCounter: destroying it in release is safe");
+            }
+            finally
+            {
+                if (opened) EditorSceneManager.CloseScene(scene, true);
             }
         }
     }
