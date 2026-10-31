@@ -1,26 +1,3 @@
-# Bus Jam
-
-A 3D mobile puzzle game in the style of Bus Jam, built with Unity. Tap a passenger to send them to a bus of
-their color. Passengers whose bus is not at the stop wait in a few slots, and the level is lost when those
-slots fill up.
-
-The full design (rules, architecture, every decision and why) is in [`Docs/ARCHITECTURE.md`](Docs/ARCHITECTURE.md),
-written in Turkish.
-
-## Getting started
-
-1. Install **Unity 2022.3.19f1** with Unity Hub. Use exactly this version; the project is not upgraded.
-2. Clone the repository and add the folder in Unity Hub (**Add → Add project from disk**).
-3. Open it. Nothing else needs to be installed:
-   - Unity packages download on first open, from `Packages/manifest.json`.
-   - DOTween, TextMesh Pro resources and all project settings are already in the repository.
-
-The editor always opens `Assets/_Game/Scenes/Main.unity`. Press **Play** from any scene and the game starts
-from the main scene.
-
-To build for Android you also need the **Android Build Support** module. Add it in Unity Hub under
-**Installs → 2022.3.19f1 → Add modules**. You do not need it to play in the editor or to run the tests.
-
 ## Project layout
 
 | Path | Contents |
