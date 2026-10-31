@@ -60,9 +60,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
   m_Name: Zany SDF
   m_EditorClassIdentifier: 
-  hashCode: 0
+  hashCode: -564411363
   material: {fileID: 4587795354410236448}
-  materialHashCode: -2006316128
+  materialHashCode: -1621954659
   m_Version: 1.1.0
   m_SourceFontFileGUID: 2a02e43de5a56bf499dc49a1cfab08b6
   m_SourceFontFile_EditorRef: {fileID: 12800000, guid: 2a02e43de5a56bf499dc49a1cfab08b6, type: 3}
@@ -1516,6 +1516,21 @@ MonoBehaviour:
     m_Scale: 1
     m_AtlasIndex: 0
     m_ClassDefinitionType: 0
+  - m_Index: 3
+    m_Metrics:
+      m_Width: 0
+      m_Height: 0
+      m_HorizontalBearingX: 0
+      m_HorizontalBearingY: 0
+      m_HorizontalAdvance: 0
+    m_GlyphRect:
+      m_X: 0
+      m_Y: 0
+      m_Width: 0
+      m_Height: 0
+    m_Scale: 1
+    m_AtlasIndex: 0
+    m_ClassDefinitionType: 0
   m_CharacterTable:
   - m_ElementType: 1
     m_Unicode: 32
@@ -1896,6 +1911,10 @@ MonoBehaviour:
   - m_ElementType: 1
     m_Unicode: 126
     m_GlyphIndex: 99
+    m_Scale: 1
+  - m_ElementType: 1
+    m_Unicode: 10
+    m_GlyphIndex: 3
     m_Scale: 1
   m_AtlasTextures:
   - {fileID: -1619844946171635046}

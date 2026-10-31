@@ -872,6 +872,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotMarkerPrefab: {fileID: 8615524153017414854, guid: 431b8a84fd52890459be99d47b5fdc6a, type: 3}
   backdropPrefab: {fileID: 391539114138765056, guid: b6922cffc5b236d45b1d185d3729a3dd, type: 3}
+  roadPrefab: {fileID: 391539114138765056, guid: 332b4b72c04c64e4e92981e84fe5cd01, type: 3}
+  busStopSignPrefab: {fileID: 3765646909215470186, guid: 208ad8ad21f689a49b7e0fc27cac3989, type: 3}
   poolRoot: {fileID: 284647862}
   slotMarkerPrewarm: 8
 --- !u!1 &253956067

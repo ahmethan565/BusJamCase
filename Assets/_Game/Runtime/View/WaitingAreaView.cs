@@ -5,11 +5,13 @@ using UnityEngine.Pool;
 
 namespace Game.Runtime.View
 {
-    // Waiting slot markers (§10.4). Owns the SlotMarker pool.
+    // Waiting slot markers, the stop backdrop, the road and the bus stop sign (§10.4). Owns the SlotMarker pool.
     public sealed class WaitingAreaView : MonoBehaviour
     {
         [SerializeField] private GameObject slotMarkerPrefab;
         [SerializeField] private Transform backdropPrefab;
+        [SerializeField] private Transform roadPrefab;
+        [SerializeField] private Transform busStopSignPrefab;
         [SerializeField] private Transform poolRoot;
         [SerializeField] private int slotMarkerPrewarm = 8;
 
@@ -17,6 +19,8 @@ namespace Game.Runtime.View
         private LayoutSettings settings;
         private ObjectPool<GameObject> markers;
         private Transform backdrop;
+        private Transform road;
+        private Transform busStopSign;
 
         // Once, in the bootstrap.
         public void Init(LayoutSettings layoutSettings)
@@ -25,6 +29,10 @@ namespace Game.Runtime.View
             markers = PieceFactory.CreatePool(slotMarkerPrefab, poolRoot);
             backdrop = Instantiate(backdropPrefab, poolRoot);
             backdrop.gameObject.SetActive(false);
+            road = Instantiate(roadPrefab, poolRoot);
+            road.gameObject.SetActive(false);
+            busStopSign = Instantiate(busStopSignPrefab, poolRoot);
+            busStopSign.gameObject.SetActive(false);
         }
 
         public void Prewarm() => PieceFactory.Prewarm(markers, slotMarkerPrewarm);
@@ -32,6 +40,9 @@ namespace Game.Runtime.View
         public void Build(int slotCount, BoardLayout layout)
         {
             PieceFactory.PlaceBackdrop(backdrop, layout.StopBackdrop, settings.CellSize);
+            PieceFactory.PlaceBackdrop(road, layout.BusRoad, settings.CellSize);
+            busStopSign.SetPositionAndRotation(layout.BusStopSignPosition, Quaternion.identity);
+            busStopSign.gameObject.SetActive(true);
             for (int slot = 0; slot < slotCount; slot++)
             {
                 GameObject marker = markers.Get();
@@ -46,6 +57,8 @@ namespace Game.Runtime.View
             foreach (GameObject marker in active) markers.Release(marker);
             active.Clear();
             if (backdrop != null) backdrop.gameObject.SetActive(false);
+            if (road != null) road.gameObject.SetActive(false);
+            if (busStopSign != null) busStopSign.gameObject.SetActive(false);
         }
     }
 }

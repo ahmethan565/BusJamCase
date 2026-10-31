@@ -954,6 +954,12 @@ public Bounds BoardBackdrop { get; }
 public Bounds StopBackdrop { get; }
 public Vector3 BusQueuePosition => BusParkPosition + new Vector3(s.BusQueueOffsetX, 0f, 0f);    // sıradaki otobüs (ContentBounds'ta değil; bir kısmı görünür)
 public Vector3 BusQueueEnterPosition => BusEnterPosition + new Vector3(s.BusQueueOffsetX, 0f, 0f); // takipçi, öndekinin bir kuyruk mesafesi arkasından girer
+// Otobüs yolu (ContentBounds'ta değil): z'de StopBackdrop.max.z'den park noktasına simetrik; x'te BusExitPosition'dan
+// BusQueueEnterPosition'a, iki uçta birer kuyruk mesafesi fazlasıyla.
+public Bounds BusRoad { get; }
+// Durak tabelası: yolun koltuk tarafı kenarında, park etmiş otobüsün burnunun bir kuyruk boşluğu önünde
+// (park x - (BusQueueOffsetX / 2 + 0.15) = yarım otobüs + 0.3); koltuk → kapı yürüyüşlerinin dışında (6 koltuğa kadar ≥ 0.3).
+public Vector3 BusStopSignPosition { get; }
 
     // Dünya → hücre (tek bölme işlemi)
     public GridPos WorldToCell(Vector3 world) => new GridPos(
@@ -1080,6 +1086,7 @@ public void Clear();
 ```
 - `Floor` → `FloorTile`; `Wall` → `FloorTile` + `WallBlock`; `Void` → **hiçbir şey.**
 - **Zeminler:** `BoardView` tahtanın altına (`layout.BoardBackdrop`), `WaitingAreaView` koltuk sırasının altına (`layout.StopBackdrop`) birer `Backdrop` koyar (koyu gri-mavi, Simple Lit, gölgesiz; üst yüzü karoların hemen altında). İki zemin arada boşluk kalmadan birleşir, böylece tahta ve koltuklar bitişik görünür; otobüs şeridi zeminlerin dışında kalır. Zemin nesnesi `Init`'te bir kez oluşturulur, `Build` yerleştirir, `Clear` gizler. `ContentBounds` zeminleri de kapsar.
+- **Yol ve durak tabelası:** `WaitingAreaView` otobüs şeridinin altına bir `Road` (koyu asfalt, `Backdrop` ile aynı küp, Simple Lit, gölgesiz) ve park noktasına bir `BusStopSign` koyar. Yol `layout.BusRoad`: z'de koltuk zemininin üst kenarından başlar (boşluksuz birleşir) ve park noktasına göre simetriktir; x'te otobüslerin doğduğu ve kaybolduğu noktaları (kuyruktaki otobüs dahil) aşar, böylece ekranı yatayda her en-boy oranında baştan sona kaplar. Yol `ContentBounds`'a girmez (kamera ona göre uzaklaşmaz). Tabela `layout.BusStopSignPosition`: yolun koltuk tarafındaki kenarında, park etmiş otobüsün burnunun hemen önünde (yolcuların koltuktan kapıya yolunun dışında). İkisi de `Init`'te bir kez oluşturulur, `Build` yerleştirir, `Clear` gizler.
 - **Kenarlar:** Her `Floor`/`Wall` hücresi için 4 yönün her birinde komşu `!Exists` ise o kenara bir `EdgePiece` (yönüne göre döndürülmüş) konur. **İstisna:** çıkış hücresinin (§2.4, `Board.IsExit`) **üst** kenarı çizilmez; yolcular yola o taraftan çıkar. Ortadaki deliğin altındaki hücre çıkış olmadığı için onun üst kenarı çizilir; duvarların kenarları değişmez. Karar `BoardView.HasEdge(board, cell, direction)` statik metodunda. Auto-tiling algoritması yok.
 
 ### 10.5 `GameplayPresenter : MonoBehaviour, IGameListener`
@@ -2116,6 +2123,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - `ScreenView.Init` butonları soyut `BindButtons()` ile bağlar (Awake EditMode testlerinde çalışmaz); popup açılışı ortak `PopIn` yardımcısında (§12.2). HUD'daki baştan başlat butonunun metni "Restart" (font'ta ↻ glifi yok).
 - **Dil:** oyuncu metinleri ve editör araçlarının metinleri Türkçeden **İngilizceye** çevrildi (Faz 7 sonrası ekip kararı; §1, §4.4, §7.3, §12.3, §12.5). Testler İngilizce metinleri ve sahnede Türkçe karakter kalmadığını denetler.
 - **Tahta ve koltuk zeminleri** (ekip kararı): tahtanın ve koltuk sırasının altında bitişik iki zemin (§9.2, §9.3, §10.4); kamera sığdırması zeminleri kapsar.
+- **Yol ve durak tabelası** (ekip kararı): otobüs şeridinin altında ekranı yatayda kaplayan bir yol ve park noktasında bir durak tabelası (§9.3, §10.4).
 - **Süre paneli** (ekip kararı): süre metni `Timer.png` görselinin koyu yuvasında durur; süresiz bölümde panelin tamamı gizlenir (§12.3).
 - **Çıkış kenarları** (oyun testi, ekip kararı): çıkış hücrelerinin üst kenarında gri `EdgePiece` yok (§10.4).
 - **Bölüm süresi** (Faz 9): `Docs/TIMER_DESIGN.md` uygulandı (§2.11, §16.3). Kayıp sebebi popup'a taşınır ("Out of space!" / "Time's up!").

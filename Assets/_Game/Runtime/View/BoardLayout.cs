@@ -55,6 +55,15 @@ namespace Game.Runtime.View
         public Bounds BoardBackdrop { get; private set; }
         public Bounds StopBackdrop { get; private set; }
 
+        // The road under the bus lane: from the stop backdrop's top edge, centered on the park point; it reaches past
+        // where buses spawn and vanish, so it spans the whole screen width. Not in ContentBounds.
+        public Bounds BusRoad { get; private set; }
+
+        // The bus stop sign: on the road's seat-side edge, one queue gap ahead of the parked bus's nose
+        // (queue offset = bus length + gap, so offset / 2 + gap / 2 = half a bus length + gap); clear of the seat -> door walks.
+        public Vector3 BusStopSignPosition =>
+            new Vector3(BusParkPosition.x - (s.BusQueueOffsetX / 2f + 0.15f), 0f, BusRoad.min.z);
+
         // Board + waiting slots + backdrops + bus area (for the camera)
         public Bounds ContentBounds { get; }
 
@@ -71,6 +80,10 @@ namespace Game.Runtime.View
             float slotsHalfWidth = Mathf.Abs(SlotPosition(0).x) + s.SlotSpacing / 2f;
             float slotsTop = s.SlotsOffset * s.CellSize + s.SlotSpacing / 2f + pad;
             StopBackdrop = FromEdges(-slotsHalfWidth - pad, slotsHalfWidth + pad, joinZ, slotsTop);
+
+            float roadHalfWidth = BusParkPosition.z - slotsTop;
+            BusRoad = FromEdges(BusExitPosition.x - s.BusQueueOffsetX, BusQueueEnterPosition.x + s.BusQueueOffsetX,
+                slotsTop, BusParkPosition.z + roadHalfWidth);
         }
 
         private static Bounds FromEdges(float minX, float maxX, float minZ, float maxZ) =>
