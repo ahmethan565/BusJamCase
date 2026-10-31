@@ -28,7 +28,7 @@ MonoBehaviour:
   idleBreathTime: 1.2
   busArriveTime: 0.5
   busDepartTime: 0.4
-  indicatorSpacing: 0.3
+  seatSpacing: 0.7
   popupTime: 0.25
   nodePulseScale: 1.1
   nodePulseTime: 0.6

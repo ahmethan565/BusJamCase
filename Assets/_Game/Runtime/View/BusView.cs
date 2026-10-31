@@ -6,17 +6,16 @@ using UnityEngine;
 
 namespace Game.Runtime.View
 {
-    // Visual of one bus: body + fill indicators under IndicatorRoot (§10.7).
+    // Visual of one bus: body + the passengers seated on its roof under SeatRoot (§10.7).
+    // Trick: everyone is already in their seat, hidden; each boarding reveals the next one.
     public sealed class BusView : MonoBehaviour
     {
         [SerializeField] private Renderer bodyRenderer;
-        [SerializeField] private Transform indicatorRoot;
-        [SerializeField] private Renderer indicatorPrefab;
-        [SerializeField] private Material emptyIndicatorMaterial;
-        [SerializeField] private Material filledIndicatorMaterial;
+        [SerializeField] private Transform seatRoot;
+        [SerializeField] private Renderer seatedPassengerPrefab;
 
         // Kept with the pooled bus; only grows when a bus with a bigger capacity shows up.
-        private readonly List<Renderer> indicators = new List<Renderer>();
+        private readonly List<Renderer> seats = new List<Renderer>();
         private AnimationSettings anim;
         private int capacity;
 
@@ -28,7 +27,7 @@ namespace Game.Runtime.View
         public event Action<BusView> Parked;
 
         // Boardings run in parallel (§10.8): the bus leaves when nobody is left to get on, and
-        // the indicators fill by how many are in, because passengers can get on out of seat order.
+        // the seats fill by how many are in, because passengers can get on out of seat order.
         public int PendingBoardings { get; private set; }
         private int boarded;
 
@@ -47,17 +46,16 @@ namespace Game.Runtime.View
             bodyRenderer.sharedMaterial = material;
             transform.SetPositionAndRotation(enterPosition, Quaternion.identity);
 
-            while (indicators.Count < capacity)
-                indicators.Add(Instantiate(indicatorPrefab, indicatorRoot));
+            while (seats.Count < capacity)
+                seats.Add(Instantiate(seatedPassengerPrefab, seatRoot));
 
-            for (int i = 0; i < indicators.Count; i++)
+            // Everyone is seated in the bus colour (passengers and buses share it) and hidden until they board.
+            for (int i = 0; i < seats.Count; i++)
             {
-                Renderer indicator = indicators[i];
-                bool used = i < capacity;
-                indicator.gameObject.SetActive(used);
-                if (!used) continue;
-                indicator.transform.localPosition = new Vector3((i - (capacity - 1) / 2f) * anim.IndicatorSpacing, 0f, 0f);
-                indicator.sharedMaterial = emptyIndicatorMaterial;
+                Renderer seat = seats[i];
+                seat.gameObject.SetActive(false);
+                seat.sharedMaterial = material;
+                seat.transform.localPosition = new Vector3((i - (capacity - 1) / 2f) * anim.SeatSpacing, 0f, 0f);
             }
         }
 
@@ -101,15 +99,17 @@ namespace Game.Runtime.View
                 .OnComplete(() => onComplete());
         }
 
-        // The first `count` indicators are filled. The punch reuses the tap squash feel.
+        // The first `count` seats are taken. The one that just got its passenger pops in with the tap squash feel.
         public void SetFilledCount(int count)
         {
             for (int i = 0; i < capacity; i++)
-                indicators[i].sharedMaterial = i < count ? filledIndicatorMaterial : emptyIndicatorMaterial;
+                seats[i].gameObject.SetActive(i < count);
 
-            indicatorRoot.DOKill(complete: true);
-            indicatorRoot.DOPunchScale(anim.TapSquash, anim.TapSquashTime)
-                .SetLink(gameObject, LinkBehaviour.KillOnDisable);
+            if (count < 1 || count > capacity) return;
+            Transform newcomer = seats[count - 1].transform;
+            newcomer.DOKill(complete: true);
+            newcomer.DOPunchScale(anim.TapSquash, anim.TapSquashTime)
+                .SetLink(newcomer.gameObject, LinkBehaviour.KillOnDisable);
         }
 
         public void ResetForPool()
@@ -118,10 +118,12 @@ namespace Game.Runtime.View
             PendingBoardings = 0;
             boarded = 0;
             transform.DOKill();
-            indicatorRoot.DOKill();
-            indicatorRoot.localScale = Vector3.one;
-            foreach (Renderer indicator in indicators)
-                indicator.gameObject.SetActive(false);
+            foreach (Renderer seat in seats)
+            {
+                seat.transform.DOKill();
+                seat.transform.localScale = Vector3.one;
+                seat.gameObject.SetActive(false);
+            }
         }
     }
 }

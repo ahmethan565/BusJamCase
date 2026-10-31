@@ -43,7 +43,7 @@ namespace Game.Editor.Tests
             Assert.AreEqual(0.02f, a.IntroStagger);
             Assert.AreEqual(0.03f, a.IdleBreathScale);
             Assert.AreEqual(1.2f, a.IdleBreathTime);
-            Assert.AreEqual(0.3f, a.IndicatorSpacing);
+            Assert.AreEqual(0.7f, a.SeatSpacing);
             Assert.AreEqual(0.25f, a.PopupTime);
             Assert.AreEqual(1.1f, a.NodePulseScale);
             Assert.AreEqual(0.6f, a.NodePulseTime);

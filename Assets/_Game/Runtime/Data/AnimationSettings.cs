@@ -26,7 +26,8 @@ namespace Game.Runtime.Data
         [Header("Bus")]
         [SerializeField] private float busArriveTime = 0.5f;
         [SerializeField] private float busDepartTime = 0.4f;
-        [SerializeField] private float indicatorSpacing = 0.3f;
+        [Tooltip("Distance between the passengers seated on the bus roof")]
+        [SerializeField] private float seatSpacing = 0.7f;
 
         [Header("UI")]
         [SerializeField] private float popupTime = 0.25f;
@@ -55,7 +56,7 @@ namespace Game.Runtime.Data
         public float IdleBreathTime => idleBreathTime;
         public float BusArriveTime => busArriveTime;
         public float BusDepartTime => busDepartTime;
-        public float IndicatorSpacing => indicatorSpacing;
+        public float SeatSpacing => seatSpacing;
         public float PopupTime => popupTime;
         public float NodePulseScale => nodePulseScale;
         public float NodePulseTime => nodePulseTime;

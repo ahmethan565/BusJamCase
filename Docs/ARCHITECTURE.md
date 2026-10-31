@@ -1052,19 +1052,19 @@ private void Update()
 | Prefab | İçerik |
 |---|---|
 | `Passenger` | Katmanlı hiyerarşi (§10.6) + blob gölge quad'ı |
-| `Bus` | Gövde + doluluk göstergeleri için boş bir `IndicatorRoot` |
-| `BusIndicator` | Tek doluluk göstergesi |
+| `Bus` | Gövde + oturan yolcular için boş bir `SeatRoot` (tavanın biraz altında) |
+| `SeatedPassenger` | Otobüsün tavanında oturan tek yolcu: yolcu mesh'i, otobüse yarıya kadar gömülü; script'siz, gölgesiz |
 | `FloorTile`, `WallBlock`, `EdgePiece`, `SlotMarker` | Statik tahta parçaları |
 
 - Havuz: Unity'nin yerleşik **`UnityEngine.Pool.ObjectPool<T>`** sınıfı. Ayrı bir havuz sınıfı yazılmaz.
 - **Sahiplik:** Yolcu ve otobüs havuzlarının sahibi **`GameplayPresenter`**; tahta parçalarının sahibi `BoardView`; koltuk işaretlerinin sahibi `WaitingAreaView`. Bir görseli **sadece sahibi** havuza geri verir. Adımlar (`BoardStep`, `BusDepartStep`) havuza doğrudan dokunmaz; sahibin `ReleasePassenger(id)` / `ReleaseBus(id)` metodunu çağırır. Bu metotlar sözlükten de siler; böylece `Clear()` aynı nesneyi ikinci kez havuza vermez.
-- Havuzdan alınırken: `SetActive(true)`. Havuza verilirken: `ResetForPool()` (tween'leri öldür, tüm katmanların yerel konum/rotasyon/ölçeğini sıfırla, göstergeleri kapat) + `SetActive(false)`.
+- Havuzdan alınırken: `SetActive(true)`. Havuza verilirken: `ResetForPool()` (tween'leri öldür, tüm katmanların yerel konum/rotasyon/ölçeğini sıfırla, oturan yolcuları gizle) + `SetActive(false)`.
 - **Ön ısıtma (pre-warm):** Her havuz sahibinin bir `Prewarm()` metodu var (`GameplayPresenter`, `BoardView`, `WaitingAreaView`); `GameBootstrap` açılışta bunları çağırır. Her biri kendi havuzundan N nesne alıp hemen geri verir; ilk bölümün intro'sunda `Instantiate` olmaz. Varsayılan N: Passenger 40, Bus 4, FloorTile 64, WallBlock 8, EdgePiece 64, SlotMarker 8.
 - Bölümler arasında nesneler **yok edilmez**, havuza döner.
 - Şu anki modeller (Faz 8) kodla üretilmiş yer tutucu low-poly mesh'lerdir (`Content/Models/`: `Passenger` ~400 üçgen, `BusBody` + `BusDetails`). Gerçek modeller geldiğinde prefab'daki `Model` / `Body` / `Details` nesnelerinin mesh'i değiştirilir; pivot ayakta (y = 0) kalmalıdır. Otobüs -X yönüne (sola) gider; ön cam o taraftadır. Duvar (`WallBlock`) görüşü kapatmasın diye çok basık bir yarım küredir (`Content/Models/WallDome`: 0,9 çap, 0,18 yükseklik).
 
 ### 10.3 `ColorPalette` (ScriptableObject)
-`PassengerColor` → `Material` (yolcu ve otobüs ortak) ve `Color` (UI/göstergeler).
+`PassengerColor` → `Material` (yolcu ve otobüs ortak) ve `Color` (UI).
 - **Renk başına bir materyal** (URP Simple Lit). `MaterialPropertyBlock` **kullanılmaz** (SRP Batcher uyumluluğunu bozar).
 
 ### 10.4 `BoardView` ve `WaitingAreaView`
@@ -1243,17 +1243,17 @@ public Vector3 DoorPoint { get; private set; }
 public bool IsParked { get; private set; }                     // Arrive bitince true; Init, Depart ve ResetForPool'da false
 public event Action<BusView> Parked;                           // Arrive bitince (presenter tutulan yolcuları kapıya yollar)
 public void Configure(AnimationSettings anim);                 // havuzun oluşturma fonksiyonunda bir kez
-public void Init(int busId, Material material, int capacity, Vector3 enterPosition, Vector3 doorPoint);   // SetActive(true), konum, göstergeler
+public void Init(int busId, Material material, int capacity, Vector3 enterPosition, Vector3 doorPoint);   // SetActive(true), konum, koltuklar (hepsi gizli, otobüs malzemesiyle)
 public void Arrive(Vector3 parkPosition, Action onComplete);    // DOMove, Ease.OutQuad, BusArriveTime (önce kendi tween'ini öldürür)
 public void DriveTo(Vector3 position);                          // kuyruğa ilerleme; park sayılmaz
 public void Depart(Vector3 exitPosition, Action onComplete);    // DOMove, Ease.InQuad, BusDepartTime
-public void SetFilledCount(int count);                          // ilk `count` gösterge dolu + IndicatorRoot.DOPunchScale
+public void SetFilledCount(int count);                          // ilk `count` koltuktaki yolcu görünür; yeni görünen DOPunchScale
 public int PendingBoardings { get; }                           // binmesi beklenen, henüz binmemiş yolcu sayısı
 public void ExpectBoarding();                                  // OnPassengerBoarded'da +1
-public int CompleteBoarding();                                 // yolcu girdi: -1, binen sayısını döndürür (gösterge ve perde bunu kullanır)
+public int CompleteBoarding();                                 // yolcu girdi: -1, binen sayısını döndürür (koltuklar ve perde bunu kullanır)
 public void ResetForPool();
 ```
-- **Göstergeler:** `BusView` bir gösterge listesi tutar. `Init`'te `capacity` kadar gösterge görünür olur; liste yetmezse `BusIndicator` prefab'ından eklenir (havuzdaki otobüsle birlikte saklanır, bir daha oluşturulmaz). Fazlası gizlenir. Göstergeler `IndicatorRoot` altında ortalanarak dizilir: `x = (i - (capacity - 1) / 2f) * IndicatorSpacing`.
+- **Oturan yolcular (doluluk):** Biniş, otobüsün tavanındaki koltuklarda oturan yolcularla gösterilir. **Trick:** yolcular zaten koltuktadır, sadece gizlidir; her biniş bir sonrakini açar. Yürüyen yolcu kapıda havuza döner, koltuktaki ise otobüsle birlikte saklanan ayrı bir modeldir (yolcu otobüse bağlanmaz; iki havuzun ömrü ayrı kalır). `BusView` bir koltuk listesi tutar; liste yetmezse `SeatedPassenger` prefab'ından eklenir (bir daha oluşturulmaz). `Init`'te hepsi gizlenir ve otobüsün malzemesini alır (yolcu ve otobüs aynı malzemeyi paylaşır). `SetFilledCount(n)` ilk `n` koltuğu açar; binişler paralel olduğu için koltuklar biniş sırasına değil sayıya göre dolar. Koltuklar `SeatRoot` altında ortalanarak dizilir: `x = (i - (capacity - 1) / 2f) * SeatSpacing`.
 
 ### 10.8 `BusLane` ve adımlar
 ```csharp
@@ -1335,7 +1335,7 @@ Hepsi Play modunda değiştirilip denenebilir; **kodda sabit süre/hız/güç ya
 | `BusArriveTime` / `BusDepartTime` | 0.5 / 0.4 sn |
 | `IntroPopTime` / `IntroStagger` | 0.25 / 0.02 sn |
 | `IdleBreathScale` / `IdleBreathTime` | 0.03 / 1.2 sn |
-| `IndicatorSpacing` | 0.3 |
+| `SeatSpacing` | 0.7 |
 | `PopupTime` | 0.25 sn |
 | `NodePulseScale` / `NodePulseTime` | 1.1 / 0.6 sn |
 
@@ -1357,7 +1357,7 @@ DOTween.Init(recycleAllByDefault: true, useSafeMode: true, logBehaviour: LogBeha
 | | Yürüyüş | Kök | Serbest |
 | | Adım zıplaması | Bounce | Serbest, yürürken |
 | | Otobüse zıplayıp küçülme | Kök + Body | Şerit |
-| Otobüs | Geliş / doluluk göstergesi / gidiş | Kök / IndicatorRoot | Şerit |
+| Otobüs | Geliş / koltukta beliren yolcu / gidiş | Kök / SeatRoot (yeni koltuk) | Şerit |
 | UI | Popup ölçek 0.8 → 1 + fade | Panel | UI (`SetUpdate(true)`) |
 | UI | Harita mevcut düğüm nabzı | Düğüm | UI, sonsuz Yoyo |
 
@@ -2120,6 +2120,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - `ScreenView.Init` butonları soyut `BindButtons()` ile bağlar (Awake EditMode testlerinde çalışmaz); popup açılışı ortak `PopIn` yardımcısında (§12.2). HUD'daki baştan başlat butonunun metni "Restart" (font'ta ↻ glifi yok).
 - **Dil:** oyuncu metinleri ve editör araçlarının metinleri Türkçeden **İngilizceye** çevrildi (Faz 7 sonrası ekip kararı; §1, §4.4, §7.3, §12.3, §12.5). Testler İngilizce metinleri ve sahnede Türkçe karakter kalmadığını denetler.
 - **Tahta ve koltuk zeminleri** (ekip kararı): tahtanın ve koltuk sırasının altında bitişik iki zemin (§9.2, §9.3, §10.4); kamera sığdırması zeminleri kapsar.
+- **Oturan yolcular** (ekip kararı): otobüs doluluğu beyaz noktalar yerine tavandaki koltuklarda beliren yolcularla gösterilir; yolcular koltukta hazır bekler, binişle açılır (§10.1, §10.7). `BusIndicator` ve iki gösterge malzemesi kaldırıldı.
 - **Bölüm düğümü görseli** (ekip kararı): düğüm gövdesi `level1.png` (§12.4).
 - **Yol** (ekip kararı): otobüs şeridinin altında ekranı yatayda kaplayan bir yol (§9.3, §10.4). Park noktasındaki durak tabelası denendi, sonra kaldırıldı.
 - **Süre paneli** (ekip kararı): süre metni `Timer.png` görselinin koyu yuvasında durur; süresiz bölümde panelin tamamı gizlenir (§12.3).

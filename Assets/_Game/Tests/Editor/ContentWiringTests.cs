@@ -109,19 +109,19 @@ namespace Game.Editor.Tests
         }
 
         [Test]
-        public void BusPrefab_HasIndicatorRoot()
+        public void BusPrefab_HasSeatRoot()
         {
             GameObject prefab = LoadPrefab("Bus");
 
             Assert.IsNotNull(prefab.GetComponent<BusView>());
-            Assert.IsNotNull(prefab.transform.Find("IndicatorRoot"));
+            Assert.IsNotNull(prefab.transform.Find("SeatRoot"));
             AssertAllReferencesAssigned(prefab.GetComponent<BusView>());
         }
 
         [Test]
         public void AllPrefabs_ExistWithoutColliders()
         {
-            foreach (string name in new[] { "Passenger", "Bus", "BusIndicator", "FloorTile", "WallBlock", "EdgePiece", "SlotMarker" })
+            foreach (string name in new[] { "Passenger", "Bus", "SeatedPassenger", "FloorTile", "WallBlock", "EdgePiece", "SlotMarker" })
             {
                 GameObject prefab = LoadPrefab(name);
                 Assert.IsEmpty(prefab.GetComponentsInChildren<Collider>(true), $"{name}: no physics is used (§19 #23)");
