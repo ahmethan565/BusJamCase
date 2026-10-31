@@ -237,7 +237,7 @@ Parmak ──▶ InputHandler ──CellTapped(GridPos)──▶ GameSession.Tap
 | Editor → Enter Play Mode Options | **Kapalı bırakılır** (varsayılan). Açılırsa (domain reload kapalı) ScriptableObject'lerdeki çalışma zamanı alanları Play modları arasında taşınabilir |
 
 ### 4.4 TextMeshPro font
-Metinler İngilizce olduğu için ASCII yeterlidir. Tüm UI metinleri `Content/Fonts/Zany SDF` (Zany.ttf'den, dinamik atlas; ASCII karakterleri atlasa önceden gömülü) kullanır; TMP Settings'teki varsayılan font da budur. Eski `LiberationSans_TR SDF` yedek (fallback) olarak kalır. Kabul kriteri: sahnedeki her metnin tüm karakterleri font'ta var (kare/boşluk yok); bunu `UiWiringTests` denetler.
+Metinler İngilizce olduğu için ASCII yeterlidir. Tüm UI metinleri `Content/Fonts/Zany SDF` (Zany.ttf'den, dinamik atlas; ASCII karakterleri atlasa önceden gömülü) kullanır; TMP Settings'teki varsayılan font da budur. Yedek (fallback) font yok; eski `LiberationSans_TR SDF` kullanılmadığı için silindi. Kabul kriteri: sahnedeki her metnin tüm karakterleri font'ta var (kare/boşluk yok); bunu `UiWiringTests` denetler.
 
 ---
 
