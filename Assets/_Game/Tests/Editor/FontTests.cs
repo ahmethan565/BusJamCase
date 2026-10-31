@@ -12,7 +12,7 @@ namespace Game.Editor.Tests
     public sealed class FontTests
     {
         private const string ScenePath = "Assets/_Game/Scenes/Main.unity";
-        private const string FontAssetPath = "Assets/_Game/Content/Fonts/Zany SDF.asset";
+        private const string FontAssetPath = "Assets/_Game/Content/Fonts/Zany_SDF.asset";
 
         private Scene scene;
         private bool openedByTest;

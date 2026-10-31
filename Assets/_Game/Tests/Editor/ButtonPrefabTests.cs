@@ -18,7 +18,7 @@ namespace Game.Editor.Tests
         private const string NarrowPrefab = "Assets/_Game/Content/Prefabs/UI/Button.prefab";
         private const string WidePrefab = "Assets/_Game/Content/Prefabs/UI/WideButton.prefab";
         private const string NarrowSprite = "Assets/_Game/Content/Images/UI/Button.png";
-        private const string WideSprite = "Assets/_Game/Content/Images/UI/wideButton.png";
+        private const string WideSprite = "Assets/_Game/Content/Images/UI/WideButton.png";
 
         private Scene scene;
         private bool openedByTest;
@@ -92,7 +92,7 @@ namespace Game.Editor.Tests
             foreach (Button button in buttons)
             {
                 GameObject source = PrefabUtility.GetCorrespondingObjectFromSource(button.gameObject);
-                bool isWide = ((Image)button.targetGraphic).sprite.name == "wideButton";
+                bool isWide = ((Image)button.targetGraphic).sprite.name == "WideButton";
                 Assert.AreSame(isWide ? wide : narrow, source, button.name);
             }
         }
