@@ -4,7 +4,7 @@ using Game.Core.Path;
 
 namespace Game.Core.Levels
 {
-    // Depth-first search with a visited-state set. Same algorithm as Docs/reference/bus_jam_sim.py.
+    // Depth-first search with a visited-state set. Same algorithm as the Python reference simulator.
     public sealed class LevelSolver
     {
         private readonly IPathFinder pathFinder;

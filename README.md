@@ -8,7 +8,6 @@
 | `Assets/_Game/Tests` | EditMode tests for Core and Editor |
 | `Assets/_Game/Content/Levels` | Level assets and the `LevelCatalog` |
 | `Assets/_Game/Content/Settings` | Tunable settings assets (see below) |
-| `Docs/reference` | A Python reference simulator of the rules |
 
 ## Creating a level
 
@@ -124,14 +123,4 @@ To run the tests from the command line, close the editor first:
 
 ```bash
 "C:/Program Files/Unity/Hub/Editor/2022.3.19f1/Editor/Unity.exe" -batchmode -nographics -projectPath . -runTests -testPlatform EditMode -testResults results.xml
-```
-
-## Reference simulator
-
-`Docs/reference/bus_jam_sim.py` implements the same rules in Python, with no dependencies. It is used to
-check expected results:
-
-```bash
-cd Docs/reference
-python3 -c "from bus_jam_sim import *; from levels import LEVELS; print(solve(LEVELS['L4']))"
 ```

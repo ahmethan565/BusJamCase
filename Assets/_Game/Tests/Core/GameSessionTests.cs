@@ -6,7 +6,7 @@ using NUnit.Framework;
 
 namespace Game.Core.Tests
 {
-    // Game rules. Expected outcomes cross-checked with Docs/reference/bus_jam_sim.py.
+    // Game rules. Expected outcomes cross-checked with the Python reference simulator.
     public sealed class GameSessionTests
     {
         private RecordingGameListener recorder;
