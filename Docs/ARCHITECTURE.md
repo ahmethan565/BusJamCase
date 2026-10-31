@@ -228,6 +228,8 @@ Parmak ──▶ InputHandler ──CellTapped(GridPos)──▶ GameSession.Tap
 | Scripting Backend (Android) | IL2CPP |
 | Target Architectures (Android) | ARM64 (Google Play zorunluluğu) |
 | Texture Compression (Android) | ASTC |
+| Company / Package (Android) | `Ahmethan` / `com.ahmethan.busjam` |
+| Minimum API (Android) | 22 (Unity 2022.3'ün alt sınırı); Target API: kurulu en yüksek |
 | Default Icon | `Content/Images/AppIcon.png` (1024×1024, oyundaki dolu kırmızı otobüsün render'ı; konu ortada, Android maskeleri kırpmaz). Platform ikonları boş bırakılır, hepsi bunu kullanır |
 
 ### 4.3 Project Settings
@@ -1898,8 +1900,8 @@ Tahmin değil ölçüm: **gerçek cihazda** Unity Profiler (CPU, GC Alloc sütun
 **Cihazda ölçüm adımları:**
 1. Telefonda Geliştirici Seçenekleri → USB hata ayıklama açık; telefonu USB ile bağla.
 2. File → Build Settings → Android → Switch Platform (bir kez).
-3. Tools → Game → **Configure Development Build** (Development Build + Autoconnect Profiler açar; derin profil kapalı).
-4. Build And Run. Oyun telefonda açılınca Window → Analysis → **Profiler** otomatik bağlanır (bağlanmazsa üstteki hedef listesinden telefonu seç).
+3. Tools → Game → **Build Android APK (Development)**: §4.2'deki Android ayarlarını uygular, Development Build + Autoconnect Profiler açar (derin profil kapalı) ve `Builds/Android/BusJamCase-dev.apk` üretir (`Builds/` git dışı). Telefona `adb install -r` ile kurulur; ya da sadece ayarlar için Tools → Game → Configure Development Build, sonra Build And Run.
+4. Oyun telefonda açılınca Window → Analysis → **Profiler** otomatik bağlanır (bağlanmazsa üstteki hedef listesinden telefonu seç).
 5. Menüden Bölüm 5'i aç ve ~30 saniye oyna (hızlı ardışık dokunuşlar dahil). Profiler'da:
    - CPU Usage: kare süresi ≤ 16,6 ms (60 FPS).
    - Hierarchy görünümü, **GC Alloc** sütunu: oyun sırasında dokunuş olmayan karelerde 0 B.
@@ -2125,6 +2127,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - **Tahta ve koltuk zeminleri** (ekip kararı): tahtanın ve koltuk sırasının altında bitişik iki zemin (§9.2, §9.3, §10.4); kamera sığdırması zeminleri kapsar.
 - **Oturan yolcular** (ekip kararı): otobüs doluluğu beyaz noktalar yerine tavandaki koltuklarda beliren yolcularla gösterilir; yolcular koltukta hazır bekler, binişle açılır (§10.1, §10.7). `BusIndicator` ve iki gösterge malzemesi kaldırıldı. Kapasite okunsun diye her koltukta koyu bir kutu var. Koltuk ve yolcu tek `BusSeat` prefab'ında; büyük kapasitede ikisi birlikte küçülür (önce ayrı prefab'lardı, küçülünce yolcunun sadece kafası kalıyordu).
 - **Bölüm düğümü görseli** (ekip kararı): düğüm gövdesi `level1.png` (§12.4).
+- **Android build** (ekip kararı): `Game.Editor.AndroidBuild` Android ayarlarını kodla uygular ve tek tıkla development APK üretir (§4.2, §16.5). Sadece development build; release ve imzalama anahtarı (keystore) yayın aşamasına kaldı (debug anahtarı kullanılır).
 - **FPS göstergesi** (cihaz testi): sadece development build'de görünen `FPSCounter` (§16.5); `Update` kuralına beşinci, sadece hata ayıklama amaçlı istisna (§16.3).
 - **Yol** (ekip kararı): otobüs şeridinin altında ekranı yatayda kaplayan bir yol (§9.3, §10.4). Park noktasındaki durak tabelası denendi, sonra kaldırıldı.
 - **Süre paneli** (ekip kararı): süre metni `Timer.png` görselinin koyu yuvasında durur; süresiz bölümde panelin tamamı gizlenir (§12.3).
