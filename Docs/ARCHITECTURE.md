@@ -1058,7 +1058,7 @@ private void Update()
 - Havuzdan alınırken: `SetActive(true)`. Havuza verilirken: `ResetForPool()` (tween'leri öldür, tüm katmanların yerel konum/rotasyon/ölçeğini sıfırla, göstergeleri kapat) + `SetActive(false)`.
 - **Ön ısıtma (pre-warm):** Her havuz sahibinin bir `Prewarm()` metodu var (`GameplayPresenter`, `BoardView`, `WaitingAreaView`); `GameBootstrap` açılışta bunları çağırır. Her biri kendi havuzundan N nesne alıp hemen geri verir; ilk bölümün intro'sunda `Instantiate` olmaz. Varsayılan N: Passenger 40, Bus 4, FloorTile 64, WallBlock 8, EdgePiece 64, SlotMarker 8.
 - Bölümler arasında nesneler **yok edilmez**, havuza döner.
-- Şu anki modeller (Faz 8) kodla üretilmiş yer tutucu low-poly mesh'lerdir (`Content/Models/`: `Passenger` ~400 üçgen, `BusBody` + `BusDetails`). Gerçek modeller geldiğinde prefab'daki `Model` / `Body` / `Details` nesnelerinin mesh'i değiştirilir; pivot ayakta (y = 0) kalmalıdır. Otobüs -X yönüne (sola) gider; ön cam o taraftadır.
+- Şu anki modeller (Faz 8) kodla üretilmiş yer tutucu low-poly mesh'lerdir (`Content/Models/`: `Passenger` ~400 üçgen, `BusBody` + `BusDetails`). Gerçek modeller geldiğinde prefab'daki `Model` / `Body` / `Details` nesnelerinin mesh'i değiştirilir; pivot ayakta (y = 0) kalmalıdır. Otobüs -X yönüne (sola) gider; ön cam o taraftadır. Duvar (`WallBlock`) görüşü kapatmasın diye çok basık bir yarım küredir (`Content/Models/WallDome`: 0,9 çap, 0,18 yükseklik).
 
 ### 10.3 `ColorPalette` (ScriptableObject)
 `PassengerColor` → `Material` (yolcu ve otobüs ortak) ve `Color` (UI/göstergeler).
