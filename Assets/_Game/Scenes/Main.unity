@@ -1131,6 +1131,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   slotMarkerPrefab: {fileID: 8615524153017414854, guid: 431b8a84fd52890459be99d47b5fdc6a, type: 3}
+  backdropPrefab: {fileID: 391539114138765056, guid: b6922cffc5b236d45b1d185d3729a3dd, type: 3}
   poolRoot: {fileID: 284647862}
   slotMarkerPrewarm: 8
 --- !u!1 &253956067
@@ -3505,6 +3506,7 @@ MonoBehaviour:
   floorTilePrefab: {fileID: 1390254440066863027, guid: 98d6af5898d74e34ab9f10769980a439, type: 3}
   wallBlockPrefab: {fileID: 4314996853161338195, guid: 66776578e9cd5bb49a70c7e19ac5e52a, type: 3}
   edgePiecePrefab: {fileID: 7618199294095355413, guid: 984a5ef6f4a16cb449bca61664114a09, type: 3}
+  backdropPrefab: {fileID: 391539114138765056, guid: b6922cffc5b236d45b1d185d3729a3dd, type: 3}
   poolRoot: {fileID: 284647862}
   floorTilePrewarm: 64
   wallBlockPrewarm: 8

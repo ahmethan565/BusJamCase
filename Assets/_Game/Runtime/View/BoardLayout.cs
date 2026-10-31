@@ -19,6 +19,7 @@ namespace Game.Runtime.View
             width = level.Width;
             height = level.Height;
             slotCount = level.WaitingSlots;
+            ComputeBackdrops();
             ContentBounds = ComputeContentBounds();
         }
 
@@ -49,19 +50,38 @@ namespace Game.Runtime.View
             Mathf.RoundToInt((world.x - Origin.x) / s.CellSize),
             Mathf.RoundToInt((Origin.z - world.z) / s.CellSize));
 
-        // Board + waiting slots + bus area (for the camera)
+        // The backdrops under the board (and the road) and under the seat row; they touch at the line between
+        // the road and the seats, so board and seats look joined. The bus lane stays outside them.
+        public Bounds BoardBackdrop { get; private set; }
+        public Bounds StopBackdrop { get; private set; }
+
+        // Board + waiting slots + backdrops + bus area (for the camera)
         public Bounds ContentBounds { get; }
+
+        private void ComputeBackdrops()
+        {
+            float half = s.CellSize / 2f;
+            float pad = s.BackdropPadding * s.CellSize;
+            Vector3 topLeft = CellToWorld(new GridPos(0, 0));
+            Vector3 bottomRight = CellToWorld(new GridPos(width - 1, height - 1));
+            float joinZ = (s.RoadOffset + s.SlotsOffset) / 2f * s.CellSize;
+
+            BoardBackdrop = FromEdges(topLeft.x - half - pad, bottomRight.x + half + pad, bottomRight.z - half - pad, joinZ);
+
+            float slotsHalfWidth = Mathf.Abs(SlotPosition(0).x) + s.SlotSpacing / 2f;
+            float slotsTop = s.SlotsOffset * s.CellSize + s.SlotSpacing / 2f + pad;
+            StopBackdrop = FromEdges(-slotsHalfWidth - pad, slotsHalfWidth + pad, joinZ, slotsTop);
+        }
+
+        private static Bounds FromEdges(float minX, float maxX, float minZ, float maxZ) =>
+            new Bounds(new Vector3((minX + maxX) / 2f, 0f, (minZ + maxZ) / 2f), new Vector3(maxX - minX, 0f, maxZ - minZ));
 
         private Bounds ComputeContentBounds()
         {
             float half = s.CellSize / 2f;
-            Vector3 topLeft = CellToWorld(new GridPos(0, 0));
-            Vector3 bottomRight = CellToWorld(new GridPos(width - 1, height - 1));
-            float slotsHalfWidth = Mathf.Abs(SlotPosition(0).x) + s.SlotSpacing / 2f;
-
-            float minX = Mathf.Min(topLeft.x - half, -slotsHalfWidth);
-            float maxX = Mathf.Max(bottomRight.x + half, slotsHalfWidth);
-            float minZ = bottomRight.z - half;
+            float minX = Mathf.Min(BoardBackdrop.min.x, StopBackdrop.min.x);
+            float maxX = Mathf.Max(BoardBackdrop.max.x, StopBackdrop.max.x);
+            float minZ = BoardBackdrop.min.z;
             float maxZ = BusParkPosition.z + half;
 
             var center = new Vector3((minX + maxX) / 2f, 0f, (minZ + maxZ) / 2f);

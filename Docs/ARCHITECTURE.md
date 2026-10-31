@@ -922,6 +922,7 @@ JSON dosyası veya bulut kaydı gerekirse yeni bir `IProgressStorage` yazılır;
 | `SlotSpacing` | 1.1 | Koltuklar arası mesafe |
 | `DoorOffsetZ` | 0.6 | Kapı noktasının otobüsün önüne (−z) uzaklığı |
 | `BusOffscreenX` | 10 | Otobüsün ekran dışı başlangıç/bitiş x'i |
+| `BackdropPadding` | 0.2 | Tahta ve koltuk zeminlerinin taştığı pay (hücre cinsinden) |
 | `BusQueueOffsetX` | 2.7 | Sıradaki otobüsün park noktasının sağında beklediği mesafe (otobüs boyu 2.4 + küçük boşluk) |
 
 ### 9.3 `BoardLayout` (Runtime/View, saf hesap sınıfı)
@@ -947,6 +948,10 @@ public sealed class BoardLayout
     public Vector3 DoorPoint       => BusParkPosition + new Vector3(0f, 0f, -s.DoorOffsetZ);
     public Vector3 BusEnterPosition => BusParkPosition + new Vector3( s.BusOffscreenX, 0f, 0f);
     public Vector3 BusExitPosition  => BusParkPosition + new Vector3(-s.BusOffscreenX, 0f, 0f);
+// Zeminler (Bounds, y = 0): tahta zemini tahtayı + yolu kaplar, koltuk zemini koltuk sırasını; ikisi JoinZ'de birleşir.
+// JoinZ = (RoadOffset + SlotsOffset) / 2 * CellSize
+public Bounds BoardBackdrop { get; }
+public Bounds StopBackdrop { get; }
 public Vector3 BusQueuePosition => BusParkPosition + new Vector3(s.BusQueueOffsetX, 0f, 0f);    // sıradaki otobüs (ContentBounds'ta değil; bir kısmı görünür)
 public Vector3 BusQueueEnterPosition => BusEnterPosition + new Vector3(s.BusQueueOffsetX, 0f, 0f); // takipçi, öndekinin bir kuyruk mesafesi arkasından girer
 
@@ -1074,6 +1079,7 @@ public void Build(int slotCount, BoardLayout layout);
 public void Clear();
 ```
 - `Floor` → `FloorTile`; `Wall` → `FloorTile` + `WallBlock`; `Void` → **hiçbir şey.**
+- **Zeminler:** `BoardView` tahtanın altına (`layout.BoardBackdrop`), `WaitingAreaView` koltuk sırasının altına (`layout.StopBackdrop`) birer `Backdrop` koyar (koyu gri-mavi, Simple Lit, gölgesiz; üst yüzü karoların hemen altında). İki zemin arada boşluk kalmadan birleşir, böylece tahta ve koltuklar bitişik görünür; otobüs şeridi zeminlerin dışında kalır. Zemin nesnesi `Init`'te bir kez oluşturulur, `Build` yerleştirir, `Clear` gizler. `ContentBounds` zeminleri de kapsar.
 - **Kenarlar:** Her `Floor`/`Wall` hücresi için 4 yönün her birinde komşu `!Exists` ise o kenara bir `EdgePiece` (yönüne göre döndürülmüş) konur. **İstisna:** çıkış hücresinin (§2.4, `Board.IsExit`) **üst** kenarı çizilmez; yolcular yola o taraftan çıkar. Ortadaki deliğin altındaki hücre çıkış olmadığı için onun üst kenarı çizilir; duvarların kenarları değişmez. Karar `BoardView.HasEdge(board, cell, direction)` statik metodunda. Auto-tiling algoritması yok.
 
 ### 10.5 `GameplayPresenter : MonoBehaviour, IGameListener`
@@ -2106,6 +2112,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - `CameraFitter` varsayılan `margin` değeri 0.15 → **0.3** (Faz 3'te ölçüldü: 0.15 dikey ekranda alt köşeleri kırpıyordu, §9.4).
 - `ScreenView.Init` butonları soyut `BindButtons()` ile bağlar (Awake EditMode testlerinde çalışmaz); popup açılışı ortak `PopIn` yardımcısında (§12.2). HUD'daki baştan başlat butonunun metni "Restart" (font'ta ↻ glifi yok).
 - **Dil:** oyuncu metinleri ve editör araçlarının metinleri Türkçeden **İngilizceye** çevrildi (Faz 7 sonrası ekip kararı; §1, §4.4, §7.3, §12.3, §12.5). Testler İngilizce metinleri ve sahnede Türkçe karakter kalmadığını denetler.
+- **Tahta ve koltuk zeminleri** (ekip kararı): tahtanın ve koltuk sırasının altında bitişik iki zemin (§9.2, §9.3, §10.4); kamera sığdırması zeminleri kapsar.
 - **Çıkış kenarları** (oyun testi, ekip kararı): çıkış hücrelerinin üst kenarında gri `EdgePiece` yok (§10.4).
 - **Bölüm süresi** (Faz 9): `Docs/TIMER_DESIGN.md` uygulandı (§2.11, §16.3). Kayıp sebebi popup'a taşınır ("Out of space!" / "Time's up!").
 - **Paralel biniş** (oyun testi, ekip kararı): binişler artık şeritte sırayla değil paralel oynar; otobüs park edince koltuktaki yolcuları aynı anda koşar, her yolcu kapıya varınca biner, otobüs son yolcu girince kalkar. Gösterge ve perde binen sayısına göre (§10.5, §10.7, §10.8, §13.3). Kurallar ve testler değişmedi.

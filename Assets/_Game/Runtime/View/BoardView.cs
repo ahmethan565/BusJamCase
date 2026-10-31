@@ -14,6 +14,7 @@ namespace Game.Runtime.View
         [SerializeField] private GameObject floorTilePrefab;
         [SerializeField] private GameObject wallBlockPrefab;
         [SerializeField] private GameObject edgePiecePrefab;
+        [SerializeField] private Transform backdropPrefab;
         [SerializeField] private Transform poolRoot;
         [SerializeField] private int floorTilePrewarm = 64;
         [SerializeField] private int wallBlockPrewarm = 8;
@@ -25,6 +26,7 @@ namespace Game.Runtime.View
         private ObjectPool<GameObject> floorTiles;
         private ObjectPool<GameObject> wallBlocks;
         private ObjectPool<GameObject> edgePieces;
+        private Transform backdrop;
 
         // Once, in the bootstrap.
         public void Init(LayoutSettings layoutSettings)
@@ -33,6 +35,8 @@ namespace Game.Runtime.View
             floorTiles = PieceFactory.CreatePool(floorTilePrefab, poolRoot);
             wallBlocks = PieceFactory.CreatePool(wallBlockPrefab, poolRoot);
             edgePieces = PieceFactory.CreatePool(edgePiecePrefab, poolRoot);
+            backdrop = Instantiate(backdropPrefab, poolRoot);
+            backdrop.gameObject.SetActive(false);
         }
 
         public void Prewarm()
@@ -44,6 +48,7 @@ namespace Game.Runtime.View
 
         public void Build(LevelData level, BoardLayout layout)
         {
+            PieceFactory.PlaceBackdrop(backdrop, layout.BoardBackdrop, settings.CellSize);
             Board board = CellsOnly(level);   // the same exit definition as the rules (§2.4)
             for (int y = 0; y < level.Height; y++)
                 for (int x = 0; x < level.Width; x++)
@@ -81,6 +86,7 @@ namespace Game.Runtime.View
         {
             foreach (var (pool, piece) in active) pool.Release(piece);
             active.Clear();
+            if (backdrop != null) backdrop.gameObject.SetActive(false);
         }
 
         private void Place(ObjectPool<GameObject> pool, Vector3 position, Quaternion rotation)
