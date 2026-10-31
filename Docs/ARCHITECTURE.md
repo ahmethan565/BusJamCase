@@ -217,14 +217,21 @@ Parmak ──▶ InputHandler ──CellTapped(GridPos)──▶ GameSession.Tap
 
 ## 4. Proje Kurulumu
 
+### 4.0 Klonlayıp açma
+Repo klonlandıktan sonra hiçbir şey kurulmaz: Unity Hub'da **2022.3.19f1** ile açılır, o kadar.
+- Unity paketleri `Packages/manifest.json` + `packages-lock.json`'dan ilk açılışta kendiliğinden iner.
+- DOTween (`Assets/Plugins/Demigiant`, ASMDEF dahil), TMP Essential Resources ve tüm Project Settings repoda.
+- `.gitignore` sadece Unity/IDE'nin yeniden ürettiklerini dışarıda bırakır (`Library/`, `Temp/`, `Logs/`, `UserSettings/`, `*.csproj`, `*.sln`, build çıktıları).
+- APK almak için ayrıca Unity Hub'dan **Android Build Support** modülü gerekir (sadece build için; editörde oynamak ve testler için gerekmez).
+
 ### 4.1 Paketler
 | Paket | Kaynak | Not |
 |---|---|---|
 | Universal RP | Package Manager | 2022.3 için doğrulanmış (verified) 14.x sürümü |
 | Input System | Package Manager | 2022.3 için doğrulanmış 1.7.x sürümü |
-| TextMeshPro | Package Manager | 2022.3'te **ayrı paket** (3.0.x). İlk açılışta **TMP Essential Resources** içe aktarılır |
+| TextMeshPro | Package Manager | 2022.3'te **ayrı paket** (3.0.x). **TMP Essential Resources** repoda (`Assets/TextMesh Pro`) |
 | Test Framework | Package Manager | Varsayılan olarak gelir (1.1.x) |
-| DOTween (ücretsiz) | Asset Store | Kurulumdan sonra **DOTween Utility Panel → "Create ASMDEF"** butonuna basılmalı. Basılmazsa `Game.Runtime` DOTween'i göremez |
+| DOTween (ücretsiz) | Asset Store | Repoda, `DOTween.Modules` ASMDEF'i dahil (Utility Panel → "Create ASMDEF" ile üretildi; yoksa `Game.Runtime` DOTween'i göremez) |
 
 ### 4.2 Player Settings
 | Ayar | Değer |
@@ -2134,6 +2141,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - **Tahta ve koltuk zeminleri** (ekip kararı): tahtanın ve koltuk sırasının altında bitişik iki zemin (§9.2, §9.3, §10.4); kamera sığdırması zeminleri kapsar.
 - **Oturan yolcular** (ekip kararı): otobüs doluluğu beyaz noktalar yerine tavandaki koltuklarda beliren yolcularla gösterilir; yolcular koltukta hazır bekler, binişle açılır (§10.1, §10.7). `BusIndicator` ve iki gösterge malzemesi kaldırıldı. Kapasite okunsun diye her koltukta koyu bir kutu var. Koltuk ve yolcu tek `BusSeat` prefab'ında; büyük kapasitede ikisi birlikte küçülür (önce ayrı prefab'lardı, küçülünce yolcunun sadece kafası kalıyordu).
 - **Bölüm düğümü görseli** (ekip kararı): düğüm gövdesi `level1.png` (§12.4).
+- **Klonla-aç** (ekip kararı): repo klonlanınca hiçbir kurulum gerekmez; `.gitignore` İngilizceye çevrildi, köke sabitlendi ve standart Unity girdileriyle tamamlandı (§4.0).
 - **Yorum kuralları** (ekip kararı): kod yorumları kısaltıldı ve §1'deki yorum kurallarına göre düzenlendi; kod davranışı değişmedi.
 - **Arayüz sesleri** (ekip kararı): buton tıklaması `Switch.ogg`, yürüyebilen yolcuya dokunuş `Drop.ogg`, yürüyemeyen yolcuya dokunuş `Error.ogg` (Kenney Interface Sounds, §13.3); otobüs durma sesi `BusStop.ogg` (baştaki/sondaki sessizlik kesildi, 1.2× hızlandırıldı: 0.75 sn). Sadece ses dosyaları değişti (eski GUID'ler korundu); eski `Click`/`Pop`/`Bonk`/`Brake` wav dosyaları silindi.
 - **Android build** (ekip kararı): `Game.Editor.AndroidBuild` Android ayarlarını kodla uygular ve tek tıkla development APK üretir (§4.2, §16.5). Sadece development build; release ve imzalama anahtarı (keystore) yayın aşamasına kaldı (debug anahtarı kullanılır).
