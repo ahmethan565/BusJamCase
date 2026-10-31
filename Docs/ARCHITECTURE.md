@@ -228,6 +228,7 @@ Parmak ──▶ InputHandler ──CellTapped(GridPos)──▶ GameSession.Tap
 | Scripting Backend (Android) | IL2CPP |
 | Target Architectures (Android) | ARM64 (Google Play zorunluluğu) |
 | Texture Compression (Android) | ASTC |
+| Default Icon | `Content/Images/AppIcon.png` (1024×1024, oyundaki dolu kırmızı otobüsün render'ı; konu ortada, Android maskeleri kırpmaz). Platform ikonları boş bırakılır, hepsi bunu kullanır |
 
 ### 4.3 Project Settings
 | Ayar | Değer |
