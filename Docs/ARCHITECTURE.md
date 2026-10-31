@@ -1538,6 +1538,8 @@ public abstract class ScreenView : MonoBehaviour
 ```
 **`Fire` ne zaman kullanılmaz?** Sonucu kesin bir geçiş olmayan tıklamalarda: HUD butonu (tekrar basılabilir), harita düğümleri (kilitli düğüm geçiş yapmaz). Bunlar doğrudan `Feedback?.UiClick()` + event çağırır. Aksi halde kilitli bir düğüme dokunmak tüm haritayı tıklanamaz bırakır.
 
+**Buton prefab'ları:** Tüm butonlar iki prefab'dan gelir: `Content/Prefabs/UI/Button.prefab` (`Button.png`) ve `WideButton.prefab` (`wideButton.png`); her biri buton görseli + `Label`. Basılınca `ButtonPress` butonu küçültür (`AnimationSettings.ButtonPressScale/Time`), bırakınca eski boyutuna döner; renk değişimi `Button`'ın ColorTint geçişidir.
+
 Popup panelleri `panel 1.png` arka planını ve bir `VerticalLayoutGroup` (ortada, elemanlar arası sabit 40 px, çocuk boyutlarına dokunmaz) kullanır; gizlenen eleman (son bölümde Next) aradan kendiliğinden çıkar. Geniş butonlar `wideButton.png` oranında (560×161).
 
 Popup'lar (`WinScreen`, `LoseScreen`, `QuitConfirmScreen`) `Show` içinde panelini ölçek 0.8 → 1 ve fade ile açar (`PopupTime`, `SetUpdate(true)`). Bu ortak animasyon `ScreenView`'daki `protected void PopIn(Transform panel, float time)` yardımcısındadır. Tam ekran yarı saydam arka plan tahtaya dokunmayı da engeller.
