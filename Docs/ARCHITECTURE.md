@@ -2152,7 +2152,7 @@ Bilerek yapılmayanlar. Eklenmesi istenirse önce bu doküman güncellenir.
 
 ---
 
-## 21. Ekler: 5 Bölüm ve Referans Simülatör
+## 21. Ekler: Bölümler ve Referans Simülatör
 
 ### 21.1 Bölümler
 Tüm bölümler referans simülatörle (§21.2) **doğrulandı ve çözüldü**; 3000 rastgele oyunda 0 kilitlenme. "Rastgele kazanma oranı" bölümler arası zorluk karşılaştırması içindir (§7.4).
@@ -2211,6 +2211,103 @@ Buses:  "GRPBYRGB"   Capacity: 3   Slots: 6
 Bilinen çözüm: (2,0) (3,0) (1,1) (2,1) (3,1) (4,1) (0,2) (0,3) (1,2) (5,2) (3,3) (4,3) (4,4) (4,5) (1,3) (2,3) (5,3) (1,4) (3,4) (0,5) (5,4) (1,5) (3,5) (5,5)
 ```
 > Bölüm 5'te koltuk sayısı bilinçli olarak 6: 5 koltukla rastgele kazanma oranı çok daha düşüktü. Koltuk sayısının bölüm başına bir zorluk ayarı olduğunu da gösterir. Oyun testinde zor gelirse ilk ayar budur.
+
+**Bölüm 6 — `test`** · 3×10 · 2 renk · 3 koltuk · *Ekip test bölümü: kapasite 15 (tavan koltuklarının sığdırılması)*
+
+**Uç durum bölümleri (7–16).** Her biri tek bir kuralı ya da sınırı ucuna kadar zorlar; hepsi havuz ön ısıtma sınırları içinde (≤ 40 yolcu, ≤ 64 hücre, ≤ 8 duvar, ≤ 8 koltuk). `CatalogTests` hepsinin geçerli ve çözülebilir olduğunu, `EdgeCaseLevelTests` her bölümün kendi uç durumunu koruduğunu denetler.
+
+**Bölüm 7 — `Level_07_SingleTap`** · 1×1 · 1 renk · 1 koltuk · Süre: yok · *Uç durum: En küçük bölüm: 1×1, tek yolcu, kapasite 1, tek koltuk, süre yok* · Rastgele kazanma: ~%100
+```
+Rows:   "R"
+Buses:  "R"   Capacity: 1   Slots: 1
+Bilinen çözüm: (0,0)
+```
+
+**Bölüm 8 — `Level_08_OneSlot`** · 3×2 · 2 renk · 1 koltuk · Süre: yok · *Uç durum: Tek bekleme koltuğu: yanlış renge ilk dokunuş anında kaybettirir* · Rastgele kazanma: ~%22
+```
+Rows:   "RBR"
+        "B.."
+Buses:  "RB"   Capacity: 2   Slots: 1
+Bilinen çözüm: (0,0) (2,0) (1,0) (0,1)
+```
+
+**Bölüm 9 — `Level_09_SameColorQueue`** · 3×2 · 1 renk · 3 koltuk · Süre: yok · *Uç durum: Aynı renkten 6 tek kişilik otobüs art arda: hızlı otobüs kuyruğu* · Rastgele kazanma: ~%100
+```
+Rows:   "RRR"
+        "RRR"
+Buses:  "RRRRRR"   Capacity: 1   Slots: 3
+Bilinen çözüm: (0,0) (1,0) (2,0) (0,1) (1,1) (2,1)
+```
+
+**Bölüm 10 — `Level_10_AllColors`** · 6×2 · 6 renk · 5 koltuk · Süre: 60 sn · *Uç durum: 6 rengin hepsi, her renkten bir otobüs* · Rastgele kazanma: ~%3
+```
+Rows:   "RGBYPO"
+        "OPYBGR"
+Buses:  "RGBYPO"   Capacity: 2   Slots: 5
+Bilinen çözüm: (0,0) (1,0) (2,0) (3,0) (5,0) (5,1) (4,0) (4,1) (0,1) (3,1) (1,1) (2,1)
+```
+
+**Bölüm 11 — `Level_11_WideBoard`** · 9×3 · 3 renk · 6 koltuk · Süre: 90 sn · *Uç durum: En geniş tahta (9 sütun): kamera genişliğe göre sığdırır* · Rastgele kazanma: ~%5
+```
+Rows:   "RGBRGBRGB"
+        "GBRGBRGBR"
+        "BRG...BRG"
+Buses:  "RGBRGB"   Capacity: 4   Slots: 6
+Bilinen çözüm: (0,0) (1,0) (2,0) (3,0) (4,0) (5,0) (6,0) (7,0) (2,1) (8,0) (0,1) (1,1) (3,1) (4,1) (5,1) (6,1) (7,1) (8,1) (0,2) (1,2) (7,2) (2,2) (6,2) (8,2)
+```
+
+**Bölüm 12 — `Level_12_TallBoard`** · 3×10 · 3 renk · 5 koltuk · Süre: 90 sn · *Uç durum: En uzun tahta (10 satır): kamera derinliğe göre sığdırır, uzun kuyruklar* · Rastgele kazanma: ~%1
+```
+Rows:   "RGB"
+        "GBR"
+        "BRG"
+        "RGB"
+        "GBR"
+        "BRG"
+        "R.B"
+        "G.R"
+        "B.G"
+        "..."
+Buses:  "RGBRGB"   Capacity: 4   Slots: 5
+Bilinen çözüm: (0,0) (1,0) (2,0) (0,1) (2,1) (0,2) (1,2) (0,3) (1,1) (2,2) (1,3) (2,3) (0,4) (1,4) (2,4) (0,5) (1,5) (2,5) (0,6) (2,7) (2,6) (0,7) (0,8) (2,8)
+```
+
+**Bölüm 13 — `Level_13_Maze`** · 5×5 · 3 renk · 4 koltuk · Süre: yok · *Uç durum: 8 duvarla (havuz sınırı) uzun, kıvrımlı bir koridor* · Rastgele kazanma: ~%95
+```
+Rows:   "RB..."
+        "###.#"
+        "G...."
+        ".####"
+        "RGB.."
+Buses:  "RGB"   Capacity: 2   Slots: 4
+Bilinen çözüm: (0,0) (1,0) (0,2) (0,4) (1,4) (2,4)
+```
+
+**Bölüm 14 — `Level_14_NearlyFull`** · 4×2 · 3 renk · 3 koltuk · Süre: yok · *Uç durum: Bekleme alanının bir eksiği kadar park gerekir; bir fazlası kaybettirir* · Rastgele kazanma: ~%22
+```
+Rows:   "GGBB"
+        "RR.."
+Buses:  "RGB"   Capacity: 2   Slots: 3
+Bilinen çözüm: (0,0) (1,0) (0,1) (1,1) (2,0) (3,0)
+```
+
+**Bölüm 15 — `Level_15_ShortTimer`** · 3×3 · 3 renk · 5 koltuk · Süre: 12 sn · *Uç durum: 12 saniye: son 10 saniye uyarısı hemen başlar* · Rastgele kazanma: ~%42
+```
+Rows:   "RGB"
+        "GBR"
+        "BRG"
+Buses:  "RGB"   Capacity: 3   Slots: 5
+Bilinen çözüm: (0,0) (1,0) (2,0) (0,1) (1,1) (2,1) (1,2) (0,2) (2,2)
+```
+
+**Bölüm 16 — `Level_16_DeepExits`** · 5×3 · 3 renk · 5 koltuk · Süre: 60 sn · *Uç durum: Üst satırın altında çıkışlar (üstleri void), farklı yükseklikte çıkışlar* · Rastgele kazanma: ~%30
+```
+Rows:   "R---R"
+        "GBRBG"
+        "BGRGB"
+Buses:  "RGB"   Capacity: 4   Slots: 5
+Bilinen çözüm: (0,0) (4,0) (0,1) (1,1) (2,1) (3,1) (4,1) (2,2) (0,2) (1,2) (3,2) (4,2)
+```
 
 ### 21.2 Referans simülatör (`Docs/reference/bus_jam_sim.py`)
 - §2'deki oynanış kurallarının Python uygulaması: ayrıştırma, çıkış/yol hesabı, dokunuş, otobüs zinciri, çözücü (DFS + ziyaret kümesi) ve rastgele oyuncu simülasyonu. Doğrulamanın sadece 4–6. kurallarını (renk sayıları, çıkış, erişilebilirlik) uygular; 1–3. kurallar (sürüm, kapasite/koltuk ≥ 1, en az bir yolcu/otobüs) sadece C# tarafında.
