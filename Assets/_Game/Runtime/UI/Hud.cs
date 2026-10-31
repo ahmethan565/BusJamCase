@@ -15,6 +15,7 @@ namespace Game.Runtime.UI
         [SerializeField] private AnimationSettings animationSettings;
         [SerializeField] private TMP_Text levelLabel;
         [SerializeField] private TMP_Text timeLabel;
+        [SerializeField] private GameObject timerPanel;   // the timer art; the time sits in its dark slot
         [SerializeField] private Button restartButton;
         [SerializeField] private Color timeColor = Color.white;
         [SerializeField] private Color warningColor = new Color(1f, 0.32f, 0.27f);
@@ -30,7 +31,7 @@ namespace Game.Runtime.UI
         public void SetTimeLimit(int seconds)
         {
             StopWarning();
-            timeLabel.gameObject.SetActive(seconds > 0);
+            timerPanel.SetActive(seconds > 0);
             if (seconds <= 0) return;
 
             if (timeTexts.Length < seconds + 1) timeTexts = new string[seconds + 1];

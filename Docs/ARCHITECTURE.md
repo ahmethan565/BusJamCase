@@ -1548,7 +1548,7 @@ Popup'lar (`WinScreen`, `LoseScreen`, `QuitConfirmScreen`) `Show` içinde paneli
 | Ekran | İçerik | Event'ler | Not |
 |---|---|---|---|
 | `LevelMapScreen` | Aşağıdan yukarıya bölüm zinciri | `LevelSelected(int)` (sadece açık düğümler için) | `Fire` kullanmaz; §12.4 |
-| `Hud` | Bölüm numarası + **baştan başlat** butonu | `RestartClicked` | `Fire` kullanmaz (tekrar tekrar basılabilir); tıkta `Feedback.UiClick()` |
+| `Hud` | Bölüm numarası + süre paneli + **baştan başlat** butonu | `RestartClicked` | `Fire` kullanmaz (tekrar tekrar basılabilir); tıkta `Feedback.UiClick()` |
 | `WinScreen` | "Well done!", Next, Main Menu | `NextClicked`, `MenuClicked` | `Show(bool showNextButton)`; son bölümde "All levels completed!" |
 | `LoseScreen` | "Out of space!", Try Again, Main Menu | `RetryClicked`, `MenuClicked` | |
 | `QuitConfirmScreen` | "Quit the game?", Yes, No | `ConfirmClicked`, `CancelClicked` | Menüde overlay |
@@ -1556,8 +1556,9 @@ Popup'lar (`WinScreen`, `LoseScreen`, `QuitConfirmScreen`) `Show` içinde paneli
 **HUD yerleşimi:**
 ```
 ┌──────────────────────────────────┐
-│            Level 3      [Restart]│   ← SafeAreaFitter içinde
+│[⏱ 1:00]     Level 3      [Restart]│   ← SafeAreaFitter içinde
 ```
+**Süre paneli:** süre metni `Timer.png` görselinin (`TimerPanel`, `Image`, raycast kapalı, oranı korunur) çocuğudur; metnin anchor'ları görseldeki koyu yuvaya (202x90 px içinde x 79..180, y 26..68) oturur, böylece süre hep o yuvanın içinde ortalanır. Süresiz bölümde `Hud` metni değil paneli gizler.
 HUD'da başka bir şey **yok** (ayarlar, ana menü butonu, sayaç yok — bkz. §20).
 
 ### 12.4 `LevelMapScreen` ve `LevelNodeView`
@@ -2115,6 +2116,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - `ScreenView.Init` butonları soyut `BindButtons()` ile bağlar (Awake EditMode testlerinde çalışmaz); popup açılışı ortak `PopIn` yardımcısında (§12.2). HUD'daki baştan başlat butonunun metni "Restart" (font'ta ↻ glifi yok).
 - **Dil:** oyuncu metinleri ve editör araçlarının metinleri Türkçeden **İngilizceye** çevrildi (Faz 7 sonrası ekip kararı; §1, §4.4, §7.3, §12.3, §12.5). Testler İngilizce metinleri ve sahnede Türkçe karakter kalmadığını denetler.
 - **Tahta ve koltuk zeminleri** (ekip kararı): tahtanın ve koltuk sırasının altında bitişik iki zemin (§9.2, §9.3, §10.4); kamera sığdırması zeminleri kapsar.
+- **Süre paneli** (ekip kararı): süre metni `Timer.png` görselinin koyu yuvasında durur; süresiz bölümde panelin tamamı gizlenir (§12.3).
 - **Çıkış kenarları** (oyun testi, ekip kararı): çıkış hücrelerinin üst kenarında gri `EdgePiece` yok (§10.4).
 - **Bölüm süresi** (Faz 9): `Docs/TIMER_DESIGN.md` uygulandı (§2.11, §16.3). Kayıp sebebi popup'a taşınır ("Out of space!" / "Time's up!").
 - **Paralel biniş** (oyun testi, ekip kararı): binişler artık şeritte sırayla değil paralel oynar; otobüs park edince koltuktaki yolcuları aynı anda koşar, her yolcu kapıya varınca biner, otobüs son yolcu girince kalkar. Gösterge ve perde binen sayısına göre (§10.5, §10.7, §10.8, §13.3). Kurallar ve testler değişmedi.
