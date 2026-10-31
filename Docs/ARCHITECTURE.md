@@ -263,7 +263,6 @@ Metinler İngilizce olduğu için ASCII yeterlidir. Tüm UI metinleri `Content/F
 ### 5.1 Klasörler
 ```
 (Unity proje kökü)
-CLAUDE.md                         Claude Code kuralları
 Docs/                             Assets dışında; Unity içe aktarmaz
   ARCHITECTURE.md                 bu doküman
   reference/                      referans simülatör
@@ -2141,6 +2140,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - **Tahta ve koltuk zeminleri** (ekip kararı): tahtanın ve koltuk sırasının altında bitişik iki zemin (§9.2, §9.3, §10.4); kamera sığdırması zeminleri kapsar.
 - **Oturan yolcular** (ekip kararı): otobüs doluluğu beyaz noktalar yerine tavandaki koltuklarda beliren yolcularla gösterilir; yolcular koltukta hazır bekler, binişle açılır (§10.1, §10.7). `BusIndicator` ve iki gösterge malzemesi kaldırıldı. Kapasite okunsun diye her koltukta koyu bir kutu var. Koltuk ve yolcu tek `BusSeat` prefab'ında; büyük kapasitede ikisi birlikte küçülür (önce ayrı prefab'lardı, küçülünce yolcunun sadece kafası kalıyordu).
 - **Bölüm düğümü görseli** (ekip kararı): düğüm gövdesi `level1.png` (§12.4).
+- **CLAUDE.md** (ekip kararı): Claude Code kuralları repodan çıkarıldı, proje dışındaki `BusJamDocs` klasöründe tutulur.
 - **Klonla-aç** (ekip kararı): repo klonlanınca hiçbir kurulum gerekmez; `.gitignore` İngilizceye çevrildi, köke sabitlendi ve standart Unity girdileriyle tamamlandı (§4.0).
 - **Yorum kuralları** (ekip kararı): kod yorumları kısaltıldı ve §1'deki yorum kurallarına göre düzenlendi; kod davranışı değişmedi.
 - **Arayüz sesleri** (ekip kararı): buton tıklaması `Switch.ogg`, yürüyebilen yolcuya dokunuş `Drop.ogg`, yürüyemeyen yolcuya dokunuş `Error.ogg` (Kenney Interface Sounds, §13.3); otobüs durma sesi `BusStop.ogg` (baştaki/sondaki sessizlik kesildi, 1.2× hızlandırıldı: 0.75 sn). Sadece ses dosyaları değişti (eski GUID'ler korundu); eski `Click`/`Pop`/`Bonk`/`Brake` wav dosyaları silindi.
