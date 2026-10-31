@@ -1876,7 +1876,7 @@ Menü öğeleri **sadece Play modu dışında** aktiftir (`EditorApplication.isP
 | Karakter modeli | Low-poly, ~500–1500 üçgen; iskelet/Animator **yok** (animasyonlar prosedürel DOTween) |
 
 ### 16.3 Kod kuralları
-- **"Update'te durum yoklama yok" kuralı:** Hiçbir sınıf her karede oyun durumunu kontrol ederek karar vermez; değişiklikler olay (event/callback) ile iletilir. Bilinçli istisnalar sadece dört tane: `InputHandler` ve `BackButtonInput` (input okumak), `GameplayPresenter` (`BusLane.Tick` + bitiş kontrolü), `SessionClock` (geçen süreyi Core'a vermek; zaman doğası gereği kare kare ilerler, Faz 9). Başka bir sınıfa `Update` eklenmez.
+- **"Update'te durum yoklama yok" kuralı:** Hiçbir sınıf her karede oyun durumunu kontrol ederek karar vermez; değişiklikler olay (event/callback) ile iletilir. Bilinçli istisnalar sadece beş tane: `InputHandler` ve `BackButtonInput` (input okumak), `GameplayPresenter` (`BusLane.Tick` + bitiş kontrolü), `SessionClock` (geçen süreyi Core'a vermek; zaman doğası gereği kare kare ilerler, Faz 9), `FPSCounter` (sadece cihaz testi için; kare süresini ölçmek, §16.5). Başka bir sınıfa `Update` eklenmez.
 - **Her karede sıfır GC tahsisi.** Dokunuş başına küçük tahsisler (yol listesi, `OnComplete` lambda'ları) kabul.
 - BFS tamponları yeniden kullanılır (§6.10).
 - Oyun döngüsünde LINQ, string birleştirme, `GetComponent` yok.
@@ -1907,6 +1907,8 @@ Tahmin değil ölçüm: **gerçek cihazda** Unity Profiler (CPU, GC Alloc sütun
    - Memory: toplam < 300 MB.
 6. Bir kareyi incelemek için Window → Analysis → Frame Debugger (telefona bağlıyken).
 7. Profiler'da oyun sırasında `Instantiate` görülürse ilgili havuzun ön ısıtma sayısı (`Main.unity` Inspector'ında) büyütülür.
+
+**FPS göstergesi (`Runtime/Diagnostics/FPSCounter`):** cihazda hızlı bakış için safe area'nın sağ üstünde "58 FPS (17.2 ms)". `OnGUI` ile çizilir (Canvas yok); kendi kök GameObject'ine eklenir, `DontDestroyOnLoad` ile kalır. FPS `updateInterval` (0.5 sn) boyunca `Time.unscaledDeltaTime` ile ortalanır; metin ve renk sadece bu aralıkta güncellenir (≥ 50 yeşil, 30–50 sarı, < 30 kırmızı). Yazı boyu ekran yüksekliğinin %2.5'i; `GUIStyle` ve konum sadece ekran ya da safe area değişince yeniden hesaplanır. Varsayılan olarak release build'de kendini yok eder (`Debug.isDebugBuild`). `Application.targetFrameRate`'i isteğe bağlı olarak `Start`'ta ayarlar (bootstrap'in `Awake`'teki 60'ının üzerine yazar, böylece Inspector değeri geçerli olur). Not: IMGUI her karede biraz bellek ayırır; GC ölçümü yaparken göstergeyi kapat ya da `GC Alloc` sütununda `OnGUI` satırını hariç tut.
 
 Editörde otomatik denetlenenler (`PolishTests`): URP ayarları (§16.2), modellerin üçgen sınırı, en büyük bölümün < 100 bin üçgen olması, tüm opak dünya materyallerinin tek shader (Simple Lit) kullanması ve gölge atmaması, ön ısıtma sayılarının katalogdaki her bölümü karşılaması, `BusLane.Tick`'in kare başına 0 bayt ayırması.
 
@@ -2123,6 +2125,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - **Tahta ve koltuk zeminleri** (ekip kararı): tahtanın ve koltuk sırasının altında bitişik iki zemin (§9.2, §9.3, §10.4); kamera sığdırması zeminleri kapsar.
 - **Oturan yolcular** (ekip kararı): otobüs doluluğu beyaz noktalar yerine tavandaki koltuklarda beliren yolcularla gösterilir; yolcular koltukta hazır bekler, binişle açılır (§10.1, §10.7). `BusIndicator` ve iki gösterge malzemesi kaldırıldı. Kapasite okunsun diye her koltukta koyu bir kutu var. Koltuk ve yolcu tek `BusSeat` prefab'ında; büyük kapasitede ikisi birlikte küçülür (önce ayrı prefab'lardı, küçülünce yolcunun sadece kafası kalıyordu).
 - **Bölüm düğümü görseli** (ekip kararı): düğüm gövdesi `level1.png` (§12.4).
+- **FPS göstergesi** (cihaz testi): sadece development build'de görünen `FPSCounter` (§16.5); `Update` kuralına beşinci, sadece hata ayıklama amaçlı istisna (§16.3).
 - **Yol** (ekip kararı): otobüs şeridinin altında ekranı yatayda kaplayan bir yol (§9.3, §10.4). Park noktasındaki durak tabelası denendi, sonra kaldırıldı.
 - **Süre paneli** (ekip kararı): süre metni `Timer.png` görselinin koyu yuvasında durur; süresiz bölümde panelin tamamı gizlenir (§12.3).
 - **Çıkış kenarları** (oyun testi, ekip kararı): çıkış hücrelerinin üst kenarında gri `EdgePiece` yok (§10.4).
