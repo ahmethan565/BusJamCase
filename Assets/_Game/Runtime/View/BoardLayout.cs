@@ -59,10 +59,8 @@ namespace Game.Runtime.View
         // where buses spawn and vanish, so it spans the whole screen width. Not in ContentBounds.
         public Bounds BusRoad { get; private set; }
 
-        // The bus stop sign: on the road's seat-side edge, ahead of the parked bus's nose with a visible gap between its plate
-        // and the bus (offset / 2 + 0.5 = half a bus + a 0.3 gap + half the 0.62 plate + a little); clear of the seat -> door walks.
-        public Vector3 BusStopSignPosition =>
-            new Vector3(BusParkPosition.x - (s.BusQueueOffsetX / 2f + 0.5f), 0f, BusRoad.min.z);
+        // The bus stop sign: on the road's seat-side edge, ahead of the parked bus's nose (LayoutSettings.BusStopSignOffsetX).
+        public Vector3 BusStopSignPosition => new Vector3(BusParkPosition.x - s.BusStopSignOffsetX, 0f, BusRoad.min.z);
 
         // Board + waiting slots + backdrops + bus area (for the camera)
         public Bounds ContentBounds { get; }

@@ -924,6 +924,7 @@ JSON dosyası veya bulut kaydı gerekirse yeni bir `IProgressStorage` yazılır;
 | `BusOffscreenX` | 10 | Otobüsün ekran dışı başlangıç/bitiş x'i |
 | `BackdropPadding` | 0.2 | Tahta ve koltuk zeminlerinin taştığı pay (hücre cinsinden) |
 | `BusQueueOffsetX` | 2.7 | Sıradaki otobüsün park noktasının sağında beklediği mesafe (otobüs boyu 2.4 + küçük boşluk) |
+| `BusStopSignOffsetX` | 1.85 | Durak tabelasının park noktasının solunda (otobüsün önünde) durduğu mesafe; otobüs burnu 1.2'de, levha yarım genişliği 0.31 |
 
 ### 9.3 `BoardLayout` (Runtime/View, saf hesap sınıfı)
 Bir `LevelData` ve `LayoutSettings` ile kurulur. **Tüm dünya koordinatı matematiği burada ve sadece burada.**
@@ -957,9 +958,9 @@ public Vector3 BusQueueEnterPosition => BusEnterPosition + new Vector3(s.BusQueu
 // Otobüs yolu (ContentBounds'ta değil): z'de StopBackdrop.max.z'den park noktasına simetrik; x'te BusExitPosition'dan
 // BusQueueEnterPosition'a, iki uçta birer kuyruk mesafesi fazlasıyla.
 public Bounds BusRoad { get; }
-// Durak tabelası: yolun koltuk tarafı kenarında, park etmiş otobüsün burnunun önünde; levhası ile otobüs arasında görünür boşluk kalır
-// (park x - (BusQueueOffsetX / 2 + 0.5) = yarım otobüs + 0.3 boşluk + yarım levha + pay); koltuk → kapı yürüyüşlerinin dışında (6 koltuğa kadar ≥ 0.3).
-public Vector3 BusStopSignPosition { get; }
+// Durak tabelası: yolun koltuk tarafı kenarında, park noktasının BusStopSignOffsetX solunda (otobüsün önünde, levhası ile otobüs arasında
+// görünür boşluk); koltuk → kapı yürüyüşlerinin dışında (6 koltuğa kadar ≥ 0.3).
+public Vector3 BusStopSignPosition => new Vector3(BusParkPosition.x - s.BusStopSignOffsetX, 0f, BusRoad.min.z);
 
     // Dünya → hücre (tek bölme işlemi)
     public GridPos WorldToCell(Vector3 world) => new GridPos(

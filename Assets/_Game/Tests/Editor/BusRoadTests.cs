@@ -67,6 +67,14 @@ namespace Game.Editor.Tests
         }
 
         [Test]
+        public void SignOffset_Default_AndUsedAsIs()
+        {
+            Assert.AreEqual(1.85f, settings.BusStopSignOffsetX);
+            var layout = new BoardLayout(Catalog().Get(0), settings);
+            Assert.AreEqual(layout.BusParkPosition.x - settings.BusStopSignOffsetX, layout.BusStopSignPosition.x, 1e-4f);
+        }
+
+        [Test]
         public void EveryCatalogLevel_RoadCarriesTheBusesAndTouchesTheStop()
         {
             LevelCatalog catalog = Catalog();
