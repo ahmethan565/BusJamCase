@@ -1597,7 +1597,7 @@ scrollRect.verticalNormalizedPosition = count > 1 ? currentIndex / (float)(count
 | `Current` | Açık ve geçilmemiş | Vurgulu, hafif nabız (DOTween Yoyo; `Show`'da başlar, `Hide`'da `DOKill`) | Oynanır |
 | `Locked` | `!progress.IsUnlocked(i)` | Gri, kilit ikonu | Düğüm kendi içinde `DOShakePosition` ile sallanır; **`LevelSelected` yayınlanmaz** |
 
-- `LevelNodeView` katmanları (her katmanın tek sahibi): kök `RectTransform` → kilitli sallanma (`DOShakeAnchorPos`); `Body` → "current" nabzı (ölçek). Durumlar `LevelNodeState { Completed, Current, Locked }`. Düğüm ve bağlantı çizgisi prefab'ları `Content/Prefabs/UI/` altındadır (`LevelNode`, `MapLine`).
+- `LevelNodeView` katmanları (her katmanın tek sahibi): kök `RectTransform` → kilitli sallanma (`DOShakeAnchorPos`); `Body` → "current" nabzı (ölçek). Durumlar `LevelNodeState { Completed, Current, Locked }`. `Body` görseli `Content/Images/UI/level.png` (beyaz daire, gri kenar); durum rengi onu boyar. Düğüm ve bağlantı çizgisi prefab'ları `Content/Prefabs/UI/` altındadır (`LevelNode`, `MapLine`).
 - 5 bölüm için düğümler doğrudan oluşturulur. Yüzlerce bölüm olursa sadece görünenleri çizen bir havuz eklenir (sadece `LevelMapScreen`'in içini etkiler).
 
 ### 12.5 `UiText` — 0/1 dönüşümü tek yerde
@@ -2120,6 +2120,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - `ScreenView.Init` butonları soyut `BindButtons()` ile bağlar (Awake EditMode testlerinde çalışmaz); popup açılışı ortak `PopIn` yardımcısında (§12.2). HUD'daki baştan başlat butonunun metni "Restart" (font'ta ↻ glifi yok).
 - **Dil:** oyuncu metinleri ve editör araçlarının metinleri Türkçeden **İngilizceye** çevrildi (Faz 7 sonrası ekip kararı; §1, §4.4, §7.3, §12.3, §12.5). Testler İngilizce metinleri ve sahnede Türkçe karakter kalmadığını denetler.
 - **Tahta ve koltuk zeminleri** (ekip kararı): tahtanın ve koltuk sırasının altında bitişik iki zemin (§9.2, §9.3, §10.4); kamera sığdırması zeminleri kapsar.
+- **Bölüm düğümü görseli** (ekip kararı): düğüm gövdesi `level.png` (§12.4).
 - **Yol** (ekip kararı): otobüs şeridinin altında ekranı yatayda kaplayan bir yol (§9.3, §10.4). Park noktasındaki durak tabelası denendi, sonra kaldırıldı.
 - **Süre paneli** (ekip kararı): süre metni `Timer.png` görselinin koyu yuvasında durur; süresiz bölümde panelin tamamı gizlenir (§12.3).
 - **Çıkış kenarları** (oyun testi, ekip kararı): çıkış hücrelerinin üst kenarında gri `EdgePiece` yok (§10.4).
