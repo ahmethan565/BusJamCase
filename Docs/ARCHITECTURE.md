@@ -1054,6 +1054,7 @@ private void Update()
 | `Passenger` | Katmanlı hiyerarşi (§10.6) + blob gölge quad'ı |
 | `Bus` | Gövde + oturan yolcular için boş bir `SeatRoot` (tavanın biraz altında) |
 | `SeatedPassenger` | Otobüsün tavanında oturan tek yolcu: yolcu mesh'i, otobüse yarıya kadar gömülü; script'siz, gölgesiz |
+| `SeatChair` | Tavandaki tek koltuk: koyu, alçak bir kutu (tek ortak malzeme `SeatChair`, Simple Lit, gölgesiz). Otobüs gelirken boş koltuklar görünür, böylece kaç kişinin bineceği okunur |
 | `FloorTile`, `WallBlock`, `EdgePiece`, `SlotMarker` | Statik tahta parçaları |
 
 - Havuz: Unity'nin yerleşik **`UnityEngine.Pool.ObjectPool<T>`** sınıfı. Ayrı bir havuz sınıfı yazılmaz.
@@ -1253,7 +1254,7 @@ public void ExpectBoarding();                                  // OnPassengerBoa
 public int CompleteBoarding();                                 // yolcu girdi: -1, binen sayısını döndürür (koltuklar ve perde bunu kullanır)
 public void ResetForPool();
 ```
-- **Oturan yolcular (doluluk):** Biniş, otobüsün tavanındaki koltuklarda oturan yolcularla gösterilir. **Trick:** yolcular zaten koltuktadır, sadece gizlidir; her biniş bir sonrakini açar. Yürüyen yolcu kapıda havuza döner, koltuktaki ise otobüsle birlikte saklanan ayrı bir modeldir (yolcu otobüse bağlanmaz; iki havuzun ömrü ayrı kalır). `BusView` bir koltuk listesi tutar; liste yetmezse `SeatedPassenger` prefab'ından eklenir (bir daha oluşturulmaz). `Init`'te hepsi gizlenir ve otobüsün malzemesini alır (yolcu ve otobüs aynı malzemeyi paylaşır). `SetFilledCount(n)` ilk `n` koltuğu açar; binişler paralel olduğu için koltuklar biniş sırasına değil sayıya göre dolar. Koltuklar `SeatRoot` altında ortalanarak dizilir: `x = (i - (capacity - 1) / 2f) * SeatSpacing`.
+- **Oturan yolcular (doluluk):** Biniş, otobüsün tavanındaki koltuklarda oturan yolcularla gösterilir. **Trick:** yolcular zaten koltuktadır, sadece gizlidir; her biniş bir sonrakini açar. Yürüyen yolcu kapıda havuza döner, koltuktaki ise otobüsle birlikte saklanan ayrı bir modeldir (yolcu otobüse bağlanmaz; iki havuzun ömrü ayrı kalır). `BusView` bir koltuk listesi tutar; liste yetmezse `SeatedPassenger` prefab'ından eklenir (bir daha oluşturulmaz). `Init`'te hepsi gizlenir ve otobüsün malzemesini alır (yolcu ve otobüs aynı malzemeyi paylaşır). Her koltuğun altında bir `SeatChair` durur; `Init`'te `capacity` kadarı görünür (fazlası gizli) ve biniş boyunca görünür kalır, yani boş koltuklar kaç kişinin bineceğini gösterir. `SetFilledCount(n)` ilk `n` koltuktaki yolcuyu açar; binişler paralel olduğu için koltuklar biniş sırasına değil sayıya göre dolar. Koltuklar `SeatRoot` altında ortalanarak dizilir: `x = (i - (capacity - 1) / 2f) * SeatSpacing`.
 
 ### 10.8 `BusLane` ve adımlar
 ```csharp
@@ -2120,7 +2121,7 @@ Bu kararlar tartışılarak alındı. **Kod yazarken "daha iyisi" diye değişti
 - `ScreenView.Init` butonları soyut `BindButtons()` ile bağlar (Awake EditMode testlerinde çalışmaz); popup açılışı ortak `PopIn` yardımcısında (§12.2). HUD'daki baştan başlat butonunun metni "Restart" (font'ta ↻ glifi yok).
 - **Dil:** oyuncu metinleri ve editör araçlarının metinleri Türkçeden **İngilizceye** çevrildi (Faz 7 sonrası ekip kararı; §1, §4.4, §7.3, §12.3, §12.5). Testler İngilizce metinleri ve sahnede Türkçe karakter kalmadığını denetler.
 - **Tahta ve koltuk zeminleri** (ekip kararı): tahtanın ve koltuk sırasının altında bitişik iki zemin (§9.2, §9.3, §10.4); kamera sığdırması zeminleri kapsar.
-- **Oturan yolcular** (ekip kararı): otobüs doluluğu beyaz noktalar yerine tavandaki koltuklarda beliren yolcularla gösterilir; yolcular koltukta hazır bekler, binişle açılır (§10.1, §10.7). `BusIndicator` ve iki gösterge malzemesi kaldırıldı.
+- **Oturan yolcular** (ekip kararı): otobüs doluluğu beyaz noktalar yerine tavandaki koltuklarda beliren yolcularla gösterilir; yolcular koltukta hazır bekler, binişle açılır (§10.1, §10.7). `BusIndicator` ve iki gösterge malzemesi kaldırıldı. Kapasite okunsun diye her koltuğun altında koyu bir kutu (`SeatChair`) var.
 - **Bölüm düğümü görseli** (ekip kararı): düğüm gövdesi `level1.png` (§12.4).
 - **Yol** (ekip kararı): otobüs şeridinin altında ekranı yatayda kaplayan bir yol (§9.3, §10.4). Park noktasındaki durak tabelası denendi, sonra kaldırıldı.
 - **Süre paneli** (ekip kararı): süre metni `Timer.png` görselinin koyu yuvasında durur; süresiz bölümde panelin tamamı gizlenir (§12.3).

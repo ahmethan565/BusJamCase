@@ -8,14 +8,18 @@ namespace Game.Runtime.View
 {
     // Visual of one bus: body + the passengers seated on its roof under SeatRoot (§10.7).
     // Trick: everyone is already in their seat, hidden; each boarding reveals the next one.
+    // A dark chair under each seat (ChairRoot) stays visible, so the empty chairs show how many get on.
     public sealed class BusView : MonoBehaviour
     {
         [SerializeField] private Renderer bodyRenderer;
         [SerializeField] private Transform seatRoot;
         [SerializeField] private Renderer seatedPassengerPrefab;
+        [SerializeField] private Transform chairRoot;
+        [SerializeField] private GameObject seatChairPrefab;
 
         // Kept with the pooled bus; only grows when a bus with a bigger capacity shows up.
         private readonly List<Renderer> seats = new List<Renderer>();
+        private readonly List<GameObject> chairs = new List<GameObject>();
         private AnimationSettings anim;
         private int capacity;
 
@@ -48,6 +52,8 @@ namespace Game.Runtime.View
 
             while (seats.Count < capacity)
                 seats.Add(Instantiate(seatedPassengerPrefab, seatRoot));
+            while (chairs.Count < capacity)
+                chairs.Add(Instantiate(seatChairPrefab, chairRoot));
 
             // Everyone is seated in the bus colour (passengers and buses share it) and hidden until they board.
             for (int i = 0; i < seats.Count; i++)
@@ -55,7 +61,11 @@ namespace Game.Runtime.View
                 Renderer seat = seats[i];
                 seat.gameObject.SetActive(false);
                 seat.sharedMaterial = material;
-                seat.transform.localPosition = new Vector3((i - (capacity - 1) / 2f) * anim.SeatSpacing, 0f, 0f);
+                seat.transform.localPosition = SeatPosition(i);
+
+                GameObject chair = chairs[i];
+                chair.SetActive(i < capacity);
+                chair.transform.localPosition = SeatPosition(i);
             }
         }
 
@@ -124,6 +134,11 @@ namespace Game.Runtime.View
                 seat.transform.localScale = Vector3.one;
                 seat.gameObject.SetActive(false);
             }
+            foreach (GameObject chair in chairs)
+                chair.SetActive(false);
         }
+
+        // Seat i along the roof, centred on the bus (passengers and chairs share it).
+        private Vector3 SeatPosition(int i) => new Vector3((i - (capacity - 1) / 2f) * anim.SeatSpacing, 0f, 0f);
     }
 }
