@@ -141,7 +141,7 @@ namespace Game.Editor.Tests
                 Assert.AreEqual(layout.BusRoad.min.z, sign.z, 1e-4f, $"{at}: on the seat side edge of the road");
                 Assert.AreEqual(0f, sign.y, 1e-4f, at);
                 Assert.Less(sign.x, park.x - BusHalfLength, $"{at}: ahead of the parked bus's nose");
-                Assert.Greater(sign.x, park.x - BusHalfLength - 0.5f, $"{at}: right at the bus");
+                Assert.Greater(sign.x, park.x - BusHalfLength - 1f, $"{at}: right at the bus");
 
                 // Not on any seat -> door walk
                 Vector3 door = layout.DoorPoint;

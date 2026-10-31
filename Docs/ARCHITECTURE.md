@@ -957,8 +957,8 @@ public Vector3 BusQueueEnterPosition => BusEnterPosition + new Vector3(s.BusQueu
 // Otobüs yolu (ContentBounds'ta değil): z'de StopBackdrop.max.z'den park noktasına simetrik; x'te BusExitPosition'dan
 // BusQueueEnterPosition'a, iki uçta birer kuyruk mesafesi fazlasıyla.
 public Bounds BusRoad { get; }
-// Durak tabelası: yolun koltuk tarafı kenarında, park etmiş otobüsün burnunun bir kuyruk boşluğu önünde
-// (park x - (BusQueueOffsetX / 2 + 0.15) = yarım otobüs + 0.3); koltuk → kapı yürüyüşlerinin dışında (6 koltuğa kadar ≥ 0.3).
+// Durak tabelası: yolun koltuk tarafı kenarında, park etmiş otobüsün burnunun önünde; levhası ile otobüs arasında görünür boşluk kalır
+// (park x - (BusQueueOffsetX / 2 + 0.5) = yarım otobüs + 0.3 boşluk + yarım levha + pay); koltuk → kapı yürüyüşlerinin dışında (6 koltuğa kadar ≥ 0.3).
 public Vector3 BusStopSignPosition { get; }
 
     // Dünya → hücre (tek bölme işlemi)
